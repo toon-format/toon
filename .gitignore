@@ -4,3 +4,4 @@ node_modules
 .env
 packages/toon/test/fixtures/*.json
 packages/toon/test/fixtures/*.toon
+package-lock.json

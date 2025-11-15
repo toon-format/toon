@@ -1,6 +1,10 @@
 // #region JSON types
 
 import type { Delimiter, DelimiterKey } from './constants'
+// Schema types import
+// Copyright (c) 2025 Hermann del Campo - hermann.delcampo@raiva.io
+// License: MIT (same as TOON project)
+import type { SchemaDefinition } from './schema/types'
 
 export type JsonPrimitive = string | number | boolean | null
 export type JsonObject = { [Key in string]: JsonValue } & { [Key in string]?: JsonValue | undefined }
@@ -38,9 +42,37 @@ export interface EncodeOptions {
    * @default Infinity
    */
   flattenDepth?: number
+  /**
+   * Schema name or definition for validation and reference.
+   * When a string is provided, it must be registered in SchemaRegistry.
+   * @default undefined
+   * @copyright 2025 Hermann del Campo - hermann.delcampo@raiva.io
+   * @license MIT (same as TOON project)
+   */
+  schema?: string | SchemaDefinition
+  /**
+   * Enable schema validation during encoding.
+   * When true, data will be validated against the schema before encoding.
+   * @default false
+   * @copyright 2025 Hermann del Campo - hermann.delcampo@raiva.io
+   * @license MIT (same as TOON project)
+   */
+  validateOnEncode?: boolean
+  /**
+   * Include schema reference in output.
+   * When true, the schema name will be included in the TOON output.
+   * @default false
+   * @copyright 2025 Hermann del Campo - hermann.delcampo@raiva.io
+   * @license MIT (same as TOON project)
+   */
+  includeSchema?: boolean
 }
 
-export type ResolvedEncodeOptions = Readonly<Required<EncodeOptions>>
+export type ResolvedEncodeOptions = Readonly<Required<Omit<EncodeOptions, 'schema'>>> & {
+  schema?: string | SchemaDefinition
+  validateOnEncode: boolean
+  includeSchema: boolean
+}
 
 // #endregion
 

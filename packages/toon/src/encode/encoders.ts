@@ -1,11 +1,30 @@
 import type { Depth, JsonArray, JsonObject, JsonPrimitive, JsonValue, ResolvedEncodeOptions } from '../types'
 import { DOT, LIST_ITEM_MARKER } from '../constants'
+import { SchemaRegistry } from '../schema/registry'
 import { tryFoldKeyChain } from './folding'
 import { isArrayOfArrays, isArrayOfObjects, isArrayOfPrimitives, isEmptyObject, isJsonArray, isJsonObject, isJsonPrimitive } from './normalize'
 import { encodeAndJoinPrimitives, encodeKey, encodePrimitive, formatHeader } from './primitives'
 import { LineWriter } from './writer'
 
 // #region Encode normalized JsonValue
+
+/**
+ * Extracts the schema name from resolved options if includeSchema is enabled.
+ *
+ * @param options - Resolved encode options
+ * @returns Schema name string or undefined
+ */
+function getSchemaNameForOutput(options: ResolvedEncodeOptions): string | undefined {
+  if (!options.includeSchema || !options.schema) {
+    return undefined
+  }
+
+  if (typeof options.schema === 'string') {
+    return options.schema
+  }
+
+  return options.schema.name
+}
 
 export function encodeValue(value: JsonValue, options: ResolvedEncodeOptions): string {
   if (isJsonPrimitive(value)) {
@@ -112,15 +131,17 @@ export function encodeArray(
   depth: Depth,
   options: ResolvedEncodeOptions,
 ): void {
+  const schemaName = getSchemaNameForOutput(options)
+
   if (value.length === 0) {
-    const header = formatHeader(0, { key, delimiter: options.delimiter })
+    const header = formatHeader(0, { key, delimiter: options.delimiter, schema: schemaName })
     writer.push(depth, header)
     return
   }
 
   // Primitive array
   if (isArrayOfPrimitives(value)) {
-    const arrayLine = encodeInlineArrayLine(value, options.delimiter, key)
+    const arrayLine = encodeInlineArrayLine(value, options.delimiter, key, schemaName)
     writer.push(depth, arrayLine)
     return
   }
@@ -161,19 +182,20 @@ export function encodeArrayOfArraysAsListItems(
   depth: Depth,
   options: ResolvedEncodeOptions,
 ): void {
-  const header = formatHeader(values.length, { key: prefix, delimiter: options.delimiter })
+  const schemaName = getSchemaNameForOutput(options)
+  const header = formatHeader(values.length, { key: prefix, delimiter: options.delimiter, schema: schemaName })
   writer.push(depth, header)
 
   for (const arr of values) {
     if (isArrayOfPrimitives(arr)) {
-      const arrayLine = encodeInlineArrayLine(arr, options.delimiter)
+      const arrayLine = encodeInlineArrayLine(arr, options.delimiter, undefined, schemaName)
       writer.pushListItem(depth + 1, arrayLine)
     }
   }
 }
 
-export function encodeInlineArrayLine(values: readonly JsonPrimitive[], delimiter: string, prefix?: string): string {
-  const header = formatHeader(values.length, { key: prefix, delimiter })
+export function encodeInlineArrayLine(values: readonly JsonPrimitive[], delimiter: string, prefix?: string, schema?: string): string {
+  const header = formatHeader(values.length, { key: prefix, delimiter, schema })
   const joinedValue = encodeAndJoinPrimitives(values, delimiter)
   // Only add space if there are values
   if (values.length === 0) {
@@ -194,7 +216,8 @@ export function encodeArrayOfObjectsAsTabular(
   depth: Depth,
   options: ResolvedEncodeOptions,
 ): void {
-  const formattedHeader = formatHeader(rows.length, { key: prefix, fields: header, delimiter: options.delimiter })
+  const schemaName = getSchemaNameForOutput(options)
+  const formattedHeader = formatHeader(rows.length, { key: prefix, fields: header, delimiter: options.delimiter, schema: schemaName })
   writer.push(depth, `${formattedHeader}`)
 
   writeTabularRows(rows, header, writer, depth + 1, options)
@@ -265,7 +288,8 @@ export function encodeMixedArrayAsListItems(
   depth: Depth,
   options: ResolvedEncodeOptions,
 ): void {
-  const header = formatHeader(items.length, { key: prefix, delimiter: options.delimiter })
+  const schemaName = getSchemaNameForOutput(options)
+  const header = formatHeader(items.length, { key: prefix, delimiter: options.delimiter, schema: schemaName })
   writer.push(depth, header)
 
   for (const item of items) {
@@ -289,7 +313,8 @@ export function encodeObjectAsListItem(obj: JsonObject, writer: LineWriter, dept
   else if (isJsonArray(firstValue)) {
     if (isArrayOfPrimitives(firstValue)) {
       // Inline format for primitive arrays
-      const arrayPropertyLine = encodeInlineArrayLine(firstValue, options.delimiter, firstKey)
+      const schemaName = getSchemaNameForOutput(options)
+      const arrayPropertyLine = encodeInlineArrayLine(firstValue, options.delimiter, firstKey, schemaName)
       writer.pushListItem(depth, arrayPropertyLine)
     }
     else if (isArrayOfObjects(firstValue)) {
@@ -297,7 +322,8 @@ export function encodeObjectAsListItem(obj: JsonObject, writer: LineWriter, dept
       const header = extractTabularHeader(firstValue)
       if (header) {
         // Tabular format for uniform arrays of objects
-        const formattedHeader = formatHeader(firstValue.length, { key: firstKey, fields: header, delimiter: options.delimiter })
+        const schemaName = getSchemaNameForOutput(options)
+        const formattedHeader = formatHeader(firstValue.length, { key: firstKey, fields: header, delimiter: options.delimiter, schema: schemaName })
         writer.pushListItem(depth, formattedHeader)
         writeTabularRows(firstValue, header, writer, depth + 1, options)
       }
@@ -347,7 +373,8 @@ function encodeListItemValue(
     writer.pushListItem(depth, encodePrimitive(value, options.delimiter))
   }
   else if (isJsonArray(value) && isArrayOfPrimitives(value)) {
-    const arrayLine = encodeInlineArrayLine(value, options.delimiter)
+    const schemaName = getSchemaNameForOutput(options)
+    const arrayLine = encodeInlineArrayLine(value, options.delimiter, undefined, schemaName)
     writer.pushListItem(depth, arrayLine)
   }
   else if (isJsonObject(value)) {
