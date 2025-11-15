@@ -6,7 +6,8 @@ import { LineCursor, toParsedLines } from './decode/scanner'
 import { encodeValue } from './encode/encoders'
 import { normalizeValue } from './encode/normalize'
 
-export { DEFAULT_DELIMITER, DELIMITERS } from './constants'
+export { DEFAULT_DELIMITER, DELIMITERS, JSONL_SEPARATOR } from './constants'
+export { decodeJsonl, encodeJsonl } from './jsonl'
 export type {
   DecodeOptions,
   Delimiter,

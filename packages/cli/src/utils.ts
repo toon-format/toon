@@ -7,8 +7,14 @@ export function detectMode(
   input: InputSource,
   encodeFlag?: boolean,
   decodeFlag?: boolean,
-): 'encode' | 'decode' {
+  encodeJsonlFlag?: boolean,
+  decodeJsonlFlag?: boolean,
+): 'encode' | 'decode' | 'encode-jsonl' | 'decode-jsonl' {
   // Explicit flags take precedence
+  if (encodeJsonlFlag)
+    return 'encode-jsonl'
+  if (decodeJsonlFlag)
+    return 'decode-jsonl'
   if (encodeFlag)
     return 'encode'
   if (decodeFlag)
@@ -16,6 +22,8 @@ export function detectMode(
 
   // Auto-detect based on file extension
   if (input.type === 'file') {
+    if (input.path.endsWith('.jsonl'))
+      return 'encode-jsonl'
     if (input.path.endsWith('.json'))
       return 'encode'
     if (input.path.endsWith('.toon'))

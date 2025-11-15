@@ -1,6 +1,6 @@
 # @toon-format/cli
 
-Command-line tool for converting between JSON and TOON formats.
+Command-line tool for converting between JSON, JSON Lines (JSONL), and TOON formats.
 
 [TOON (Token-Oriented Object Notation)](https://toonformat.dev) is a compact, human-readable serialization format designed for passing structured data to Large Language Models with significantly reduced token usage.
 
@@ -42,6 +42,12 @@ toon input.json -o output.toon
 # Decode TOON to JSON (auto-detected)
 toon data.toon -o output.json
 
+# Convert JSONL to TOON (with --- separators)
+toon data.jsonl --encode-jsonl -o output.toon
+
+# Convert TOON back to JSONL
+toon data.toon --decode-jsonl -o output.jsonl
+
 # Output to stdout
 toon input.json
 
@@ -60,6 +66,8 @@ cat data.toon | toon --decode
 | `-o, --output <file>` | Output file path (prints to stdout if omitted) |
 | `-e, --encode` | Force encode mode (overrides auto-detection) |
 | `-d, --decode` | Force decode mode (overrides auto-detection) |
+| `--encode-jsonl` | Convert JSONL to TOON with `---` separators |
+| `--decode-jsonl` | Convert TOON with `---` separators back to JSONL |
 | `--delimiter <char>` | Array delimiter: `,` (comma), `\t` (tab), `\|` (pipe) |
 | `--indent <number>` | Indentation size (default: `2`) |
 | `--stats` | Show token count estimates and savings (encode only) |

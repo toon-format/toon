@@ -56,3 +56,9 @@ export type Delimiter = typeof DELIMITERS[DelimiterKey]
 export const DEFAULT_DELIMITER: Delimiter = DELIMITERS.comma
 
 // #endregion
+
+// #region JSONL
+
+export const JSONL_SEPARATOR = '---'
+
+// #endregion

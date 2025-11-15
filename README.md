@@ -719,7 +719,7 @@ Experiment with TOON format interactively using these community-built tools for 
 
 ## CLI
 
-Command-line tool for converting between JSON and TOON formats.
+Command-line tool for converting between JSON, JSON Lines (JSONL), and TOON formats.
 
 ### Usage
 
@@ -737,6 +737,12 @@ npx @toon-format/cli input.json -o output.toon
 
 # Decode TOON to JSON (auto-detected)
 npx @toon-format/cli data.toon -o output.json
+
+# Convert JSONL to TOON (with --- separators)
+npx @toon-format/cli data.jsonl --encode-jsonl -o output.toon
+
+# Convert TOON back to JSONL
+npx @toon-format/cli data.toon --decode-jsonl -o output.jsonl
 
 # Output to stdout
 npx @toon-format/cli input.json
@@ -759,6 +765,8 @@ cat data.toon | npx @toon-format/cli --decode
 | `-o, --output <file>` | Output file path (prints to stdout if omitted) |
 | `-e, --encode` | Force encode mode (overrides auto-detection) |
 | `-d, --decode` | Force decode mode (overrides auto-detection) |
+| `--encode-jsonl` | Convert JSONL to TOON with `---` separators |
+| `--decode-jsonl` | Convert TOON with `---` separators back to JSONL |
 | `--delimiter <char>` | Array delimiter: `,` (comma), `\t` (tab), `\|` (pipe) |
 | `--indent <number>` | Indentation size (default: `2`) |
 | `--stats` | Show token count estimates and savings (encode only) |
@@ -1138,6 +1146,42 @@ Converts a TOON-formatted string back to JavaScript values.
 **Returns:**
 
 A JavaScript value (object, array, or primitive) representing the parsed TOON data.
+
+### JSON Lines Support
+
+TOON includes JSON Lines (JSONL) support for processing streaming data or datasets with one JSON object per line:
+
+```ts
+import { decodeJsonl, encodeJsonl } from '@toon-format/toon'
+
+// Convert array to JSONL with TOON encoding and --- separators
+const data = [
+  { id: 1, name: 'Alice', role: 'admin' },
+  { id: 2, name: 'Bob', role: 'user' }
+]
+
+const jsonl = encodeJsonl(data)
+console.log(jsonl)
+// id: 1
+// name: Alice
+// role: admin
+// ---
+// id: 2
+// name: Bob
+// role: user
+
+// Convert back to array
+const decoded = decodeJsonl(jsonl)
+// [{ id: 1, name: 'Alice', role: 'admin' }, { id: 2, name: 'Bob', role: 'user' }]
+```
+
+#### `encodeJsonl(input: unknown[], options?: EncodeOptions): string`
+
+Encodes an array of values into JSONL format using TOON encoding with `---` separators.
+
+#### `decodeJsonl(input: string, options?: DecodeOptions): JsonValue[]`
+
+Decodes a JSONL formatted string with TOON-encoded values and `---` separators back to an array.
 
 **Example:**
 

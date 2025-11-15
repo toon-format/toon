@@ -7,7 +7,7 @@ import { defineCommand } from 'citty'
 import { consola } from 'consola'
 import { DEFAULT_DELIMITER, DELIMITERS } from '../../toon/src'
 import { name, version } from '../package.json' with { type: 'json' }
-import { decodeToJson, encodeToToon } from './conversion'
+import { decodeToJson, decodeToonToJsonl, encodeJsonlToToon, encodeToToon } from './conversion'
 import { detectMode } from './utils'
 
 export const mainCommand: CommandDef<{
@@ -27,6 +27,16 @@ export const mainCommand: CommandDef<{
     alias: string
   }
   decode: {
+    type: 'boolean'
+    description: string
+    alias: string
+  }
+  encodeJsonl: {
+    type: 'boolean'
+    description: string
+    alias: string
+  }
+  decodeJsonl: {
     type: 'boolean'
     description: string
     alias: string
@@ -68,7 +78,7 @@ export const mainCommand: CommandDef<{
 }> = defineCommand({
   meta: {
     name,
-    description: 'TOON CLI — Convert between JSON and TOON formats',
+    description: 'TOON CLI — Convert between JSON, JSONL, and TOON formats',
     version,
   },
   args: {
@@ -91,6 +101,16 @@ export const mainCommand: CommandDef<{
       type: 'boolean',
       description: 'Decode TOON to JSON (auto-detected by default)',
       alias: 'd',
+    },
+    encodeJsonl: {
+      type: 'boolean',
+      description: 'Encode JSONL to TOON format',
+      alias: 'ej',
+    },
+    decodeJsonl: {
+      type: 'boolean',
+      description: 'Decode TOON to JSONL format',
+      alias: 'dj',
     },
     delimiter: {
       type: 'string',
@@ -168,7 +188,7 @@ export const mainCommand: CommandDef<{
       throw new Error(`Invalid expandPaths value "${expandPaths}". Valid values are: off, safe`)
     }
 
-    const mode = detectMode(inputSource, args.encode, args.decode)
+    const mode = detectMode(inputSource, args.encode, args.decode, args.encodeJsonl, args.decodeJsonl)
 
     try {
       if (mode === 'encode') {
@@ -180,6 +200,32 @@ export const mainCommand: CommandDef<{
           keyFolding: keyFolding as NonNullable<EncodeOptions['keyFolding']>,
           flattenDepth,
           printStats: args.stats === true,
+        })
+      }
+      else if (mode === 'encode-jsonl') {
+        await encodeJsonlToToon({
+          input: inputSource,
+          output: outputPath,
+          delimiter: delimiter as Delimiter,
+          indent,
+          keyFolding: keyFolding as NonNullable<EncodeOptions['keyFolding']>,
+          flattenDepth,
+          printStats: args.stats === true,
+        })
+      }
+      else if (mode === 'decode-jsonl') {
+        await decodeToonToJsonl({
+          input: inputSource,
+          output: outputPath,
+          indent,
+          strict: args.strict !== false,
+          expandPaths: expandPaths as NonNullable<DecodeOptions['expandPaths']>,
+          encodeOptions: {
+            delimiter: delimiter as Delimiter,
+            indent,
+            keyFolding: keyFolding as NonNullable<EncodeOptions['keyFolding']>,
+            flattenDepth,
+          },
         })
       }
       else {
