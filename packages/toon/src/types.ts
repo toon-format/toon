@@ -97,28 +97,3 @@ export interface BlankLineInfo {
 // #endregion
 
 export type Depth = number
-
-// #region Streaming types
-
-import type { Readable, Writable } from 'node:stream'
-
-export interface StreamEncodeOptions extends EncodeOptions {
-  /**
-   * High water mark for the output stream.
-   * @default 16384
-   */
-  highWaterMark?: number
-}
-
-export interface StreamDecodeOptions extends DecodeOptions {
-  /**
-   * High water mark for the output stream.
-   * @default 16384
-   */
-  highWaterMark?: number
-}
-
-export type ResolvedStreamEncodeOptions = Readonly<Required<StreamEncodeOptions>>
-export type ResolvedStreamDecodeOptions = Readonly<Required<StreamDecodeOptions>>
-
-// #endregion

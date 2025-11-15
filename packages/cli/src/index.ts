@@ -65,11 +65,6 @@ export const mainCommand: CommandDef<{
     description: string
     default: false
   }
-  stream: {
-    type: 'boolean'
-    description: string
-    default: false
-  }
 }> = defineCommand({
   meta: {
     name,
@@ -131,11 +126,6 @@ export const mainCommand: CommandDef<{
       description: 'Show token statistics',
       default: false,
     },
-    stream: {
-      type: 'boolean',
-      description: 'Enable streaming mode for large datasets',
-      default: false,
-    },
   },
   async run({ args }) {
     const input = args.input
@@ -190,7 +180,6 @@ export const mainCommand: CommandDef<{
           keyFolding: keyFolding as NonNullable<EncodeOptions['keyFolding']>,
           flattenDepth,
           printStats: args.stats === true,
-          stream: args.stream === true,
         })
       }
       else {
@@ -200,7 +189,6 @@ export const mainCommand: CommandDef<{
           indent,
           strict: args.strict !== false,
           expandPaths: expandPaths as NonNullable<DecodeOptions['expandPaths']>,
-          stream: args.stream === true,
         })
       }
     }
