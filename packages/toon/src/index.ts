@@ -85,11 +85,27 @@ export function decode(input: string, options?: DecodeOptions): JsonValue {
 }
 
 function resolveOptions(options?: EncodeOptions): ResolvedEncodeOptions {
+  const indent = options?.indent ?? 2
+  const keyFolding = options?.keyFolding ?? 'off'
+  const flattenDepth = options?.flattenDepth ?? Number.POSITIVE_INFINITY
+  const delimiterOption = options?.delimiter ?? DEFAULT_DELIMITER
+
+  if (delimiterOption === 'auto') {
+    return {
+      indent,
+      delimiter: DEFAULT_DELIMITER,
+      delimiterStrategy: 'auto',
+      keyFolding,
+      flattenDepth,
+    }
+  }
+
   return {
-    indent: options?.indent ?? 2,
-    delimiter: options?.delimiter ?? DEFAULT_DELIMITER,
-    keyFolding: options?.keyFolding ?? 'off',
-    flattenDepth: options?.flattenDepth ?? Number.POSITIVE_INFINITY,
+    indent,
+    delimiter: delimiterOption,
+    delimiterStrategy: 'fixed',
+    keyFolding,
+    flattenDepth,
   }
 }
 

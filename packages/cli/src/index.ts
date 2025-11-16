@@ -94,7 +94,7 @@ export const mainCommand: CommandDef<{
     },
     delimiter: {
       type: 'string',
-      description: 'Delimiter for arrays: comma (,), tab (\\t), or pipe (|)',
+      description: 'Delimiter for arrays: comma (,), tab (\\t), pipe (|), or auto',
       default: ',',
     },
     indent: {
@@ -142,10 +142,14 @@ export const mainCommand: CommandDef<{
     }
 
     // Validate delimiter
-    const delimiter = args.delimiter || DEFAULT_DELIMITER
-    if (!(Object.values(DELIMITERS)).includes(delimiter as Delimiter)) {
-      throw new Error(`Invalid delimiter "${delimiter}". Valid delimiters are: comma (,), tab (\\t), pipe (|)`)
+    const delimiterInput = args.delimiter || DEFAULT_DELIMITER
+    const delimiterValues = Object.values(DELIMITERS)
+    if (delimiterInput !== 'auto' && !delimiterValues.includes(delimiterInput as Delimiter)) {
+      throw new Error(`Invalid delimiter "${delimiterInput}". Valid delimiters are: comma (,), tab (\\t), pipe (|), auto`)
     }
+    const delimiterOption = (delimiterInput === 'auto'
+      ? 'auto'
+      : delimiterInput) as NonNullable<EncodeOptions['delimiter']>
 
     // Validate `keyFolding`
     const keyFolding = args.keyFolding || 'off'
@@ -175,7 +179,7 @@ export const mainCommand: CommandDef<{
         await encodeToToon({
           input: inputSource,
           output: outputPath,
-          delimiter: delimiter as Delimiter,
+          delimiter: delimiterOption,
           indent,
           keyFolding: keyFolding as NonNullable<EncodeOptions['keyFolding']>,
           flattenDepth,

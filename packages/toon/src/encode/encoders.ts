@@ -1,5 +1,5 @@
-import type { Depth, JsonArray, JsonObject, JsonPrimitive, JsonValue, ResolvedEncodeOptions } from '../types'
-import { DOT, LIST_ITEM_MARKER } from '../constants'
+import type { Delimiter, Depth, JsonArray, JsonObject, JsonPrimitive, JsonValue, ResolvedEncodeOptions } from '../types'
+import { DELIMITERS, DOT, LIST_ITEM_MARKER } from '../constants'
 import { tryFoldKeyChain } from './folding'
 import { isArrayOfArrays, isArrayOfObjects, isArrayOfPrimitives, isEmptyObject, isJsonArray, isJsonObject, isJsonPrimitive } from './normalize'
 import { encodeAndJoinPrimitives, encodeKey, encodePrimitive, formatHeader } from './primitives'
@@ -120,7 +120,8 @@ export function encodeArray(
 
   // Primitive array
   if (isArrayOfPrimitives(value)) {
-    const arrayLine = encodeInlineArrayLine(value, options.delimiter, key)
+    const delimiter = resolveDelimiterForPrimitiveArray(value, options)
+    const arrayLine = encodeInlineArrayLine(value, delimiter, key)
     writer.push(depth, arrayLine)
     return
   }
@@ -129,7 +130,8 @@ export function encodeArray(
   if (isArrayOfArrays(value)) {
     const allPrimitiveArrays = value.every(arr => isArrayOfPrimitives(arr))
     if (allPrimitiveArrays) {
-      encodeArrayOfArraysAsListItems(key, value, writer, depth, options)
+      const delimiter = resolveDelimiterForArrayOfArrays(value, options)
+      encodeArrayOfArraysAsListItems(key, value, writer, depth, delimiter)
       return
     }
   }
@@ -138,7 +140,8 @@ export function encodeArray(
   if (isArrayOfObjects(value)) {
     const header = extractTabularHeader(value)
     if (header) {
-      encodeArrayOfObjectsAsTabular(key, value, header, writer, depth, options)
+      const delimiter = resolveDelimiterForTabularArray(value, options)
+      encodeArrayOfObjectsAsTabular(key, value, header, writer, depth, options, delimiter)
     }
     else {
       encodeMixedArrayAsListItems(key, value, writer, depth, options)
@@ -159,14 +162,14 @@ export function encodeArrayOfArraysAsListItems(
   values: readonly JsonArray[],
   writer: LineWriter,
   depth: Depth,
-  options: ResolvedEncodeOptions,
+  delimiter: Delimiter,
 ): void {
-  const header = formatHeader(values.length, { key: prefix, delimiter: options.delimiter })
+  const header = formatHeader(values.length, { key: prefix, delimiter })
   writer.push(depth, header)
 
   for (const arr of values) {
     if (isArrayOfPrimitives(arr)) {
-      const arrayLine = encodeInlineArrayLine(arr, options.delimiter)
+      const arrayLine = encodeInlineArrayLine(arr, delimiter)
       writer.pushListItem(depth + 1, arrayLine)
     }
   }
@@ -193,11 +196,12 @@ export function encodeArrayOfObjectsAsTabular(
   writer: LineWriter,
   depth: Depth,
   options: ResolvedEncodeOptions,
+  delimiter: Delimiter,
 ): void {
-  const formattedHeader = formatHeader(rows.length, { key: prefix, fields: header, delimiter: options.delimiter })
+  const formattedHeader = formatHeader(rows.length, { key: prefix, fields: header, delimiter })
   writer.push(depth, `${formattedHeader}`)
 
-  writeTabularRows(rows, header, writer, depth + 1, options)
+  writeTabularRows(rows, header, writer, depth + 1, delimiter)
 }
 
 export function extractTabularHeader(rows: readonly JsonObject[]): string[] | undefined {
@@ -245,11 +249,11 @@ function writeTabularRows(
   header: readonly string[],
   writer: LineWriter,
   depth: Depth,
-  options: ResolvedEncodeOptions,
+  delimiter: Delimiter,
 ): void {
   for (const row of rows) {
     const values = header.map(key => row[key])
-    const joinedValue = encodeAndJoinPrimitives(values as JsonPrimitive[], options.delimiter)
+    const joinedValue = encodeAndJoinPrimitives(values as JsonPrimitive[], delimiter)
     writer.push(depth, joinedValue)
   }
 }
@@ -289,7 +293,8 @@ export function encodeObjectAsListItem(obj: JsonObject, writer: LineWriter, dept
   else if (isJsonArray(firstValue)) {
     if (isArrayOfPrimitives(firstValue)) {
       // Inline format for primitive arrays
-      const arrayPropertyLine = encodeInlineArrayLine(firstValue, options.delimiter, firstKey)
+      const delimiter = resolveDelimiterForPrimitiveArray(firstValue, options)
+      const arrayPropertyLine = encodeInlineArrayLine(firstValue, delimiter, firstKey)
       writer.pushListItem(depth, arrayPropertyLine)
     }
     else if (isArrayOfObjects(firstValue)) {
@@ -297,9 +302,10 @@ export function encodeObjectAsListItem(obj: JsonObject, writer: LineWriter, dept
       const header = extractTabularHeader(firstValue)
       if (header) {
         // Tabular format for uniform arrays of objects
-        const formattedHeader = formatHeader(firstValue.length, { key: firstKey, fields: header, delimiter: options.delimiter })
+        const delimiter = resolveDelimiterForTabularArray(firstValue, options)
+        const formattedHeader = formatHeader(firstValue.length, { key: firstKey, fields: header, delimiter })
         writer.pushListItem(depth, formattedHeader)
-        writeTabularRows(firstValue, header, writer, depth + 1, options)
+        writeTabularRows(firstValue, header, writer, depth + 1, delimiter)
       }
       else {
         // Fall back to list format for non-uniform arrays of objects
@@ -347,12 +353,102 @@ function encodeListItemValue(
     writer.pushListItem(depth, encodePrimitive(value, options.delimiter))
   }
   else if (isJsonArray(value) && isArrayOfPrimitives(value)) {
-    const arrayLine = encodeInlineArrayLine(value, options.delimiter)
+    const delimiter = resolveDelimiterForPrimitiveArray(value, options)
+    const arrayLine = encodeInlineArrayLine(value, delimiter)
     writer.pushListItem(depth, arrayLine)
   }
   else if (isJsonObject(value)) {
     encodeObjectAsListItem(value, writer, depth, options)
   }
+}
+
+// #endregion
+
+// #region Delimiter resolution helpers
+
+const AUTO_DELIMITER_PRIORITY: readonly Delimiter[] = [
+  DELIMITERS.tab,
+  DELIMITERS.pipe,
+  DELIMITERS.comma,
+]
+
+function resolveDelimiterForPrimitiveArray(values: readonly JsonPrimitive[], options: ResolvedEncodeOptions): Delimiter {
+  const strings = collectStringsFromPrimitives(values)
+  return selectDelimiter(strings, options)
+}
+
+function resolveDelimiterForArrayOfArrays(values: readonly JsonArray[], options: ResolvedEncodeOptions): Delimiter {
+  const strings: string[] = []
+
+  for (const arr of values) {
+    if (isArrayOfPrimitives(arr)) {
+      collectStringsFromPrimitives(arr, strings)
+    }
+  }
+
+  return selectDelimiter(strings, options)
+}
+
+function resolveDelimiterForTabularArray(rows: readonly JsonObject[], options: ResolvedEncodeOptions): Delimiter {
+  const strings: string[] = []
+
+  for (const row of rows) {
+    for (const value of Object.values(row)) {
+      if (typeof value === 'string') {
+        strings.push(value)
+      }
+    }
+  }
+
+  return selectDelimiter(strings, options)
+}
+
+function collectStringsFromPrimitives(values: readonly JsonPrimitive[], target: string[] = []): string[] {
+  for (const value of values) {
+    if (typeof value === 'string') {
+      target.push(value)
+    }
+  }
+  return target
+}
+
+function selectDelimiter(strings: readonly string[], options: ResolvedEncodeOptions): Delimiter {
+  if (strings.length === 0 || options.delimiterStrategy === 'fixed') {
+    return options.delimiter
+  }
+
+  let bestDelimiter = options.delimiter
+  let bestScore = countDelimiterCollisions(strings, bestDelimiter)
+
+  for (const candidate of AUTO_DELIMITER_PRIORITY) {
+    if (candidate === bestDelimiter) {
+      continue
+    }
+
+    const score = countDelimiterCollisions(strings, candidate)
+    if (score < bestScore) {
+      bestScore = score
+      bestDelimiter = candidate
+
+      if (score === 0) {
+        break
+      }
+    }
+  }
+
+  return bestDelimiter
+}
+
+function countDelimiterCollisions(strings: readonly string[], delimiter: Delimiter): number {
+  let collisions = 0
+
+  for (const value of strings) {
+    if (value.includes(delimiter)) {
+      collisions++
+    }
+  }
+
+  return collisions
 }
 
 // #endregion

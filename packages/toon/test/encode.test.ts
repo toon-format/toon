@@ -43,11 +43,52 @@ for (const fixtures of fixtureFiles) {
   })
 }
 
+describe('auto delimiter selection', () => {
+  it('prefers delimiter that avoids quoting for inline arrays', () => {
+    const result = encode({
+      tags: ['foo,bar', 'baz'],
+    }, { delimiter: 'auto' })
+
+    expect(result).toBe('tags[2	]: foo,bar	baz')
+  })
+
+  it('prefers delimiter that avoids quoting for tabular arrays', () => {
+    const result = encode({
+      rows: [
+        { name: 'Alice, Bob', id: 1 },
+        { name: 'Charlie', id: 2 },
+      ],
+    }, { delimiter: 'auto' })
+
+    expect(result).toBe([
+      'rows[2	]{name	id}:',
+      '  Alice, Bob	1',
+      '  Charlie	2',
+    ].join('\n'))
+  })
+})
+
 function resolveEncodeOptions(options?: TestCase['options']): ResolvedEncodeOptions {
+  const indent = options?.indent ?? 2
+  const keyFolding = options?.keyFolding ?? 'off'
+  const flattenDepth = options?.flattenDepth ?? Number.POSITIVE_INFINITY
+  const delimiterOption = options?.delimiter ?? DEFAULT_DELIMITER
+
+  if (delimiterOption === 'auto') {
+    return {
+      indent,
+      delimiter: DEFAULT_DELIMITER,
+      delimiterStrategy: 'auto',
+      keyFolding,
+      flattenDepth,
+    }
+  }
+
   return {
-    indent: options?.indent ?? 2,
-    delimiter: options?.delimiter ?? DEFAULT_DELIMITER,
-    keyFolding: options?.keyFolding ?? 'off',
-    flattenDepth: options?.flattenDepth ?? Number.POSITIVE_INFINITY,
+    indent,
+    delimiter: delimiterOption,
+    delimiterStrategy: 'fixed',
+    keyFolding,
+    flattenDepth,
   }
 }

@@ -60,7 +60,7 @@ cat data.toon | toon --decode
 | `-o, --output <file>` | Output file path (prints to stdout if omitted) |
 | `-e, --encode` | Force encode mode (overrides auto-detection) |
 | `-d, --decode` | Force decode mode (overrides auto-detection) |
-| `--delimiter <char>` | Array delimiter: `,` (comma), `\t` (tab), `\|` (pipe) |
+| `--delimiter <char>` | Array delimiter: `,` (comma), `\t` (tab), `\|` (pipe), or `auto` |
 | `--indent <number>` | Indentation size (default: `2`) |
 | `--stats` | Show token count estimates and savings (encode only) |
 | `--no-strict` | Disable strict validation when decoding |
@@ -92,6 +92,13 @@ Example output:
 
 ```bash
 toon data.json --delimiter "\t" -o output.toon
+```
+
+#### Auto-select delimiter
+
+```bash
+# Let TOON choose the delimiter that avoids extra quoting
+toon data.json --delimiter auto -o output.toon
 ```
 
 #### Pipe-separated with length markers
