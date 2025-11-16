@@ -89,7 +89,10 @@
       "name": "toon_formater",
       "version": "1.0.0",
       "dependencies": [
-        "meta"
+        "analyzer",
+        "build",
+        "meta",
+        "source_gen"
       ]
     },
     {

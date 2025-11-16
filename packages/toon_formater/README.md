@@ -8,8 +8,7 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  toon_formater:
-    path: ../toon_formater  # or use pub.dev when published
+  toon_formater: ^1.0.0
 ```
 
 ## Usage

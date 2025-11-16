@@ -10,7 +10,7 @@ packages:
     source: hosted
     version: "67.0.0"
   analyzer:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: analyzer
       sha256: "37577842a27e4338429a1cbc32679d508836510b056f1eedf0c8d20e39c1383d"
@@ -50,7 +50,7 @@ packages:
     source: hosted
     version: "2.1.2"
   build:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: build
       sha256: "80184af8b6cb3e5c1c4ec6d8544d27711700bc3e6d2efad04238c7b5290889f0"
@@ -378,7 +378,7 @@ packages:
     source: hosted
     version: "2.0.1"
   source_gen:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: source_gen
       sha256: "14658ba5f669685cd3d63701d01b31ea748310f7ab854e471962670abcf57832"

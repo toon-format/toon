@@ -25,7 +25,7 @@ class ToonGenerator extends GeneratorForAnnotation<ToonSerializable> {
       );
     }
 
-    final classElement = element as ClassElement;
+    final classElement = element;
     final generateToToon = annotation.read('generateToToon').boolValue;
     final generateFromToon = annotation.read('generateFromToon').boolValue;
 
@@ -56,7 +56,10 @@ class ToonGenerator extends GeneratorForAnnotation<ToonSerializable> {
       for (final field in _getSerializableFields(classElement)) {
         final fieldName = field.name;
         final toonField = _getToonFieldAnnotation(field);
-        final serializedName = toonField?.read('name')?.stringValue ?? fieldName;
+        final nameReader = toonField?.read('name');
+        final serializedName = nameReader != null && !nameReader.isNull
+            ? nameReader.stringValue
+            : fieldName;
 
         buffer.writeln('    map[\'$serializedName\'] = instance.$fieldName;');
       }
@@ -78,7 +81,10 @@ class ToonGenerator extends GeneratorForAnnotation<ToonSerializable> {
         final field = fields[i];
         final fieldName = field.name;
         final toonField = _getToonFieldAnnotation(field);
-        final serializedName = toonField?.read('name')?.stringValue ?? fieldName;
+        final nameReader = toonField?.read('name');
+        final serializedName = nameReader != null && !nameReader.isNull
+            ? nameReader.stringValue
+            : fieldName;
         final fieldType = field.type;
         final isLast = i == fields.length - 1;
 
@@ -97,7 +103,7 @@ class ToonGenerator extends GeneratorForAnnotation<ToonSerializable> {
         } else if (fieldType.isDartCoreMap) {
           valueAccess = '$valueAccess as Map? ?? {}';
         } else {
-          valueAccess = '$valueAccess';
+          valueAccess = valueAccess;
         }
 
         buffer.writeln('      $fieldName: $valueAccess${isLast ? '' : ','}');

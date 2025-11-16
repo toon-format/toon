@@ -170,7 +170,7 @@ void _encodeArrayOfObjectsAsTabular(
   writer.push(depth, formattedHeader);
 
   for (final row in rows) {
-    final values = header.map((key) => row[key] as JsonPrimitive).toList();
+    final values = header.map((key) => row[key]).toList();
     final joinedValue = encodeAndJoinPrimitives(values, options.delimiter);
     writer.push(depth + 1, joinedValue);
   }
