@@ -1,0 +1,39 @@
+{
+  "name": "codelens-toon",
+  "version": "0.1.0",
+  "description": "Hierarchical codebase analysis tool that outputs structured data in TOON format for efficient LLM context",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "codelens": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/cli.ts",
+    "test": "vitest",
+    "lint": "eslint .",
+    "example": "tsx src/cli.ts --input ./examples/sample.ts --level 2"
+  },
+  "keywords": [
+    "toon",
+    "code-analysis",
+    "llm",
+    "token-efficiency",
+    "ast",
+    "documentation"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@toon-format/toon": "workspace:*",
+    "commander": "^12.1.0",
+    "tree-sitter": "^0.21.1",
+    "tree-sitter-typescript": "^0.21.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.8"
+  }
+}

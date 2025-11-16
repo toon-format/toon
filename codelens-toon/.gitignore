@@ -1,0 +1,8 @@
+node_modules/
+dist/
+*.toon
+*.log
+.DS_Store
+coverage/
+.vscode/
+.idea/
