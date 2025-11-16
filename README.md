@@ -48,7 +48,7 @@ AI is becoming cheaper and more accessible, but larger context windows allow for
 }
 ```
 
-YAML conveys the same infromation with **fewer tokens**:
+YAML conveys the same information with **fewer tokens**:
 
 ```yaml
 users:
