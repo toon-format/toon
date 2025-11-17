@@ -1,7 +1,7 @@
 import type { DecodeOptions, EncodeOptions } from '../../toon/src'
 import type { InputSource } from './types'
-import * as fsp from 'node:fs/promises'
-import * as path from 'node:path'
+import { writeFile } from 'node:fs/promises'
+import { relative } from 'node:path'
 import process from 'node:process'
 import { consola } from 'consola'
 import { estimateTokenCount } from 'tokenx'
@@ -11,11 +11,13 @@ import { formatInputLabel, readInput } from './utils'
 export async function encodeToToon(config: {
   input: InputSource
   output?: string
-  indent: NonNullable<EncodeOptions['indent']>
-  delimiter: NonNullable<EncodeOptions['delimiter']>
-  keyFolding?: NonNullable<EncodeOptions['keyFolding']>
+  indent: number
+  delimiter: EncodeOptions['delimiter']
+  keyFolding?: EncodeOptions['keyFolding']
   flattenDepth?: number
   printStats: boolean
+  dryRun?: boolean
+  verbose?: boolean
 }): Promise<void> {
   const jsonContent = await readInput(config.input)
 
@@ -36,11 +38,24 @@ export async function encodeToToon(config: {
 
   const toonOutput = encode(data, encodeOptions)
 
+  if (config.verbose) {
+    consola.info(`Generated TOON output (${toonOutput.length} characters)`)
+    consola.info(`Dry run mode: ${config.dryRun}`)
+  }
+
   if (config.output) {
-    await fsp.writeFile(config.output, toonOutput, 'utf-8')
     const relativeInputPath = formatInputLabel(config.input)
-    const relativeOutputPath = path.relative(process.cwd(), config.output)
-    consola.success(`Encoded \`${relativeInputPath}\` → \`${relativeOutputPath}\``)
+    const relativeOutputPath = relative(process.cwd(), config.output)
+    
+    if (config.dryRun) {
+      consola.info(`[DRY RUN] Would encode \`${relativeInputPath}\` → \`${relativeOutputPath}\``)
+      if (config.verbose) {
+        showPreview(toonOutput)
+      }
+    } else {
+      await writeFile(config.output, toonOutput, 'utf-8')
+      consola.success(`Encoded \`${relativeInputPath}\` → \`${relativeOutputPath}\``)
+    }
   }
   else {
     console.log(toonOutput)
@@ -61,9 +76,11 @@ export async function encodeToToon(config: {
 export async function decodeToJson(config: {
   input: InputSource
   output?: string
-  indent: NonNullable<DecodeOptions['indent']>
-  strict: NonNullable<DecodeOptions['strict']>
-  expandPaths?: NonNullable<DecodeOptions['expandPaths']>
+  indent: number
+  strict: boolean
+  expandPaths?: DecodeOptions['expandPaths']
+  dryRun?: boolean
+  verbose?: boolean
 }): Promise<void> {
   const toonContent = await readInput(config.input)
 
@@ -82,13 +99,31 @@ export async function decodeToJson(config: {
 
   const jsonOutput = JSON.stringify(data, undefined, config.indent)
 
+  if (config.verbose) {
+    consola.info(`Generated JSON output (${jsonOutput.length} characters)`)
+  }
+
   if (config.output) {
-    await fsp.writeFile(config.output, jsonOutput, 'utf-8')
     const relativeInputPath = formatInputLabel(config.input)
-    const relativeOutputPath = path.relative(process.cwd(), config.output)
-    consola.success(`Decoded \`${relativeInputPath}\` → \`${relativeOutputPath}\``)
+    const relativeOutputPath = relative(process.cwd(), config.output)
+    
+    if (config.dryRun) {
+      consola.info(`[DRY RUN] Would decode \`${relativeInputPath}\` → \`${relativeOutputPath}\``)
+      if (config.verbose) {
+        showPreview(jsonOutput)
+      }
+    } else {
+      await writeFile(config.output, jsonOutput, 'utf-8')
+      consola.success(`Decoded \`${relativeInputPath}\` → \`${relativeOutputPath}\``)
+    }
   }
   else {
     console.log(jsonOutput)
   }
+}
+
+// Helper functions for output formatting
+function showPreview(content: string): void {
+  console.log('\n--- Preview of output ---')
+  console.log(content.slice(0, 500) + (content.length > 500 ? '\n...(truncated)' : ''))
 }
