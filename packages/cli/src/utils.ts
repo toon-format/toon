@@ -1,6 +1,6 @@
 import type { InputSource } from './types'
-import * as fsp from 'node:fs/promises'
-import * as path from 'node:path'
+import { readFile } from 'node:fs/promises'
+import { relative, basename } from 'node:path'
 import process from 'node:process'
 
 export function detectMode(
@@ -27,18 +27,13 @@ export function detectMode(
 }
 
 export async function readInput(source: InputSource): Promise<string> {
-  if (source.type === 'stdin')
-    return readFromStdin()
-
-  return fsp.readFile(source.path, 'utf-8')
+  return source.type === 'stdin' ? readFromStdin() : readFile(source.path, 'utf-8')
 }
 
 export function formatInputLabel(source: InputSource): string {
-  if (source.type === 'stdin')
-    return 'stdin'
-
-  const relativePath = path.relative(process.cwd(), source.path)
-  return relativePath || path.basename(source.path)
+  if (source.type === 'stdin') return 'stdin'
+  const relativePath = relative(process.cwd(), source.path)
+  return relativePath || basename(source.path)
 }
 
 function readFromStdin(): Promise<string> {

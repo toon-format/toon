@@ -35,8 +35,15 @@
     "test": "vitest"
   },
   "dependencies": {
+    "chokidar": "^4.0.3",
     "citty": "^0.1.6",
+    "cli-progress": "^3.12.0",
     "consola": "^3.4.2",
+    "glob": "^11.1.0",
+    "p-limit": "^6.2.0",
     "tokenx": "^1.2.1"
+  },
+  "devDependencies": {
+    "@types/cli-progress": "^3.11.6"
   }
 }
