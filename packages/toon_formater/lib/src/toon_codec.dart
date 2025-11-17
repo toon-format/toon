@@ -192,6 +192,8 @@ void _encodeArrayOfObjectsAsTabular(
           'Tabular array contains non-primitive value for key "$key": ${value.runtimeType}',
         );
       }
+      // Cast is safe after isJsonPrimitive check, but needed for type system
+      // ignore: unnecessary_cast
       return value as JsonPrimitive;
     }).toList();
     final joinedValue = encodeAndJoinPrimitives(values, options.delimiter);
@@ -284,6 +286,8 @@ void _encodeObjectAsListItem(
                 'Tabular array contains non-primitive value for key "$key": ${value.runtimeType}',
               );
             }
+            // Cast is safe after isJsonPrimitive check, but needed for type system
+            // ignore: unnecessary_cast
             return value as JsonPrimitive;
           }).toList();
           final joinedValue = encodeAndJoinPrimitives(values, options.delimiter);

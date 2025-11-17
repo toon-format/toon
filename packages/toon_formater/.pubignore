@@ -1,0 +1,20 @@
+# Test output files
+test/hardfile_*.txt
+test/hardfile_*.json
+test/hardfile_*.toon
+test/hardfile_processed.json
+test/hardfile_encode_error.txt
+test/hardfile_decoded.json
+test/hardfile_encoded.toon
+test/hardfile_roundtrip_comparison.txt
+test/hardfile_benchmark_summary.txt
+
+# IDE files
+.vscode/
+.idea/
+*.iml
+
+# Build files
+.dart_tool/
+build/
+
