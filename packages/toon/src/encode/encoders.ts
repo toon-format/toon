@@ -9,7 +9,7 @@ import { LineWriter } from './writer'
 
 export function encodeValue(value: JsonValue, options: ResolvedEncodeOptions): string {
   if (isJsonPrimitive(value)) {
-    return encodePrimitive(value, options.delimiter)
+    return encodePrimitive(value, options.delimiter, options.quoteStrings)
   }
 
   const writer = new LineWriter(options.indent)
@@ -59,7 +59,7 @@ export function encodeKeyValuePair(key: string, value: JsonValue, writer: LineWr
       if (remainder === undefined) {
         // The folded chain ended at a leaf (primitive, array, or empty object)
         if (isJsonPrimitive(leafValue)) {
-          writer.push(depth, `${encodedFoldedKey}: ${encodePrimitive(leafValue, options.delimiter)}`)
+          writer.push(depth, `${encodedFoldedKey}: ${encodePrimitive(leafValue, options.delimiter, options.quoteStrings)}`)
           return
         }
         else if (isJsonArray(leafValue)) {
@@ -88,7 +88,7 @@ export function encodeKeyValuePair(key: string, value: JsonValue, writer: LineWr
   const encodedKey = encodeKey(key)
 
   if (isJsonPrimitive(value)) {
-    writer.push(depth, `${encodedKey}: ${encodePrimitive(value, options.delimiter)}`)
+    writer.push(depth, `${encodedKey}: ${encodePrimitive(value, options.delimiter, options.quoteStrings)}`)
   }
   else if (isJsonArray(value)) {
     encodeArray(key, value, writer, depth, options)
@@ -120,7 +120,7 @@ export function encodeArray(
 
   // Primitive array
   if (isArrayOfPrimitives(value)) {
-    const arrayLine = encodeInlineArrayLine(value, options.delimiter, key)
+    const arrayLine = encodeInlineArrayLine(value, options.delimiter, key, options.quoteStrings)
     writer.push(depth, arrayLine)
     return
   }
@@ -166,15 +166,15 @@ export function encodeArrayOfArraysAsListItems(
 
   for (const arr of values) {
     if (isArrayOfPrimitives(arr)) {
-      const arrayLine = encodeInlineArrayLine(arr, options.delimiter)
+      const arrayLine = encodeInlineArrayLine(arr, options.delimiter, undefined, options.quoteStrings)
       writer.pushListItem(depth + 1, arrayLine)
     }
   }
 }
 
-export function encodeInlineArrayLine(values: readonly JsonPrimitive[], delimiter: string, prefix?: string): string {
+export function encodeInlineArrayLine(values: readonly JsonPrimitive[], delimiter: string, prefix?: string, quoteStrings?: boolean): string {
   const header = formatHeader(values.length, { key: prefix, delimiter })
-  const joinedValue = encodeAndJoinPrimitives(values, delimiter)
+  const joinedValue = encodeAndJoinPrimitives(values, delimiter, quoteStrings)
   // Only add space if there are values
   if (values.length === 0) {
     return header
@@ -249,7 +249,7 @@ function writeTabularRows(
 ): void {
   for (const row of rows) {
     const values = header.map(key => row[key])
-    const joinedValue = encodeAndJoinPrimitives(values as JsonPrimitive[], options.delimiter)
+    const joinedValue = encodeAndJoinPrimitives(values as JsonPrimitive[], options.delimiter, options.quoteStrings)
     writer.push(depth, joinedValue)
   }
 }
@@ -284,12 +284,12 @@ export function encodeObjectAsListItem(obj: JsonObject, writer: LineWriter, dept
   const encodedKey = encodeKey(firstKey)
 
   if (isJsonPrimitive(firstValue)) {
-    writer.pushListItem(depth, `${encodedKey}: ${encodePrimitive(firstValue, options.delimiter)}`)
+    writer.pushListItem(depth, `${encodedKey}: ${encodePrimitive(firstValue, options.delimiter, options.quoteStrings)}`)
   }
   else if (isJsonArray(firstValue)) {
     if (isArrayOfPrimitives(firstValue)) {
       // Inline format for primitive arrays
-      const arrayPropertyLine = encodeInlineArrayLine(firstValue, options.delimiter, firstKey)
+      const arrayPropertyLine = encodeInlineArrayLine(firstValue, options.delimiter, firstKey, options.quoteStrings)
       writer.pushListItem(depth, arrayPropertyLine)
     }
     else if (isArrayOfObjects(firstValue)) {
@@ -344,7 +344,7 @@ function encodeListItemValue(
   options: ResolvedEncodeOptions,
 ): void {
   if (isJsonPrimitive(value)) {
-    writer.pushListItem(depth, encodePrimitive(value, options.delimiter))
+    writer.pushListItem(depth, encodePrimitive(value, options.delimiter, options.quoteStrings))
   }
   else if (isJsonArray(value) && isArrayOfPrimitives(value)) {
     const arrayLine = encodeInlineArrayLine(value, options.delimiter)

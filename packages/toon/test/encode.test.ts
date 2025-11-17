@@ -43,11 +43,37 @@ for (const fixtures of fixtureFiles) {
   })
 }
 
+
 function resolveEncodeOptions(options?: TestCase['options']): ResolvedEncodeOptions {
   return {
     indent: options?.indent ?? 2,
     delimiter: options?.delimiter ?? DEFAULT_DELIMITER,
     keyFolding: options?.keyFolding ?? 'off',
     flattenDepth: options?.flattenDepth ?? Number.POSITIVE_INFINITY,
+    quoteStrings: options?.quoteStrings ?? false,
   }
 }
+
+describe('encode (quoteStrings option)', () => {
+  it('should quote all string values when quoteStrings is true', () => {
+    const input = { a: 'foo', b: 'bar baz', c: 42, d: true }
+    const expected = 'a: "foo"\nb: "bar baz"\nc: 42\nd: true'
+    const result = encode(input, { quoteStrings: true })
+    expect(result).toBe(expected)
+  })
+
+  it('should quote strings in arrays when quoteStrings is true', () => {
+    const input = { arr: ['x', 'y z', 'w'] }
+    const expected = 'arr[3]: "x","y z","w"'
+    const result = encode(input, { quoteStrings: true })
+    expect(result).toBe(expected)
+  })
+
+  it('should not quote strings when quoteStrings is false (default)', () => {
+    const input = { a: 'foo', b: 'bar baz', c: 42 }
+    // Only b should be quoted because it contains a space
+    const expected = 'a: foo\nb: "bar baz"\nc: 42'
+    const result = encode(input)
+    expect(result).toBe(expected)
+  })
+})

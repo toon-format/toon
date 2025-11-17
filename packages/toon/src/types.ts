@@ -38,6 +38,12 @@ export interface EncodeOptions {
    * @default Infinity
    */
   flattenDepth?: number
+    /**
+   * Always wrap string values in quotes during encoding.
+   * Useful for consistent string serialization or when building formats that require strict quoting.
+   * @default false
+   */
+  quoteStrings?: boolean
 }
 
 export type ResolvedEncodeOptions = Readonly<Required<EncodeOptions>>

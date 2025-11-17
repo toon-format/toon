@@ -90,6 +90,7 @@ function resolveOptions(options?: EncodeOptions): ResolvedEncodeOptions {
     delimiter: options?.delimiter ?? DEFAULT_DELIMITER,
     keyFolding: options?.keyFolding ?? 'off',
     flattenDepth: options?.flattenDepth ?? Number.POSITIVE_INFINITY,
+    quoteStrings: options?.quoteStrings ?? false,
   }
 }
 
