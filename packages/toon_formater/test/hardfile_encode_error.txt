@@ -1,0 +1,26 @@
+Error encoding hardfile.json:
+type 'List<Object?>' is not a subtype of type 'String' in type cast
+
+Stack trace:
+#0      encodePrimitive (package:toon_formater/src/primitives.dart:20:36)
+#1      encodeAndJoinPrimitives (package:toon_formater/src/primitives.dart:55:18)
+#2      _encodeArrayOfObjectsAsTabular (package:toon_formater/src/toon_codec.dart:174:25)
+#3      _encodeArray (package:toon_formater/src/toon_codec.dart:103:7)
+#4      _encodeKeyValuePair (package:toon_formater/src/toon_codec.dart:64:5)
+#5      _encodeObjectAsListItem (package:toon_formater/src/toon_codec.dart:260:5)
+#6      _encodeListItemValue (package:toon_formater/src/toon_codec.dart:213:5)
+#7      _encodeMixedArrayAsListItems (package:toon_formater/src/toon_codec.dart:190:5)
+#8      _encodeArray (package:toon_formater/src/toon_codec.dart:116:3)
+#9      _encodeKeyValuePair (package:toon_formater/src/toon_codec.dart:64:5)
+#10     _encodeObject (package:toon_formater/src/toon_codec.dart:45:5)
+#11     _encodeKeyValuePair (package:toon_formater/src/toon_codec.dart:69:7)
+#12     _encodeObject (package:toon_formater/src/toon_codec.dart:45:5)
+#13     _encodeValue (package:toon_formater/src/toon_codec.dart:32:5)
+#14     encode (package:toon_formater/src/toon_codec.dart:11:10)
+#15     main.<anonymous closure>.<anonymous closure> (file:///Volumes/Untitled/abdelrhmanabdelsalam/toon/packages/toon_formater/test/hardfile_test.dart:90:23)
+#16     Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:242:19)
+<asynchronous suspension>
+#17     Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:240:7)
+<asynchronous suspension>
+#18     Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:282:9)
+<asynchronous suspension>

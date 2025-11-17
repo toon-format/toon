@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:benchmark_harness/benchmark_harness.dart';
 import 'package:toon_formater/toon_formater.dart';
 
@@ -174,6 +175,99 @@ void main() {
   print('');
   JsonRoundTripBenchmark(largeData).report();
   ToonRoundTripBenchmark(largeData).report();
+
+  // Real-world data benchmark (hardfile.json)
+  try {
+    final hardfile = File('test/hardfile.json');
+    if (hardfile.existsSync()) {
+      var hardfileJsonString = hardfile.readAsStringSync();
+      
+      // Pre-process JSON to handle NaN and Infinity (not valid JSON)
+      var processedJson = hardfileJsonString
+          .replaceAll(': NaN', ': null')
+          .replaceAll(': Infinity', ': null')
+          .replaceAll(': -Infinity', ': null')
+          .replaceAll('"NaN"', 'null')
+          .replaceAll('"Infinity"', 'null');
+      
+      // Escape control characters in string literals
+      final buffer = StringBuffer();
+      bool inString = false;
+      int backslashCount = 0;
+      
+      for (int i = 0; i < processedJson.length; i++) {
+        final char = processedJson[i];
+        final codeUnit = char.codeUnitAt(0);
+        
+        if (char == '\\') {
+          backslashCount++;
+          buffer.write(char);
+          continue;
+        }
+        
+        final isEscaped = (backslashCount % 2) == 1;
+        backslashCount = 0;
+        
+        if (char == '"' && !isEscaped) {
+          inString = !inString;
+          buffer.write(char);
+          continue;
+        }
+        
+        if (inString && !isEscaped && codeUnit >= 0 && codeUnit < 32) {
+          switch (char) {
+            case '\t':
+              buffer.write('\\t');
+              break;
+            case '\n':
+              buffer.write('\\n');
+              break;
+            case '\r':
+              buffer.write('\\r');
+              break;
+            case '\b':
+              buffer.write('\\b');
+              break;
+            case '\f':
+              buffer.write('\\f');
+              break;
+            default:
+              buffer.write('\\u${codeUnit.toRadixString(16).padLeft(4, '0')}');
+          }
+        } else {
+          buffer.write(char);
+        }
+      }
+      
+      processedJson = buffer.toString();
+      hardfileJsonString = processedJson;
+      final hardfileData = jsonDecode(hardfileJsonString) as Map<String, dynamic>;
+
+      print('\n--- Real-World Data (hardfile.json) ---');
+      final hardfileToonString = encode(hardfileData);
+
+      print('JSON size: ${hardfileJsonString.length} bytes');
+      print('Toon size: ${hardfileToonString.length} bytes');
+      print('Size ratio: ${(hardfileToonString.length / hardfileJsonString.length * 100).toStringAsFixed(1)}%');
+
+      JsonEncodeBenchmark(hardfileData).report();
+      ToonEncodeBenchmark(hardfileData).report();
+      print('');
+      JsonDecodeBenchmark(hardfileJsonString).report();
+      ToonDecodeBenchmark(hardfileToonString).report();
+      print('');
+      JsonRoundTripBenchmark(hardfileData).report();
+      ToonRoundTripBenchmark(hardfileData).report();
+    } else {
+      print('\n--- Real-World Data (hardfile.json) ---');
+      print('File not found: test/hardfile.json');
+      print('Skipping real-world data benchmark');
+    }
+  } catch (e) {
+    print('\n--- Real-World Data (hardfile.json) ---');
+    print('Error loading hardfile.json: $e');
+    print('Skipping real-world data benchmark');
+  }
 
   print('\n$separator');
 }

@@ -1,0 +1,36 @@
+=== Round Trip Comparison ===
+
+Original JSON size: 3279 bytes
+Encoded TOON size: 2165 bytes
+Decoded JSON size: 2 bytes
+
+=== Encoded TOON (first 500 chars) ===
+company:
+  name: Tech Solutions Inc.
+  alias: TSI​
+  founded: 0
+  rating: null
+  valuation: null
+  branches[2]:
+    - city: Tokyo
+      employees: 1200
+      coordinates:
+        lat: 35.6895
+        lon: "139.6917"
+    - city: Cairo
+      employees: "1200"
+      coordinates:
+        lat: "30.0444"
+        lon: 31.2357
+  location:
+    city: New York
+    state: NY
+    address:
+      street: 21 2nd Street
+      zipCode: "10021"
+      unit: null
+      unitLiteral: "null"
+      tabIndented: "\tTabbe...
+
+=== Decoded JSON (first 500 chars) ===
+{}

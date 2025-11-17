@@ -1,0 +1,10 @@
+=== Hardfile Benchmark Data Summary ===
+
+Data structure:
+  - Top-level keys: 1
+  - company (object): 10 keys
+
+Size metrics:
+  - JSON: 3279 bytes
+  - TOON: 2165 bytes
+  - Compression: 34.0%

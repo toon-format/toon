@@ -1,0 +1,153 @@
+{
+  "company": {
+    "name": "Tech Solutions Inc.",
+    "alias": "TSI\u200B", 
+    "founded": -0,
+    "rating": NaN,
+    "valuation": Infinity,
+    "branches": [
+      {
+        "city": "Tokyo",
+        "employees": 1200,
+        "coordinates": {
+          "lat": 35.6895,
+          "lon": "139.6917" 
+        }
+      },
+      {
+        "city": "Cairo",
+        "employees": "1200", 
+        "coordinates": {
+          "lat": "30.0444",
+          "lon": 31.2357
+        }
+      }
+    ],
+    "location": {
+      "city": "New York",
+      "state": "NY",
+      "address": {
+        "street": "21 2nd Street",
+        "zipCode": "10021",
+        "unit": null,
+        "unitLiteral": "null",
+        "tabIndented": "\tTabbedValue"
+      }
+    },
+    "departments": [
+      {
+        "deptName": "Engineering",
+        "manager": {
+          "firstName": "John",
+          "lastName": "Doe",
+          "employeeId": "E123",
+          "extra": {
+            "notes": "He said, \"Keep the comma, , , do NOT remove it.\""
+          }
+        },
+        "employees": [
+          {
+            "firstName": "Mary",
+            "lastName": "Smith",
+            "age": 32,
+            "height": 165.00000000000006,
+            "skills": [
+              "Python",
+              "Java",
+              "JSON",
+              ",",
+              "|",
+              "\t"
+            ]
+          },
+          {
+            "firstName": "Jim",
+            "lastName": "Galley",
+            "age": 41,
+            "skills": [
+              "C++",
+              "JavaScript",
+              "5",
+              5,
+              "05"
+            ]
+          }
+        ],
+        "projects": [
+          {
+            "projectName": "Project Alpha",
+            "status": "In Progress",
+            "teamSize": 5,
+            "metadata": [
+              { "k": "A", "v": 1 },
+              { "v": 1, "k": "A" }
+            ]
+          },
+          {
+            "projectName": "🚀 Launch Prep",
+            "status": "Pending",
+            "budget": 50000000000000001
+          }
+        ]
+      },
+      {
+        "deptName": "Sales",
+        "manager": {
+          "firstName": "Sally",
+          "lastName": "Green",
+          "employeeId": "S456",
+          "unicode": "✓✓✓"
+        },
+        "employees": [
+          {
+            "firstName": "Mike",
+            "lastName": "Ross",
+            "age": "27",
+            "skills": [
+              "Negotiation",
+              "CRM",
+              "{\"malformed\": true}",
+              "100,200,300"
+            ]
+          }
+        ],
+        "dynamicKeys": {
+          "2025-12-31": "year-end",
+          "user.id": "should be escaped?",
+          "": "empty key?",
+          " ":"space key",
+          "	": "tab key"
+        }
+      }
+    ],
+    "mixedArray": [
+      1,
+      "1",
+      null,
+      "null",
+      true,
+      "true",
+      0,
+      -0,
+      -0.0,
+      "0",
+      "00",
+      [],
+      {},
+      [1, "1"],
+      { "a": 1, "b": "1" }
+    ],
+    "unicodeWeirdness": {
+      "zeroWidth": "Hello\u200BWorld",
+      "rtl": "\u202Eabc",
+      "emojiKey😊": "works?",
+      "deep": {
+        "nest": {
+          "level": {
+            "x": [1, 2, 3, {"inside": "yes, with commas,| and pipes"}]
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,100 @@
+company:
+  name: Tech Solutions Inc.
+  alias: TSI​
+  founded: 0
+  rating: null
+  valuation: null
+  branches[2]:
+    - city: Tokyo
+      employees: 1200
+      coordinates:
+        lat: 35.6895
+        lon: "139.6917"
+    - city: Cairo
+      employees: "1200"
+      coordinates:
+        lat: "30.0444"
+        lon: 31.2357
+  location:
+    city: New York
+    state: NY
+    address:
+      street: 21 2nd Street
+      zipCode: "10021"
+      unit: null
+      unitLiteral: "null"
+      tabIndented: "\tTabbedValue"
+  departments[2]:
+    - deptName: Engineering
+      manager:
+        firstName: John
+        lastName: Doe
+        employeeId: E123
+        extra:
+          notes: "He said, \"Keep the comma, , , do NOT remove it.\""
+      employees[2]:
+        - firstName: Mary
+          lastName: Smith
+          age: 32
+          height: 165.00000000000006
+          skills[6]: Python,Java,JSON,",",|,"\t"
+        - firstName: Jim
+          lastName: Galley
+          age: 41
+          skills[5]: C++,JavaScript,"5",5,"05"
+      projects[2]:
+        - projectName: Project Alpha
+          status: In Progress
+          teamSize: 5
+          metadata[2]{k,v}:
+            A,1
+            A,1
+        - projectName: 🚀 Launch Prep
+          status: Pending
+          budget: 50000000000000001
+    - deptName: Sales
+      manager:
+        firstName: Sally
+        lastName: Green
+        employeeId: S456
+        unicode: ✓✓✓
+      employees[1]:
+        - firstName: Mike
+          lastName: Ross
+          age: "27"
+          skills[4]: Negotiation,CRM,"{\"malformed\": true}","100,200,300"
+      dynamicKeys:
+        "2025-12-31": year-end
+        user.id: should be escaped?
+        "": empty key?
+        " ": space key
+        "\t": tab key
+  mixedArray[15]:
+    - 1
+    - "1"
+    - null
+    - "null"
+    - true
+    - "true"
+    - 0
+    - 0
+    - 0
+    - "0"
+    - "00"
+    - [0]:
+    - 
+    - [2]: 1,"1"
+    - a: 1
+      b: "1"
+  unicodeWeirdness:
+    zeroWidth: Hello​World
+    rtl: ‮abc
+    "emojiKey😊": works?
+    deep:
+      nest:
+        level:
+          x[4]:
+            - 1
+            - 2
+            - 3
+            - inside: "yes, with commas,| and pipes"

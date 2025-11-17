@@ -41,8 +41,15 @@ void _encodeObject(
   int depth,
   EncodeOptions options,
 ) {
-  for (final entry in value.entries) {
+  final entries = value.entries.toList();
+  for (int i = 0; i < entries.length; i++) {
+    final entry = entries[i];
     _encodeKeyValuePair(entry.key, entry.value, writer, depth, options);
+    
+    // Add blank line between top-level entries (depth 0)
+    if (depth == 0 && i < entries.length - 1) {
+      writer.push(0, '');
+    }
   }
 }
 
@@ -137,7 +144,14 @@ List<String>? _extractTabularHeaderOptimized(JsonArray value) {
   final firstKeys = firstRow.keys.toList();
   if (firstKeys.isEmpty) return null;
 
-  // Validate all rows in single pass
+  // Validate first row values are primitives
+  for (final key in firstKeys) {
+    if (!isJsonPrimitive(firstRow[key])) {
+      return null;
+    }
+  }
+
+  // Validate all remaining rows in single pass
   for (int i = 1; i < value.length; i++) {
     final row = value[i] as JsonObject;
     if (row.length != firstKeys.length) {
@@ -170,7 +184,16 @@ void _encodeArrayOfObjectsAsTabular(
   writer.push(depth, formattedHeader);
 
   for (final row in rows) {
-    final values = header.map((key) => row[key]).toList();
+    final values = header.map((key) {
+      final value = row[key];
+      // Ensure value is a primitive (validation should have caught non-primitives)
+      if (!isJsonPrimitive(value)) {
+        throw FormatException(
+          'Tabular array contains non-primitive value for key "$key": ${value.runtimeType}',
+        );
+      }
+      return value as JsonPrimitive;
+    }).toList();
     final joinedValue = encodeAndJoinPrimitives(values, options.delimiter);
     writer.push(depth + 1, joinedValue);
   }
@@ -237,15 +260,60 @@ void _encodeObjectAsListItem(
   } else if (isJsonArray(firstEntry.value)) {
     // Handle array in list item
     final arr = firstEntry.value as JsonArray;
-    final header = formatHeader(
-      arr.length,
-      key: firstEntry.key,
-      delimiter: options.delimiter,
-    );
-    writer.pushListItem(depth, header);
-    // Encode array items
-    for (final item in arr) {
-      _encodeListItemValue(item, writer, depth + 1, options);
+    
+    // Check if it's an array of objects that can be tabular
+    if (isArrayOfObjects(arr)) {
+      final tabularHeader = _extractTabularHeaderOptimized(arr);
+      if (tabularHeader != null) {
+        // Use tabular format
+        final objects = arr.map((v) => v as JsonObject).toList();
+        final formattedHeader = formatHeader(
+          objects.length,
+          key: firstEntry.key,
+          fields: tabularHeader,
+          delimiter: options.delimiter,
+        );
+        writer.pushListItem(depth, formattedHeader);
+        
+        // Encode tabular rows
+        for (final row in objects) {
+          final values = tabularHeader.map((key) {
+            final value = row[key];
+            if (!isJsonPrimitive(value)) {
+              throw FormatException(
+                'Tabular array contains non-primitive value for key "$key": ${value.runtimeType}',
+              );
+            }
+            return value as JsonPrimitive;
+          }).toList();
+          final joinedValue = encodeAndJoinPrimitives(values, options.delimiter);
+          writer.push(depth + 1, joinedValue);
+        }
+      } else {
+        // Fall back to expanded format
+        final header = formatHeader(
+          arr.length,
+          key: firstEntry.key,
+          delimiter: options.delimiter,
+        );
+        writer.pushListItem(depth, header);
+        // Encode array items
+        for (final item in arr) {
+          _encodeListItemValue(item, writer, depth + 1, options);
+        }
+      }
+    } else {
+      // Primitive or mixed array
+      final header = formatHeader(
+        arr.length,
+        key: firstEntry.key,
+        delimiter: options.delimiter,
+      );
+      writer.pushListItem(depth, header);
+      // Encode array items
+      for (final item in arr) {
+        _encodeListItemValue(item, writer, depth + 1, options);
+      }
     }
   } else if (isJsonObject(firstEntry.value)) {
     writer.pushListItem(depth, '$encodedKey:');
