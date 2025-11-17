@@ -20,6 +20,15 @@ export type {
   ResolvedEncodeOptions,
 } from './types'
 
+// Streaming API exports
+export {
+  streamEncodeGenerator,
+  streamDecodeGenerator,
+  batchEncode,
+  batchDecode,
+} from './streaming'
+export type { StreamOptions } from './streaming'
+
 /**
  * Encodes a JavaScript value into TOON format string.
  *
