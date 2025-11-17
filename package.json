@@ -11,6 +11,8 @@
     "lint:fix": "eslint . --fix",
     "test": "pnpm -r test",
     "test:types": "tsc --noEmit",
+    "conformance": "cd conformance && node cli.mjs",
+    "conformance:report": "cd conformance && node cli.mjs --report --output ../conformance-results",
     "release": "bumpp -r"
   },
   "devDependencies": {

@@ -1,0 +1,14 @@
+{
+  "name": "typescript",
+  "displayName": "TypeScript/JavaScript (Reference)",
+  "language": "TypeScript",
+  "version": "1.0.0",
+  "command": "node",
+  "args": ["c:/git-ai/toon/packages/cli/bin/toon.mjs", "convert", "--encode"],
+  "active": true,
+  "options": {
+    "inputMethod": "stdin",
+    "outputMethod": "stdout"
+  },
+  "workingDirectory": "c:/git-ai/toon"
+}

@@ -1,0 +1,29 @@
+{
+  "name": "toon-conformance",
+  "version": "1.0.0",
+  "description": "Cross-language TOON conformance testing framework",
+  "type": "module",
+  "main": "src/runner.js",
+  "bin": {
+    "toon-conformance": "cli.mjs"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "node cli.mjs",
+    "test:typescript": "node cli.mjs --impl typescript",
+    "test:basic": "node cli.mjs --category basic",
+    "test:verbose": "node cli.mjs --verbose",
+    "test:report": "node cli.mjs --report --output ./results",
+    "add-impl": "node scripts/add-implementation.mjs"
+  },
+  "dependencies": {
+    "@toon-format/toon": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
