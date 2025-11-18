@@ -30,11 +30,40 @@ println()
 # ============================================================================
 println("Encoding nested structures:")
 nested = Dict(
-    "user" => Dict(
-        "name" => "Charlie",
-        "email" => "charlie@example.com"
-    )
+    "context" => Dict(
+        "task" => "Our favorite hikes together",
+        "location" => "Boulder",
+        "season" => "spring_2025"
+    ),
+    "friends" => ["ana", "luis", "sam"],
+    "hikes" => [
+        Dict(
+            "id" => 1,
+            "name" => "Blue Lake Trail",
+            "distanceKm" => 7.5,
+            "elevationGain" => 320,
+            "companion" => "ana",
+            "wasSunny" => true
+        ),
+        Dict(
+            "id" => 2,
+            "name" => "Ridge Overlook",
+            "distanceKm" => 9.2,
+            "elevationGain" => 540,
+            "companion" => "luis",
+            "wasSunny" => false
+        ),
+        Dict(
+            "id" => 3,
+            "name" => "Wildflower Loop",
+            "distanceKm" => 5.1,
+            "elevationGain" => 180,
+            "companion" => "sam",
+            "wasSunny" => true
+        )
+    ]
 )
+
 println(toonEncode(nested))
 println()
 

@@ -14,7 +14,7 @@ function expand_paths_safe(value::JsonValue, strict::Bool)::JsonValue
         for (key, key_value) in value
             # Check if key contains dots and should be expanded
             if occursin(".", key)
-                segments = split(key, ".")
+                segments = [string(s) for s in split(key, ".")]
                 
                 # Validate all segments are identifiers
                 if all(seg -> is_identifier_segment(seg), segments)

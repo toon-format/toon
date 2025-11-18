@@ -31,6 +31,9 @@ function normalize_json_value(value)
         return Dict{String, Any}(string(k) => normalize_json_value(v) for (k, v) in value)
     elseif value isa Array
         return Any[normalize_json_value(item) for item in value]
+    elseif value isa Bool
+        # Preserve booleans (Bool is a subtype of Number, so check this first)
+        return value
     elseif value isa Number
         # Convert all numbers to Float64 for comparison (Julia's JSON parser does this)
         return Float64(value)

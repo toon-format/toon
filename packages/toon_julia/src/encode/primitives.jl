@@ -11,7 +11,12 @@ function encode_primitive(value::JsonPrimitive, delimiter::Char = DEFAULT_DELIMI
     end
     
     if value isa Number
-        return string(value)
+        # Encode integers without decimal point
+        if isinteger(value)
+            return string(Int64(value))
+        else
+            return string(value)
+        end
     end
     
     return encode_string_literal(value, delimiter)

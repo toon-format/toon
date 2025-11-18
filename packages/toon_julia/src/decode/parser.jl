@@ -73,7 +73,7 @@ function parse_array_header_line(
     # Extract and parse the key (might be quoted)
     key = nothing
     if bracket_start > 1
-        raw_key = strip(content[1:(bracket_start - 1)])
+        raw_key = string(strip(content[1:(bracket_start - 1)]))
         key = startswith(raw_key, string(DOUBLE_QUOTE)) ? parse_string_literal(raw_key) : raw_key
     end
     
@@ -98,7 +98,7 @@ function parse_array_header_line(
         if brace_end_idx !== nothing && (brace_start + brace_end_idx - 1) < colon_index
             fields_content = content[(brace_start + 1):(brace_start + brace_end_idx - 2)]
             field_values = parse_delimited_values(fields_content, delimiter)
-            fields = [parse_string_literal(strip(f)) for f in field_values]
+            fields = [parse_string_literal(string(strip(f))) for f in field_values]
         end
     end
     
@@ -211,6 +211,14 @@ function parse_primitive_token(token::String)::JsonPrimitive
     
     # Numeric literal
     if is_numeric_literal(trimmed)
+        # Try parsing as integer first
+        if occursin(r"^-?\d+$", trimmed)
+            try
+                return parse(Int64, trimmed)
+            catch
+                # Fall through to float parsing
+            end
+        end
         parsed_number = parse(Float64, trimmed)
         # Normalize negative zero to positive zero
         return parsed_number == 0.0 && signbit(parsed_number) ? 0.0 : parsed_number
@@ -224,11 +232,12 @@ end
 Parses a string literal.
 """
 function parse_string_literal(token::String)::String
-    trimmed_token = strip(token)
+    trimmed_token = string(strip(token))
     
     if startswith(trimmed_token, string(DOUBLE_QUOTE))
         # Find the closing quote, accounting for escaped quotes
-        closing_quote_index = find_closing_quote(trimmed_token, 0)
+        # Start after the opening quote (position 1)
+        closing_quote_index = find_closing_quote(trimmed_token, 1)
         
         if closing_quote_index == 0
             # No closing quote was found
@@ -260,7 +269,7 @@ function parse_unquoted_key(content::String, start::Int)::Tuple{String, Int}
         throw(ArgumentError("Missing colon after key"))
     end
     
-    key = strip(content[start:(parse_position - 1)])
+    key = string(strip(content[start:(parse_position - 1)]))
     
     # Skip the colon
     parse_position += 1
@@ -310,7 +319,7 @@ end
 Checks if content is an array header after hyphen.
 """
 function is_array_header_after_hyphen(content::String)::Bool
-    return startswith(strip(content), string(OPEN_BRACKET)) && find_unquoted_char(content, COLON) != 0
+    return startswith(string(strip(content)), string(OPEN_BRACKET)) && find_unquoted_char(content, COLON) != 0
 end
 
 """
