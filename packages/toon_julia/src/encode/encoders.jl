@@ -1,7 +1,8 @@
 """
 Encodes a JsonValue into TOON format string.
+Also accepts AbstractDict (like JSON.jl Objects) to preserve insertion order.
 """
-function encode_value(value::JsonValue, options::EncodeOptions)::String
+function encode_value(value, options::EncodeOptions)::String
     if is_json_primitive(value)
         return encode_primitive(value, options.delimiter)
     end
@@ -10,7 +11,7 @@ function encode_value(value::JsonValue, options::EncodeOptions)::String
     
     if is_json_array(value)
         encode_array(nothing, value, writer, 0, options)
-    elseif is_json_object(value)
+    elseif is_json_object(value) || (value isa AbstractDict && !(value isa AbstractArray))
         encode_object(value, writer, 0, options)
     end
     
@@ -19,9 +20,10 @@ end
 
 """
 Encodes an object.
+Accepts JsonObject (Dict{String, Any}) or AbstractDict (like JSON.jl Objects).
 """
 function encode_object(
-    value::JsonObject,
+    value::AbstractDict,
     writer::LineWriter,
     depth::Int,
     options::EncodeOptions,
@@ -29,7 +31,10 @@ function encode_object(
     path_prefix::Union{String, Nothing} = nothing,
     remaining_depth::Union{Int, Nothing} = nothing
 )
-    keys_list = sort(collect(keys(value)))
+    keys_list = collect(keys(value))
+    if options.sort_keys
+        keys_list = sort(keys_list)
+    end
     
     # At root level (depth 0), collect all literal dotted keys for collision checking
     if depth == 0 && root_literal_keys === nothing
@@ -38,7 +43,7 @@ function encode_object(
     
     effective_flatten_depth = something(remaining_depth, options.flatten_depth)
     
-    # Iterate over sorted keys
+    # Iterate over keys (sorted if option enabled)
     for key in keys_list
         val = value[key]
         encode_key_value_pair(key, val, writer, depth, options, keys_list, root_literal_keys, path_prefix, effective_flatten_depth)
@@ -47,10 +52,11 @@ end
 
 """
 Encodes a key-value pair.
+Accepts JsonValue or AbstractDict (like JSON.jl Objects) for the value.
 """
 function encode_key_value_pair(
     key::String,
-    value::JsonValue,
+    value,
     writer::LineWriter,
     depth::Int,
     options::EncodeOptions,
@@ -71,7 +77,7 @@ function encode_key_value_pair(
         push(writer, depth, "$(encoded_key): $(encode_primitive(value, options.delimiter))")
     elseif is_json_array(value)
         encode_array(key, value, writer, depth, options)
-    elseif is_json_object(value)
+    elseif is_json_object(value) || (value isa AbstractDict && !(value isa AbstractArray))
         push(writer, depth, "$(encoded_key):")
         if !is_empty_object(value)
             encode_object(value, writer, depth + 1, options, root_literal_keys, current_path, effective_flatten_depth)
@@ -115,7 +121,7 @@ function encode_array(
     
     # Array of objects
     if is_array_of_objects(value)
-        header = extract_tabular_header(value)
+        header = extract_tabular_header(value, options)
         if header !== nothing
             encode_array_of_objects_as_tabular(key, value, header, writer, depth, options)
         else
@@ -170,7 +176,7 @@ end
 """
 Extracts tabular header from an array of objects.
 """
-function extract_tabular_header(rows::JsonArray)::Union{Vector{String}, Nothing}
+function extract_tabular_header(rows::JsonArray, options::EncodeOptions)::Union{Vector{String}, Nothing}
     if isempty(rows)
         return nothing
     end
@@ -189,11 +195,11 @@ function extract_tabular_header(rows::JsonArray)::Union{Vector{String}, Nothing}
     end
     
     # Check if all rows have the same keys (order-independent check)
+    # Use sorted keys for validation regardless of sort_keys option
     sorted_keys = sort(first_keys)
     if is_tabular_array(rows, sorted_keys)
-        # For deterministic output, sort alphabetically
-        # Note: This may not match test expectations that preserve JSON order,
-        # but Dict iteration order is non-deterministic in Julia
+        # Tabular arrays always use sorted field order for deterministic output
+        # The sort_keys option only affects object keys, not tabular array fields
         return sorted_keys
     end
     
@@ -310,14 +316,20 @@ function encode_object_as_list_item(
         return
     end
     
-    # Sort keys: primitives first (alphabetically), then arrays (alphabetically), then objects (alphabetically)
+    # Organize keys: primitives first, then arrays, then objects
     all_keys = collect(keys(obj))
     primitive_keys = [k for k in all_keys if is_json_primitive(obj[k])]
     array_keys = [k for k in all_keys if is_json_array(obj[k])]
     object_keys = [k for k in all_keys if is_json_object(obj[k])]
     
-    sorted_keys = vcat(sort(primitive_keys), sort(array_keys), sort(object_keys))
-    first_key = sorted_keys[1]
+    # Objects in arrays (list format) always have sorted keys for deterministic output
+    # The sort_keys option only affects top-level object keys, not objects within arrays
+    primitive_keys = sort(primitive_keys)
+    array_keys = sort(array_keys)
+    object_keys = sort(object_keys)
+    
+    ordered_keys = vcat(primitive_keys, array_keys, object_keys)
+    first_key = ordered_keys[1]
     first_value = obj[first_key]
     encoded_key = encode_key(first_key)
     
@@ -332,7 +344,7 @@ function encode_object_as_list_item(
             push_list_item(writer, depth, array_property_line)
         elseif is_array_of_objects(first_value)
             # Check if array of objects can use tabular format
-            tabular_header = extract_tabular_header(first_value)
+            tabular_header = extract_tabular_header(first_value, options)
             if tabular_header !== nothing
                 # Tabular format for uniform arrays of objects
                 formatted_header = format_header(
@@ -366,9 +378,9 @@ function encode_object_as_list_item(
         end
     end
     
-    # Remaining entries on indented lines (sorted)
-    for i in 2:length(sorted_keys)
-        key = sorted_keys[i]
+    # Remaining entries on indented lines (ordered)
+    for i in 2:length(ordered_keys)
+        key = ordered_keys[i]
         val = obj[key]
         encode_key_value_pair(key, val, writer, depth + 1, options)
     end

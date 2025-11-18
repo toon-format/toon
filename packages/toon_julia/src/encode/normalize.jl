@@ -27,16 +27,33 @@ function normalize_value(value)::JsonValue
     
     # Array
     if value isa AbstractArray
+        # Check if array contains JSON.jl Objects - preserve them
+        if !isempty(value) && typeof(value[1]).name.name == :Object
+            # Array of JSON.jl Objects - preserve them to maintain order
+            return Any[normalize_value(item) for item in value]
+        end
         return Any[normalize_value(item) for item in value]
     end
     
     # Dict/AbstractDict
     if value isa AbstractDict && !(value isa AbstractArray)
-        normalized = Dict{String, Any}()
-        for (k, v) in value
-            normalized[string(k)] = normalize_value(v)
+        # Check if it's a JSON.jl Object (preserves insertion order)
+        if typeof(value).name.name == :Object
+            # JSON.jl Object - preserve it to maintain insertion order
+            # Recursively normalize nested values but keep the Object structure
+            result = typeof(value)()
+            for (k, v) in value
+                result[string(k)] = normalize_value(v)
+            end
+            return result
+        else
+            # Regular Dict - order may not be preserved
+            normalized = Dict{String, Any}()
+            for (k, v) in value
+                normalized[string(k)] = normalize_value(v)
+            end
+            return normalized
         end
-        return normalized
     end
     
     # Fallback: function, symbol, or other → nothing
@@ -56,8 +73,11 @@ function is_json_object(value)::Bool
     return value isa AbstractDict && !(value isa AbstractArray) && !(value isa Tuple)
 end
 
-function is_empty_object(value::JsonObject)::Bool
-    return isempty(value)
+function is_empty_object(value)::Bool
+    if value isa AbstractDict
+        return isempty(value)
+    end
+    return false
 end
 
 function is_plain_dict(value)::Bool

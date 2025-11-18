@@ -36,6 +36,13 @@ toonEncode(Dict("users" => [Dict("id" => 1), Dict("id" => 2)]))
 ```
 """
 function toonEncode(input; options::EncodeOptions = EncodeOptions())
+    # Check if input is a JSON.jl Object - preserve order by skipping normalization
+    # JSON.jl Objects are AbstractDict and work directly with our encoder
+    if typeof(input).name.name == :Object && input isa AbstractDict
+        # Pass JSON.jl Object directly to preserve insertion order
+        # The encoder will handle it since we updated encode_value to accept AbstractDict
+        return encode_value(input, options)
+    end
     normalized_value = normalize_value(input)
     return encode_value(normalized_value, options)
 end

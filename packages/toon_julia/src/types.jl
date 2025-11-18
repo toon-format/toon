@@ -12,14 +12,16 @@ struct EncodeOptions
     delimiter::Char
     key_folding::Symbol  # :off or :safe
     flatten_depth::Int
+    sort_keys::Bool  # Sort object keys alphabetically
 end
 
 EncodeOptions(;
     indent::Int = 2,
     delimiter::Char = DEFAULT_DELIMITER,
     key_folding::Symbol = :off,
-    flatten_depth::Int = typemax(Int)
-) = EncodeOptions(indent, delimiter, key_folding, flatten_depth)
+    flatten_depth::Int = typemax(Int),
+    sort_keys::Bool = false
+) = EncodeOptions(indent, delimiter, key_folding, flatten_depth, sort_keys)
 
 # Decoder options
 struct DecodeOptions

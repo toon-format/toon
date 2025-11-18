@@ -22,16 +22,25 @@ See the [TOON specification](https://github.com/toon-format/spec) for detailed b
 
 ## Installation
 
+Once published to the Julia General Registry:
+
 ```julia
 using Pkg
-Pkg.add(url="https://github.com/toon-format/toon_julia")
+Pkg.add("Toon")
 ```
 
 Or add to your `Project.toml`:
 
 ```toml
 [deps]
-Toon = { git = "https://github.com/toon-format/toon_julia" }
+Toon = "616451e9-093a-4ec3-b67a-88f06778d1cb"
+```
+
+**Development/Pre-release Installation:**
+
+```julia
+using Pkg
+Pkg.add(url="https://github.com/toon-format/toon_julia")
 ```
 
 ## Usage
@@ -137,6 +146,7 @@ data = toonDecode(toon_string; options=options)
 - `delimiter::Char` - Delimiter for tabular arrays (default: ',')
 - `key_folding::Symbol` - Enable key folding (`:off` or `:safe`, default: `:off`)
 - `flatten_depth::Int` - Maximum depth for key folding (default: `typemax(Int)`)
+- `sort_keys::Bool` - Sort object keys alphabetically (default: `false`)
 
 ### DecodeOptions
 

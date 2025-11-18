@@ -29,41 +29,47 @@ println()
 # Quick Start: Nested structures
 # ============================================================================
 println("Encoding nested structures:")
-nested = Dict(
-    "context" => Dict(
-        "task" => "Our favorite hikes together",
-        "location" => "Boulder",
-        "season" => "spring_2025"
-    ),
-    "friends" => ["ana", "luis", "sam"],
-    "hikes" => [
-        Dict(
-            "id" => 1,
-            "name" => "Blue Lake Trail",
-            "distanceKm" => 7.5,
-            "elevationGain" => 320,
-            "companion" => "ana",
-            "wasSunny" => true
-        ),
-        Dict(
-            "id" => 2,
-            "name" => "Ridge Overlook",
-            "distanceKm" => 9.2,
-            "elevationGain" => 540,
-            "companion" => "luis",
-            "wasSunny" => false
-        ),
-        Dict(
-            "id" => 3,
-            "name" => "Wildflower Loop",
-            "distanceKm" => 5.1,
-            "elevationGain" => 180,
-            "companion" => "sam",
-            "wasSunny" => true
-        )
-    ]
-)
-
+# Use JSON.jl to preserve insertion order (matching TypeScript implementation)
+using JSON
+nested_json = """
+{
+  "context": {
+    "task": "Our favorite hikes together",
+    "location": "Boulder",
+    "season": "spring_2025"
+  },
+  "friends": ["ana", "luis", "sam"],
+  "hikes": [
+    {
+      "id": 1,
+      "name": "Blue Lake Trail",
+      "distanceKm": 7.5,
+      "elevationGain": 320,
+      "companion": "ana",
+      "wasSunny": true
+    },
+    {
+      "id": 2,
+      "name": "Ridge Overlook",
+      "distanceKm": 9.2,
+      "elevationGain": 540,
+      "companion": "luis",
+      "wasSunny": false
+    },
+    {
+      "id": 3,
+      "name": "Wildflower Loop",
+      "distanceKm": 5.1,
+      "elevationGain": 180,
+      "companion": "sam",
+      "wasSunny": true
+    }
+  ]
+}
+"""
+nested = JSON.parse(nested_json)
+# JSON.jl preserves insertion order, so we can use default options
+# (sort_keys=false) to match TypeScript implementation output
 println(toonEncode(nested))
 println()
 
