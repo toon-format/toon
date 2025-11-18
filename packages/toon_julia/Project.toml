@@ -4,7 +4,7 @@ version = "1.0.0"
 authors = ["Toon Format Contributors"]
 description = "Token-Oriented Object Notation (TOON) – A compact, deterministic JSON format for LLM prompts"
 license = "MIT"
-repository = "https://github.com/toon-format/toon_julia"
+repository = "https://github.com/abdelrahman-tolba-software-developer/toon_julia"
 
 [compat]
 julia = "1.6"

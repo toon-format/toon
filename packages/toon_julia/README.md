@@ -40,7 +40,7 @@ Toon = "616451e9-093a-4ec3-b67a-88f06778d1cb"
 
 ```julia
 using Pkg
-Pkg.add(url="https://github.com/toon-format/toon_julia")
+Pkg.add(url="https://github.com/abdelrahman-tolba-software-developer/toon_julia")
 ```
 
 ## Usage
