@@ -1,5 +1,6 @@
 import type { DefaultTheme } from 'vitepress'
 import UnoCSS from 'unocss/vite'
+import llmstxt, { copyOrDownloadAsMarkdownButtons } from 'vitepress-plugin-llms'
 import { defineConfig } from 'vitepress'
 import { description, github, name, ogImage, ogUrl, releases, twitterImage, version } from './meta'
 
@@ -24,7 +25,7 @@ export default defineConfig({
 
   vite: {
     // @ts-expect-error – UnoCSS types are not compatible with Vite yet
-    plugins: [UnoCSS()],
+    plugins: [UnoCSS(), llmstxt()],
   },
 
   themeConfig: {
@@ -93,6 +94,11 @@ export default defineConfig({
       provider: 'local',
     },
   },
+  markdown: {
+    config(md) {
+      md.use(copyOrDownloadAsMarkdownButtons)
+    }
+  }
 })
 
 function sidebarPrimary(): DefaultTheme.SidebarItem[] {
