@@ -7,7 +7,7 @@ import { defineCommand } from 'citty'
 import { consola } from 'consola'
 import { DEFAULT_DELIMITER, DELIMITERS } from '../../toon/src'
 import { name, version } from '../package.json' with { type: 'json' }
-import { decodeToJson, encodeToToon } from './conversion'
+import { decodeBinaryToonToJson, decodeToJson, encodeToBinaryToon, encodeToToon } from './conversion'
 import { detectMode } from './utils'
 
 export const mainCommand: CommandDef<{
@@ -63,6 +63,11 @@ export const mainCommand: CommandDef<{
   stats: {
     type: 'boolean'
     description: string
+    default: false
+  }
+  binary: {
+    type: 'boolean'
+    description: 'Output binary TOON format (vs text TOON)'
     default: false
   }
 }> = defineCommand({
@@ -126,6 +131,11 @@ export const mainCommand: CommandDef<{
       description: 'Show token statistics',
       default: false,
     },
+    binary: {
+      type: 'boolean',
+      description: 'Output binary TOON format (vs text TOON)',
+      default: false,
+    },
   },
   async run({ args }) {
     const input = args.input
@@ -168,10 +178,19 @@ export const mainCommand: CommandDef<{
       throw new Error(`Invalid expandPaths value "${expandPaths}". Valid values are: off, safe`)
     }
 
-    const mode = detectMode(inputSource, args.encode, args.decode)
+    const mode = detectMode(inputSource, args.encode, args.decode, args.binary)
 
     try {
-      if (mode === 'encode') {
+      if (mode === 'encode_binary') {
+        await encodeToBinaryToon({
+          input: inputSource,
+          output: outputPath,
+          delimiter: delimiter as Delimiter,
+          keyFolding: keyFolding as NonNullable<import('../../toon/src/binary/binary-types').BinaryEncodeOptions['keyFolding']>,
+          flattenDepth,
+        })
+      }
+      else if (mode === 'encode') {
         await encodeToToon({
           input: inputSource,
           output: outputPath,
@@ -182,7 +201,16 @@ export const mainCommand: CommandDef<{
           printStats: args.stats === true,
         })
       }
-      else {
+      else if (mode === 'decode_binary') {
+        await decodeBinaryToonToJson({
+          input: inputSource,
+          output: outputPath,
+          indent,
+          strict: args.strict !== false,
+          expandPaths: expandPaths as NonNullable<import('../../toon/src/binary/binary-types').BinaryDecodeOptions['expandPaths']>,
+        })
+      }
+      else if (mode === 'decode') {
         await decodeToJson({
           input: inputSource,
           output: outputPath,
@@ -190,6 +218,9 @@ export const mainCommand: CommandDef<{
           strict: args.strict !== false,
           expandPaths: expandPaths as NonNullable<DecodeOptions['expandPaths']>,
         })
+      }
+      else {
+        throw new Error(`Unknown mode: ${mode}`)
       }
     }
     catch (error) {

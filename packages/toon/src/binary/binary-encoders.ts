@@ -5,7 +5,7 @@
 
 import type { JsonArray, JsonObject, JsonPrimitive, JsonValue } from '../types'
 import type { ResolvedBinaryEncodeOptions } from './binary-types'
-import { isArrayOfArrays, isArrayOfObjects, isArrayOfPrimitives, isEmptyObject, isJsonArray, isJsonObject, isJsonPrimitive, normalizeValue } from '../encode/normalize'
+import { isArrayOfArrays, isArrayOfObjects, isArrayOfPrimitives, isJsonArray, isJsonObject, isJsonPrimitive, normalizeValue } from '../encode/normalize'
 import { BINARY_TYPE_ARRAY, BINARY_TYPE_OBJECT } from './binary-types'
 import { BinaryWriter } from './binary-writer'
 

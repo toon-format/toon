@@ -4,7 +4,7 @@
  */
 
 import type { JsonArray, JsonObject, JsonValue } from '../types'
-import type { BinaryDecodeOptions, BinaryReaderState, ResolvedBinaryDecodeOptions } from './binary-types'
+import type { BinaryDecodeOptions, ResolvedBinaryDecodeOptions } from './binary-types'
 import { BinaryReader } from './binary-reader'
 import { BINARY_TYPE_ARRAY, BINARY_TYPE_ARRAY_HEADER, BINARY_TYPE_OBJECT } from './binary-types'
 

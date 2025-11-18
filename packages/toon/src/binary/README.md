@@ -68,7 +68,7 @@ This is particularly efficient for small array lengths and string lengths.
 ## API Reference
 
 ```typescript
-import { encodeBinary, decodeBinary } from '@toon-format/toon'
+import { decodeBinary, encodeBinary } from '@toon-format/toon'
 
 // Encode to binary
 const binaryData = encodeBinary(data, options)
@@ -175,3 +175,97 @@ assert.deepEqual(binaryDecoded, textDecoded) // ✓ Always true
 ```
 
 This ensures binary TOON is a **drop-in replacement** for cases where binary serialization is preferred.
+
+## CLI Usage
+
+The TOON CLI supports binary TOON format through the `--binary` flag, allowing you to encode JSON to binary TOON and decode binary TOON back to JSON.
+
+### Installation
+
+```bash
+npm install -g @toon-format/cli
+# or using pnpm/yarn
+pnpm add -g @toon-format/cli
+```
+
+### Encoding: JSON → Binary TOON
+
+Use `--encode --binary` to convert JSON files to compact binary TOON format:
+
+```bash
+# From file
+toon --encode --binary users.json -o users.toon.bin
+
+# From stdin
+echo '{"users": []}' | toon --encode --binary -o users.toon.bin
+
+# With encoding options
+toon --encode --binary --delimiter '\t' --key-folding safe data.json -o data.toon.bin
+```
+
+### Decoding: Binary TOON → JSON
+
+Use `--decode --binary` to convert binary TOON files back to JSON:
+
+```bash
+# From file
+toon --decode --binary users.toon.bin -o users.json
+
+# From stdin (if reading binary data)
+toon --decode --binary -o users.json < users.toon.bin
+
+# With formatting
+toon --decode --binary --indent 4 users.toon.bin -o formatted.json
+```
+
+### File Extensions
+
+- **Binary TOON files**: Automatically get `.toon.bin` extension when using `--binary`
+- **Regular TOON files**: Use `.toon` extension (text format)
+- **JSON files**: Standard `.json` extension
+
+### Options Compatibility
+
+The `--binary` flag works with all existing CLI options:
+
+```bash
+# All encoding options supported
+toon --encode --binary --delimiter '|' --key-folding safe --flattenDepth 2 input.json -o output.toon.bin
+
+# All decoding options supported
+toon --decode --binary --strict false --expand-paths safe input.toon.bin -o output.json
+```
+
+### Example Workflow
+
+```bash
+# 1. Convert large JSON dataset to binary TOON for storage
+toon --encode --binary --key-folding safe large-dataset.json -o archive.toon.bin
+
+# 2. Process and decode when needed
+toon --decode --binary archive.toon.bin -o processed.json
+```
+
+### Binary vs Text Performance
+
+For large datasets, binary TOON provides significant advantages:
+
+```bash
+# Measure space savings
+ls -lh input.json                    # 22MB JSON file
+toon --encode input.json             # 15MB text TOON
+toon --encode --binary input.json    # 4.5MB binary TOON (80% reduction!)
+```
+
+### When to Use Binary Format
+
+- **Data Archives**: Storage where size matters more than readability
+- **API Communication**: Machine-to-machine data transfer
+- **Large Datasets**: Anything over 1MB where compression helps
+- **Streaming**: High-throughput data pipelines
+
+**Do NOT use for:**
+- Human-readable files
+- Web API responses (JSON/TOON text expected)
+- Small datasets (<10KB)
+- Debugging scenarios (binary not inspectable)
