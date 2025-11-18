@@ -1,0 +1,7 @@
+name = "toon-docs"
+compatibility_date = "2025-10-01"
+routes = [ { pattern = "toonformat.dev", custom_domain = true } ]
+
+[assets]
+directory = "./.vitepress/dist/"
+not_found_handling = "404-page"

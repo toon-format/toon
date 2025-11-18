@@ -1,0 +1,14 @@
+{
+  "name": "@toon-format/docs",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview"
+  },
+  "devDependencies": {
+    "unocss": "^66.5.6",
+    "vitepress": "^1.6.4"
+  }
+}

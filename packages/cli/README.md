@@ -94,12 +94,6 @@ Example output:
 toon data.json --delimiter "\t" -o output.toon
 ```
 
-#### Pipe-separated with length markers
-
-```bash
-toon data.json --delimiter "|" --length-marker -o output.toon
-```
-
 ### Lenient Decoding
 
 Skip validation for faster processing:

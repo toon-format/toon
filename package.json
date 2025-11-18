@@ -7,6 +7,9 @@
   "scripts": {
     "build": "pnpm -r --filter=./packages/** run build",
     "automd": "automd",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "pnpm -r test",

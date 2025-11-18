@@ -1,4 +1,5 @@
 packages:
+  - docs
   - benchmarks
   - packages/*
 
