@@ -771,6 +771,7 @@ Experiment with TOON format interactively using these community-built tools for 
 
 - [Format Tokenization Playground](https://www.curiouslychase.com/playground/format-tokenization-exploration)
 - [TOON Tools](https://toontools.vercel.app/)
+- [TOON Formatter Tool](https://toon-formatter.vercel.app/)
 
 ## CLI
 
