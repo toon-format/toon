@@ -1238,7 +1238,7 @@ Task: Return only users with role "user" as TOON. Use the same header. Set [N] t
 
 ### Official Implementations
 
-- **Python:** [toon_format](https://github.com/toon-format/toon-python) *(in development)*
+- **Python:** [`pytoon`](./python) – pure-Python CLI + library bundled with this repo (see `python/README.md`)
 - **Rust:** [toon_format](https://github.com/toon-format/toon-rust) *(in development)*
 
 ### Community Implementations

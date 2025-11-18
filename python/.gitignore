@@ -1,0 +1,84 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.eggs/
+pip-wheel-metadata/
+wheelhouse/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Pytest
+.pytest_cache/
+cache/
+
+# Coverage reports
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# Mypy and other caches
+.mypy_cache/
+.dmypy.json
+.pyre/
+.ruff_cache/
+
+# Test and build artifacts
+*.log
+*.sqlite3
+*.db
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# IDEs and editors
+.idea/
+.vscode/
+.ropeproject/
+_pycache_/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.*.local
+
+# PEP 582
+__pypackages__/
+
+# PyInstaller
+*.manifest
+*.spec
+
+# tox, nox, virtualenv wrappers
+.tox/
+.nox/
+
+# Local build and temporary files
+*.egg
+.python-version
+site/
+
+# Ensure packaging files remain tracked
+!pyproject.toml
+!README.md

@@ -1,0 +1,26 @@
+[project]
+name = 'pytoon'
+version = '0.1.0'
+description = 'Pure-Python encoder/decoder for Token-Oriented Object Notation (TOON)'
+readme = 'README.md'
+license = { text = 'MIT' }
+authors = [ { name = 'TOON Contributors' } ]
+requires-python = '>=3.10'
+dependencies = []
+
+[project.scripts]
+toon = 'pytoon.cli:main'
+
+[build-system]
+requires = ['setuptools>=68', 'wheel']
+build-backend = 'setuptools.build_meta'
+
+[project.optional-dependencies]
+test = [
+    'pytest>=8.0',
+]
+
+
+[tool.setuptools]
+packages = ['pytoon']
+
