@@ -1,0 +1,17 @@
+{
+  "typescript.preferences.includePackageJsonAutoImports": "auto",
+  "typescript.suggest.autoImports": true,
+  "typescript.preferences.includeCompletionsForModuleExports": true,
+  "typescript.validate.enable": true,
+  "typescript.format.enable": true,
+  "typescript.workspaceSymbols.scope": "allOpenProjects",
+  "typescript.disableAutomaticTypeAcquisition": false,
+  "emmet.includeLanguages": {
+    "typescript": "html",
+    "typescriptreact": "html"
+  },
+  "files.associations": {
+    "*.tsx": "typescriptreact",
+    "*.jsx": "javascriptreact"
+  }
+}
