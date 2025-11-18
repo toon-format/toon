@@ -1,0 +1,36 @@
+{
+  "name": "@toon/analytics",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "server": "tsx server/index.ts",
+    "monitor": "tsx monitor/index.ts",
+    "test": "tsx enhanced-monitor.ts --test --verbose",
+    "test:quick": "tsx enhanced-monitor.ts --test --interval 2000",
+    "test:basic": "tsx enhanced-monitor.ts --verbose --interval 1000"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.0.1",
+    "@fastify/static": "^8.0.2",
+    "@fastify/websocket": "^11.0.1",
+    "fastify": "^5.1.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^18.3.26",
+    "@types/react-dom": "^18.3.7",
+    "@types/ws": "^8.5.13",
+    "@vitejs/plugin-react": "^4.7.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "recharts": "^2.13.3",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.1"
+  }
+}
