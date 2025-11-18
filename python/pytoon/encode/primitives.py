@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Iterable, List
+import math
 
 from pytoon.constants import COMMA, DEFAULT_DELIMITER, NULL_LITERAL
 from pytoon.string_utils import escape_string
@@ -14,9 +15,7 @@ def encode_primitive(value: JsonPrimitive, delimiter: str = DEFAULT_DELIMITER) -
     if isinstance(value, bool):
         return 'true' if value else 'false'
     if isinstance(value, (int, float)):
-        if isinstance(value, float) and value == 0.0:
-            return '0'
-        return format(value, 'g')
+        return _format_number_js(value)
     return encode_string_literal(str(value), delimiter)
 
 
@@ -55,4 +54,45 @@ def encode_inline_array_line(values: Iterable[JsonPrimitive], delimiter: str, pr
     if not value_list:
         return header
     return f"{header} {encode_and_join_primitives(value_list, delimiter)}"
+
+
+def _format_number_js(value: int | float) -> str:
+    """Format numbers like JavaScript `String(number)` for parity.
+
+    - integers (including integer-valued floats) are serialized without a decimal point
+    - -0.0 is serialized as '0'
+    - 'nan', 'inf' cases are mapped to 'NaN', 'Infinity', '-Infinity'
+    - exponent formatting removes zero padding in the exponent to match JS (e.g. e-07 -> e-7)
+    """
+    # Integers
+    if isinstance(value, int):
+        return str(value)
+
+    # Floats
+    if math.isnan(value):
+        return 'NaN'
+    if math.isinf(value):
+        return 'Infinity' if value > 0 else '-Infinity'
+
+    # Negative zero -> '0'
+    if value == 0.0 and math.copysign(1.0, value) < 0:
+        return '0'
+
+    # Integer-valued floats -> no decimal
+    if value.is_integer():
+        return str(int(value))
+
+    # Use Python's str() to get a compact representation then normalize exponent format
+    s = str(value)
+    # Normalize exponent zero-padding: e.g. 1.23e-07 -> 1.23e-7 and 1.23E+07 -> 1.23e+7
+    if 'e' in s or 'E' in s:
+        mantissa, sep, exp = s.partition('e' if 'e' in s else 'E')
+        # split exp sign and digits
+        if exp and (exp[0] == '+' or exp[0] == '-'):
+            sign = exp[0]
+            digits = exp[1:].lstrip('0')
+            if digits == '':
+                digits = '0'
+            s = f"{mantissa}e{sign}{digits}"
+    return s
 
