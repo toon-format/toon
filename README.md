@@ -851,6 +851,7 @@ Comprehensive guides, references, and resources to help you get the most out of 
 - **Gleam:** [toon_codec](https://github.com/axelbellec/toon_codec)
 - **Go:** [gotoon](https://github.com/alpkeskin/gotoon)
 - **Java:** [JToon](https://github.com/felipestanzani/JToon)
+- **Julia:** [ToonFormat.jl](https://github.com/abdelrahman-tolba-software-developer/ToonFormat.jl)
 - **Scala:** [toon4s](https://github.com/vim89/toon4s)
 - **Lua/Neovim:** [toon.nvim](https://github.com/thalesgelinger/toon.nvim)
 - **OCaml:** [ocaml-toon](https://github.com/davesnx/ocaml-toon)
