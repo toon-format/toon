@@ -18,10 +18,6 @@ export interface ObjectWithQuotedKeys extends JsonObject {
   [QUOTED_KEY_MARKER]?: Set<string>
 }
 
-function canMerge(a: JsonValue, b: JsonValue): a is JsonObject {
-  return isJsonObject(a) && isJsonObject(b)
-}
-
 /**
  * Expands dotted keys into nested objects in safe mode.
  *
@@ -229,3 +225,7 @@ function mergeObjects(
 }
 
 // #endregion
+
+function canMerge(a: JsonValue, b: JsonValue): a is JsonObject {
+  return isJsonObject(a) && isJsonObject(b)
+}

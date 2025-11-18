@@ -2,7 +2,7 @@
   "name": "@toon-format/cli",
   "type": "module",
   "version": "1.0.0",
-  "packageManager": "pnpm@10.20.0",
+  "packageManager": "pnpm@10.21.0",
   "description": "CLI for JSON ↔ TOON conversion using @toon-format/toon",
   "author": "Johann Schopplich <hello@johannschopplich.com>",
   "license": "MIT",
@@ -17,11 +17,11 @@
   "sideEffects": false,
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
     }
   },
-  "types": "./dist/index.d.ts",
+  "types": "./dist/index.d.mts",
   "bin": {
     "toon": "bin/toon.mjs"
   },
@@ -37,6 +37,6 @@
   "dependencies": {
     "citty": "^0.1.6",
     "consola": "^3.4.2",
-    "tokenx": "^1.2.0"
+    "tokenx": "^1.2.1"
   }
 }

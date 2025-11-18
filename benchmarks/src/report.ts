@@ -275,12 +275,9 @@ ${modelPerformance}
 
 </details>
 
-<details>
-<summary><strong>How the benchmark works</strong></summary>
-
 #### What's Being Measured
 
-This benchmark tests **LLM comprehension and data retrieval accuracy** across different input formats. Each LLM receives formatted data and must answer questions about it (this does **not** test model's ability to generate TOON output).
+This benchmark tests **LLM comprehension and data retrieval accuracy** across different input formats. Each LLM receives formatted data and must answer questions about it. This does **not** test the model's ability to generate TOON output – only to read and understand it.
 
 #### Datasets Tested
 
@@ -296,7 +293,7 @@ Eleven datasets designed to test different structural patterns and validation ca
 
 **Structural validation datasets:**
 7. **Control**: Valid complete dataset (baseline for validation)
-8. **Truncated**: Array with 3 rows removed from end (tests [N] length detection)
+8. **Truncated**: Array with 3 rows removed from end (tests \`[N]\` length detection)
 9. **Extra rows**: Array with 3 additional rows beyond declared length
 10. **Width mismatch**: Inconsistent field count (missing salary in row 10)
 11. **Missing fields**: Systematic field omissions (no email in multiple rows)
@@ -319,14 +316,14 @@ ${totalQuestions} questions are generated dynamically across five categories:
   - Example: "How many employees in Sales have salary > 80000?" → \`5\`
   - Example: "How many active employees have more than 10 years of experience?" → \`8\`
 
-- **Structure awareness (${structureAwarenessPercent}%)**: Tests format-native structural affordances (TOON's [N] count and {fields}, CSV's header row)
+- **Structure awareness (${structureAwarenessPercent}%)**: Tests format-native structural affordances (TOON's \`[N]\` count and \`{fields}\`, CSV's header row)
   - Example: "How many employees are in the dataset?" → \`100\`
   - Example: "List the field names for employees" → \`id, name, email, department, salary, yearsExperience, active\`
   - Example: "What is the department of the last employee?" → \`Sales\`
 
 - **Structural validation (${structuralValidationPercent}%)**: Tests ability to detect incomplete, truncated, or corrupted data using structural metadata
   - Example: "Is this data complete and valid?" → \`YES\` (control dataset) or \`NO\` (corrupted datasets)
-  - Tests TOON's [N] length validation and {fields} consistency checking
+  - Tests TOON's \`[N]\` length validation and \`{fields}\` consistency checking
   - Demonstrates CSV's lack of structural validation capabilities
 
 #### Evaluation Process
@@ -341,8 +338,6 @@ ${totalQuestions} questions are generated dynamically across five categories:
 - **Token counting**: Using \`gpt-tokenizer\` with \`o200k_base\` encoding (GPT-5 tokenizer)
 - **Temperature**: Not set (models use their defaults)
 - **Total evaluations**: ${totalQuestions} questions × ${formatCount} formats × ${modelNames.length} models = ${totalEvaluations.toLocaleString('en-US')} LLM calls
-
-</details>
 `.trim()
 }
 
@@ -398,7 +393,10 @@ function generateSummaryComparison(
   if (!toon || !json)
     return ''
 
-  return `**Key tradeoff:** TOON achieves **${(toon.accuracy * 100).toFixed(1)}% accuracy** (vs JSON's ${(json.accuracy * 100).toFixed(1)}%) while using **${((1 - toon.totalTokens / json.totalTokens) * 100).toFixed(1)}% fewer tokens** on these datasets.`
+  return `
+> [!TIP] Results Summary
+> TOON achieves **${(toon.accuracy * 100).toFixed(1)}% accuracy** (vs JSON's ${(json.accuracy * 100).toFixed(1)}%) while using **${((1 - toon.totalTokens / json.totalTokens) * 100).toFixed(1)}% fewer tokens** on these datasets.
+`.trim()
 }
 
 /**
