@@ -34,6 +34,7 @@ Community members have created implementations in additional languages:
 | **Go** | [gotoon](https://github.com/alpkeskin/gotoon) | [@alpkeskin](https://github.com/alpkeskin) |
 | **Java** | [JToon](https://github.com/felipestanzani/JToon) | [@felipestanzani](https://github.com/felipestanzani) |
 | **Kotlin** | [kotlin-toon](https://github.com/vexpera-br/kotlin-toon) | [@vexpera-br](https://github.com/vexpera-br) |
+| **Laravel Framework** | [laravel-toon](https://github.com/jobmetric/laravel-toon) | [@jobmetric](https://github.com/jobmetric) |
 | **Lua/Neovim** | [toon.nvim](https://github.com/thalesgelinger/toon.nvim) | [@thalesgelinger](https://github.com/thalesgelinger) |
 | **OCaml** | [ocaml-toon](https://github.com/davesnx/ocaml-toon) | [@davesnx](https://github.com/davesnx) |
 | **PHP** | [toon-php](https://github.com/HelgeSverre/toon-php) | [@HelgeSverre](https://github.com/HelgeSverre) |
