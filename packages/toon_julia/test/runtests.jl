@@ -1,6 +1,12 @@
 using Test
 using Toon
 
+# Include specification tests
+include("spec_tests.jl")
+
+# Run specification tests
+run_spec_tests()
+
 @testset "Toon.jl Tests" begin
     @testset "Encoding" begin
         # Test primitive encoding
