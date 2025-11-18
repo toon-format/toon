@@ -1,6 +1,24 @@
+<div align="center">
+  <img src="https://raw.githubusercontent.com/toon-format/toon/main/.github/og.png" alt="TOON Format" width="600"/>
+</div>
+
 # Toon.jl
 
 A Julia implementation of the TOON (Token-Oriented Object Notation) format - a compact, deterministic JSON format for LLM prompts.
+
+## Why TOON?
+
+TOON achieves **30-60% token reduction** compared to JSON while maintaining human readability. By combining YAML-like indentation with CSV-like tabular arrays, TOON is optimized for efficient data serialization in LLM contexts.
+
+### Benchmark
+
+Compared to JSON, TOON provides:
+- **30-60% reduction in token usage** when sending structured data to LLMs
+- **Improved context window utilization** through compact representation
+- **Maintained readability** with a clean, YAML-like syntax
+- **Tabular arrays** that declare field names once and stream values as rows
+
+See the [TOON specification](https://github.com/toon-format/spec) for detailed benchmarks and examples.
 
 ## Installation
 
@@ -125,6 +143,21 @@ data = toonDecode(toon_string; options=options)
 - `indent::Int` - Number of spaces per indentation level (default: 2)
 - `strict::Bool` - Enforce strict validation (default: `true`)
 - `expand_paths::Symbol` - Enable path expansion (`:off` or `:safe`, default: `:off`)
+
+## Accepted Additions
+
+This Julia implementation is part of the TOON ecosystem. Other implementations include:
+
+- **[TypeScript](https://github.com/toon-format/toon)** - Official reference implementation with complete encoder/decoder, CLI tools, and benchmarks
+- **[Python](https://github.com/toon-format/toon-python)** - Community-driven implementation aiming for full specification compliance
+- **[Rust](https://github.com/toon-format/toon-rust)** - Community-driven implementation in development
+- **[.NET](https://github.com/0xZunia/ToonSharp)** - High-performance library for serializing and deserializing TOON format
+- **[Elixir](https://github.com/kentaro/toon_ex)** - Encoder/decoder optimized for LLM token efficiency
+- **[PHP](https://github.com/HelgeSverre/toon-php)** - Implementation designed to reduce token consumption when sending structured data to LLMs
+- **[Crystal](https://github.com/mamantoha/toon-crystal)** - Reference implementation of the TOON format specification
+- **Julia (this package)** - Full-featured implementation with encoding, decoding, and configuration options
+
+For a comprehensive list of implementations and their statuses, refer to the [official TOON repository](https://github.com/toon-format/toon).
 
 ## Examples
 
