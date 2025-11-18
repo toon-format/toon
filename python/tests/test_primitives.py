@@ -38,7 +38,7 @@ def test_exponential_format_and_exponent_padding():
 
 def test_inline_array_number_formatting():
     # Inline arrays should include the same formatting
-    # Format: [3]: <delimiter-separated pritimives>
+    # Format: [3]: <delimiter-separated primitives>
     out = _e([1.0, -0.0, 1.2345e-7])
     assert out.startswith('[3]')
     assert '1,0,1.2345e-7' in out
