@@ -854,6 +854,7 @@ Comprehensive guides, references, and resources to help you get the most out of 
 - **Scala:** [toon4s](https://github.com/vim89/toon4s)
 - **Lua/Neovim:** [toon.nvim](https://github.com/thalesgelinger/toon.nvim)
 - **OCaml:** [ocaml-toon](https://github.com/davesnx/ocaml-toon)
+- **Perl:** [Data::TOON](https://github.com/ytnobody/p5-Data-TOON)
 - **PHP:** [toon-php](https://github.com/HelgeSverre/toon-php)
 - **Laravel Framework:** [laravel-toon](https://github.com/jobmetric/laravel-toon)
 - **R**: [toon](https://github.com/laresbernardo/toon)
