@@ -844,6 +844,7 @@ Comprehensive guides, references, and resources to help you get the most out of 
 
 ### Community Implementations
 
+- **Apex:** [ApexToon](https://github.com/Eacaw/ApexToon)
 - **C++:** [ctoon](https://github.com/mohammadraziei/ctoon)
 - **Clojure:** [toon](https://github.com/vadelabs/toon)
 - **Crystal:** [toon-crystal](https://github.com/mamantoha/toon-crystal)
