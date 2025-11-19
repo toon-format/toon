@@ -446,11 +446,11 @@ Eleven datasets designed to test different structural patterns and validation ca
 
 **Structural validation datasets:**
 
-  7. **Control**: Valid complete dataset (baseline for validation)
-  8. **Truncated**: Array with 3 rows removed from end (tests `[N]` length detection)
-  9. **Extra rows**: Array with 3 additional rows beyond declared length
-  10. **Width mismatch**: Inconsistent field count (missing salary in row 10)
-  11. **Missing fields**: Systematic field omissions (no email in multiple rows)
+7. **Control**: Valid complete dataset (baseline for validation)
+8. **Truncated**: Array with 3 rows removed from end (tests `[N]` length detection)
+9. **Extra rows**: Array with 3 additional rows beyond declared length
+10. **Width mismatch**: Inconsistent field count (missing salary in row 10)
+11. **Missing fields**: Systematic field omissions (no email in multiple rows)
 
 #### Question Types
 
