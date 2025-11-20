@@ -19,13 +19,28 @@ npx @toon-format/cli input.json --stats -o output.toon
 
 ## Editor Support
 
-TOON syntax highlighting is available for popular editors:
+### VS Code
 
-- **VS Code**: Use YAML syntax highlighting as a close approximation (`.toon` files can be associated with YAML language mode).
+**[TOON Language Support](https://marketplace.visualstudio.com/items?itemName=vishalraut.vscode-toon)** - Full-featured extension providing comprehensive tooling for working with TOON files.
+
+**Features:**
+- 🎨 Syntax highlighting with color-coded support for arrays, objects, and values
+- ✅ Real-time validation with error highlighting and detailed messages
+- 🔄 Bidirectional conversion (TOON ↔ JSON) with format options
+- 📝 Code snippets for common TOON patterns
+- 💰 Token optimization with visual feedback on savings
+- ⚙️ Configurable indentation and delimiters (comma, tab, pipe)
+
+Install from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=vishalraut.vscode-toon) or via command line:
+
+```bash
+code --install-extension vishalraut.vscode-toon
+```
+
+### Other Editors
+
 - **Vim/Neovim**: [toon.nvim](https://github.com/thalesgelinger/toon.nvim)
-
-> [!NOTE]
-> Native TOON syntax highlighting extensions are in development. Contributions welcome!
+- **Other editors**: Use YAML syntax highlighting as a close approximation (`.toon` files can be associated with YAML language mode).
 
 ## Web APIs
 

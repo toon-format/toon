@@ -27,6 +27,7 @@ Think of it as a translation layer: use JSON programmatically, and encode it as 
 - [Benchmarks](#benchmarks)
 - [Installation & Quick Start](#installation--quick-start)
 - [Playgrounds](#playgrounds)
+- [Editor Support](#editor-support)
 - [CLI](#cli)
 - [Format Overview](#format-overview)
 - [Using TOON with LLMs](#using-toon-with-llms)
@@ -769,6 +770,26 @@ Experiment with TOON format interactively using these community-built tools for 
 
 - [Format Tokenization Playground](https://www.curiouslychase.com/playground/format-tokenization-exploration)
 - [TOON Tools](https://toontools.vercel.app/)
+
+## Editor Support
+
+### VS Code
+
+**[TOON Language Support](https://marketplace.visualstudio.com/items?itemName=vishalraut.vscode-toon)** - Full-featured extension providing comprehensive tooling for working with TOON files.
+
+**Features:**
+- 🎨 Syntax highlighting with color-coded support for arrays, objects, and values
+- ✅ Real-time validation with error highlighting and detailed messages
+- 🔄 Bidirectional conversion (TOON ↔ JSON) with format options
+- 📝 Code snippets for common TOON patterns
+- 💰 Token optimization with visual feedback on savings
+- ⚙️ Configurable indentation and delimiters (comma, tab, pipe)
+
+Install from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=vishalraut.vscode-toon) or via command line:
+
+```bash
+code --install-extension vishalraut.vscode-toon
+```
 
 ## CLI
 
