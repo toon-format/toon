@@ -59,11 +59,13 @@ export function formatHeader(
     key?: string
     fields?: readonly string[]
     delimiter?: string
+    schema?: string
   },
 ): string {
   const key = options?.key
   const fields = options?.fields
   const delimiter = options?.delimiter ?? COMMA
+  const schema = options?.schema
 
   let header = ''
 
@@ -77,6 +79,11 @@ export function formatHeader(
   if (fields) {
     const quotedFields = fields.map(f => encodeKey(f))
     header += `{${quotedFields.join(delimiter)}}`
+  }
+
+  // Add schema reference if provided
+  if (schema) {
+    header += `@${schema}`
   }
 
   header += ':'

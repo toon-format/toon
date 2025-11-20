@@ -5,6 +5,8 @@ import { expandPathsSafe } from './decode/expand'
 import { LineCursor, toParsedLines } from './decode/scanner'
 import { encodeValue } from './encode/encoders'
 import { normalizeValue } from './encode/normalize'
+import { SchemaRegistry } from './schema/registry'
+import { validateWithSchema } from './schema/validator'
 
 export { DEFAULT_DELIMITER, DELIMITERS } from './constants'
 export type {
@@ -19,6 +21,18 @@ export type {
   ResolvedDecodeOptions,
   ResolvedEncodeOptions,
 } from './types'
+
+// Export schema types and utilities
+export type {
+  FieldDefinition,
+  PrimitiveType,
+  SchemaDefinition,
+  ValidationError,
+  ValidationResult,
+} from './schema/types'
+
+export { SchemaRegistry } from './schema/registry'
+export { validateWithSchema } from './schema/validator'
 
 /**
  * Encodes a JavaScript value into TOON format string.
@@ -44,6 +58,25 @@ export type {
 export function encode(input: unknown, options?: EncodeOptions): string {
   const normalizedValue = normalizeValue(input)
   const resolvedOptions = resolveOptions(options)
+
+  // Schema validation
+  if (resolvedOptions.schema && resolvedOptions.validateOnEncode) {
+    const schema = typeof resolvedOptions.schema === 'string'
+      ? SchemaRegistry.get(resolvedOptions.schema)
+      : resolvedOptions.schema
+
+    if (schema) {
+      const result = validateWithSchema(normalizedValue, schema)
+      if (!result.valid) {
+        const errorMessage = result.errors.map(e => `${e.path || e.field}: ${e.message}`).join('; ')
+        throw new Error(`Schema validation failed: ${errorMessage}`)
+      }
+    }
+    else if (typeof resolvedOptions.schema === 'string') {
+      throw new Error(`Schema "${resolvedOptions.schema}" not found in registry`)
+    }
+  }
+
   return encodeValue(normalizedValue, resolvedOptions)
 }
 
@@ -90,6 +123,9 @@ function resolveOptions(options?: EncodeOptions): ResolvedEncodeOptions {
     delimiter: options?.delimiter ?? DEFAULT_DELIMITER,
     keyFolding: options?.keyFolding ?? 'off',
     flattenDepth: options?.flattenDepth ?? Number.POSITIVE_INFINITY,
+    schema: options?.schema,
+    validateOnEncode: options?.validateOnEncode ?? false,
+    includeSchema: options?.includeSchema ?? false,
   }
 }
 
