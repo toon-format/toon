@@ -37,6 +37,7 @@ Community members have created implementations in additional languages:
 | **Laravel Framework** | [laravel-toon](https://github.com/jobmetric/laravel-toon) | [@jobmetric](https://github.com/jobmetric) |
 | **Lua/Neovim** | [toon.nvim](https://github.com/thalesgelinger/toon.nvim) | [@thalesgelinger](https://github.com/thalesgelinger) |
 | **OCaml** | [ocaml-toon](https://github.com/davesnx/ocaml-toon) | [@davesnx](https://github.com/davesnx) |
+| **Perl** | [Data::TOON](https://github.com/ytnobody/p5-Data-TOON) | [@ytnobody](https://github.com/ytnobody) |
 | **PHP** | [toon-php](https://github.com/HelgeSverre/toon-php) | [@HelgeSverre](https://github.com/HelgeSverre) |
 | **R** | [toon](https://github.com/laresbernardo/toon) | [@laresbernardo](https://github.com/laresbernardo) |
 | **Ruby** | [toon-ruby](https://github.com/andrepcg/toon-ruby) | [@andrepcg](https://github.com/andrepcg) |
