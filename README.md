@@ -775,17 +775,7 @@ Experiment with TOON format interactively using these community-built tools for 
 
 ### VS Code
 
-**[TOON Language Support](https://marketplace.visualstudio.com/items?itemName=vishalraut.vscode-toon)** - Full-featured extension providing comprehensive tooling for working with TOON files.
-
-**Features:**
-- 🎨 Syntax highlighting with color-coded support for arrays, objects, and values
-- ✅ Real-time validation with error highlighting and detailed messages
-- 🔄 Bidirectional conversion (TOON ↔ JSON) with format options
-- 📝 Code snippets for common TOON patterns
-- 💰 Token optimization with visual feedback on savings
-- ⚙️ Configurable indentation and delimiters (comma, tab, pipe)
-
-Install from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=vishalraut.vscode-toon) or via command line:
+[TOON Language Support](https://marketplace.visualstudio.com/items?itemName=vishalraut.vscode-toon) - Syntax highlighting, validation, conversion, and token analysis.
 
 ```bash
 code --install-extension vishalraut.vscode-toon
@@ -793,14 +783,15 @@ code --install-extension vishalraut.vscode-toon
 
 ### Tree-sitter Grammar
 
-**[tree-sitter-toon](https://github.com/3swordman/tree-sitter-toon)** - Tree-sitter grammar for TOON syntax highlighting and parsing.
+[tree-sitter-toon](https://github.com/3swordman/tree-sitter-toon) - Grammar for Tree-sitter-compatible editors (Neovim, Helix, Emacs, Zed).
 
-Enables syntax highlighting support for editors that use Tree-sitter (Neovim, Helix, Emacs, etc.). The grammar provides accurate tokenization and can be used as a foundation for Language Server Protocol implementations.
+### Neovim
+
+[toon.nvim](https://github.com/thalesgelinger/toon.nvim) - Lua-based plugin.
 
 ### Other Editors
 
-- **Vim/Neovim**: [toon.nvim](https://github.com/thalesgelinger/toon.nvim)
-- **Other editors**: Use YAML syntax highlighting as a close approximation
+Use YAML syntax highlighting as a close approximation.
 
 ## CLI
 

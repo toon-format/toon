@@ -21,15 +21,7 @@ npx @toon-format/cli input.json --stats -o output.toon
 
 ### VS Code
 
-**[TOON Language Support](https://marketplace.visualstudio.com/items?itemName=vishalraut.vscode-toon)** - Full-featured extension providing comprehensive tooling for working with TOON files.
-
-**Features:**
-- 🎨 Syntax highlighting with color-coded support for arrays, objects, and values
-- ✅ Real-time validation with error highlighting and detailed messages
-- 🔄 Bidirectional conversion (TOON ↔ JSON) with format options
-- 📝 Code snippets for common TOON patterns
-- 💰 Token optimization with visual feedback on savings
-- ⚙️ Configurable indentation and delimiters (comma, tab, pipe)
+[TOON Language Support](https://marketplace.visualstudio.com/items?itemName=vishalraut.vscode-toon) - Syntax highlighting, validation, conversion, and token analysis.
 
 Install from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=vishalraut.vscode-toon) or via command line:
 
@@ -39,37 +31,15 @@ code --install-extension vishalraut.vscode-toon
 
 ### Tree-sitter Grammar
 
-**[tree-sitter-toon](https://github.com/3swordman/tree-sitter-toon)** - Tree-sitter grammar for TOON syntax highlighting and parsing.
+[tree-sitter-toon](https://github.com/3swordman/tree-sitter-toon) - Grammar for Tree-sitter-compatible editors (Neovim, Helix, Emacs, Zed).
 
-Enables syntax highlighting support for editors that use Tree-sitter, including:
-- **Neovim** (with nvim-treesitter)
-- **Helix Editor**
-- **Emacs** (with tree-sitter mode)
-- **Zed Editor**
-- Any editor with Tree-sitter support
+### Neovim
 
-The grammar provides accurate tokenization and can be used as a foundation for Language Server Protocol (LSP) implementations.
-
-**Usage with Neovim:**
-
-Add to your Tree-sitter configuration:
-
-```lua
-local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
-parser_config.toon = {
-  install_info = {
-    url = "https://github.com/3swordman/tree-sitter-toon",
-    files = {"src/parser.c"},
-    branch = "main",
-  },
-  filetype = "toon",
-}
-```
+[toon.nvim](https://github.com/thalesgelinger/toon.nvim) - Lua-based plugin for Neovim.
 
 ### Other Editors
 
-- **Vim/Neovim**: [toon.nvim](https://github.com/thalesgelinger/toon.nvim) - Lua-based TOON support
-- **Other editors**: Use YAML syntax highlighting as a close approximation (`.toon` files can be associated with YAML language mode)
+Use YAML syntax highlighting as a close approximation. Most editors allow associating `.toon` files with YAML language mode.
 
 ## Web APIs
 
