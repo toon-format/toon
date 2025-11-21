@@ -3,10 +3,16 @@ import { DOT, LIST_ITEM_MARKER, LIST_ITEM_PREFIX } from '../constants'
 import { tryFoldKeyChain } from './folding'
 import { isArrayOfArrays, isArrayOfObjects, isArrayOfPrimitives, isEmptyObject, isJsonArray, isJsonObject, isJsonPrimitive } from './normalize'
 import { encodeAndJoinPrimitives, encodeKey, encodePrimitive, formatHeader } from './primitives'
+import {hasNesting, flattenJson} from './nestedCheck'
+
 
 // #region Encode normalized JsonValue
 
 export function* encodeJsonValue(value: JsonValue, options: ResolvedEncodeOptions, depth: Depth): Generator<string> {
+  if (hasNesting(value) === true) {
+    const [flattened, keyMap] = flattenJson(value)
+    value = flattened
+  }
   if (isJsonPrimitive(value)) {
     // Primitives at root level are returned as a single line
     const encodedPrimitive = encodePrimitive(value, options.delimiter)
