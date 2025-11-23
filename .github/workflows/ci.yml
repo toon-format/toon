@@ -1,4 +1,4 @@
-name: 🔄️ CI
+name: CI
 
 on:
   push:
@@ -18,24 +18,24 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: 📥 Checkout
+      - name: Checkout
         uses: actions/checkout@v5
         with:
           persist-credentials: false
 
-      - name: 🔧 Setup PNPM
+      - name: Setup PNPM
         uses: pnpm/action-setup@v4
 
-      - name: 🔧 Setup Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 24
 
-      - name: 🏪 Get pnpm store directory
+      - name: Get pnpm store directory
         id: pnpm-cache
         run: echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
 
-      - name: 📥 Cache PNPM dependencies
+      - name: Cache PNPM dependencies
         uses: actions/cache@v4
         with:
           path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
@@ -43,14 +43,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
-      - name: 📦 Install dependencies
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: 🗞️ Lint
+      - name: Lint
         run: pnpm run lint
 
-      - name: 🧩 Typecheck
+      - name: Typecheck
         run: pnpm run test:types
 
-      - name: 🧪 Test
+      - name: Test
         run: pnpm run test

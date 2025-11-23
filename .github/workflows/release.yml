@@ -1,4 +1,4 @@
-name: 🚀 Release + Publish
+name: Release + Publish
 
 on:
   push:
@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   release:
-    name: 🚀 Release
+    name: Release
     runs-on: ubuntu-latest
 
     permissions:
@@ -21,34 +21,34 @@ jobs:
       contents: write
 
     steps:
-      - name: 📥 Checkout
+      - name: Checkout
         uses: actions/checkout@v5
         with:
           fetch-depth: 0 # Required for fetching tags and generating release notes
           persist-credentials: true
 
-      - name: 🔧 Setup PNPM
+      - name: Setup PNPM
         uses: pnpm/action-setup@v4
 
-      - name: 🔧 Setup Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org/
           cache: pnpm
 
-      - name: 📜 Generate changelog and create GitHub release
+      - name: Generate changelog and create GitHub release
         run: npx changelogithub
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 📦 Install dependencies
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: 🛠️ Build packages
+      - name: Build packages
         run: pnpm run build
 
-      - name: 📦 Publish packages to NPM
+      - name: Publish packages to NPM
         run: npm install -g npm@latest && pnpm -r publish --access public --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
