@@ -5,8 +5,8 @@
   "packageManager": "pnpm@10.21.0",
   "description": "CLI for JSON ↔ TOON conversion using @toon-format/toon",
   "author": "Johann Schopplich <hello@johannschopplich.com>",
-  "funding": "https://github.com/sponsors/toon-format",
   "license": "MIT",
+  "funding": "https://github.com/sponsors/toon-format",
   "homepage": "https://toonformat.dev",
   "repository": {
     "type": "git",
