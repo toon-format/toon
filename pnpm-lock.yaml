@@ -98,6 +98,9 @@ importers:
       vitepress-plugin-llms:
         specifier: ^1.9.3
         version: 1.9.3
+      vue:
+        specifier: ^3.5.24
+        version: 3.5.24(typescript@5.9.3)
 
   packages/cli:
     dependencies:
