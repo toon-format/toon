@@ -2,10 +2,8 @@ name: Release + Publish
 
 on:
   push:
-    tags: ['v*']
-
-# Minimal read permissions at workflow level
-permissions: {}
+    tags:
+      - 'v*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -27,7 +25,7 @@ jobs:
           fetch-depth: 0 # Required for fetching tags and generating release notes
           persist-credentials: true
 
-      - name: Setup PNPM
+      - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
@@ -48,7 +46,7 @@ jobs:
       - name: Build packages
         run: pnpm run build
 
-      - name: Publish packages to NPM
+      - name: Publish packages to npm
         run: npm install -g npm@latest && pnpm -r publish --access public --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
