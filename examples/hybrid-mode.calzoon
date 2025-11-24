@@ -1,0 +1,184 @@
+# CALZOON Example: Hybrid Mode (CALZONE + TOON)
+# This demonstrates CALZOON's unique hybrid capability
+
+§1 E_COMMERCE_DEPLOYMENT_PLAN
+
+¶ Current_Infrastructure
+servers[5]{id,region,type,cpu,ram,status}:
+  srv-001,us-east-1,web,4,16,active
+  srv-002,us-east-1,api,8,32,active
+  srv-003,eu-west-1,web,4,16,active
+  srv-004,eu-west-1,api,8,32,active
+  srv-005,ap-south-1,cache,2,8,active
+
+databases[3]{id,region,type,size,replicas}:
+  db-001,us-east-1,primary,500,2
+  db-002,eu-west-1,replica,500,0
+  db-003,ap-south-1,replica,500,0
+
+load_metrics:
+  avgCPU: 42.5
+  avgRAM: 68.3
+  avgLatency: 185
+  requestsPerSec: 2400
+
+¶ Product_Catalog
+products[8]{id,name,category,price,stock,priority}:
+  P001,Premium Widget,electronics,299.99,150,high
+  P002,Standard Gadget,electronics,149.99,320,medium
+  P003,Basic Doohickey,tools,49.99,500,low
+  P004,Pro Thingamajig,tools,199.99,85,high
+  P005,Deluxe Whatsit,home,79.99,200,medium
+  P006,Classic Gizmo,home,39.99,450,low
+  P007,Ultra Contraption,electronics,399.99,45,high
+  P008,Mini Apparatus,tools,29.99,600,low
+
+inventory_status:
+  total_items: 2350
+  low_stock_items[3]: P004,P007,P003
+  out_of_stock: 0
+  restock_pending: 3
+
+¶ Deployment_Flow
+pre_deployment:
+  backup_databases → [✓] verify_backup → [✓] proceed
+                  → [×] alert_team ∧ abort
+
+  health_check → [all_green] → proceed
+              → [any_red] → investigate ∧ fix → recheck
+
+deployment_stages:
+  stage_1 [us-east-1]:
+    stop_traffic → deploy_api → deploy_web → smoke_test
+    smoke_test → [✓] restore_traffic → monitor
+              → [×] rollback ∧ investigate
+
+  stage_2 [eu-west-1] [@depends stage_1]:
+    stop_traffic → deploy_api → deploy_web → smoke_test
+    smoke_test → [✓] restore_traffic → monitor
+              → [×] rollback ∧ investigate
+
+  stage_3 [ap-south-1] [@depends stage_2]:
+    stop_traffic → deploy_api → deploy_web → smoke_test
+    smoke_test → [✓] restore_traffic → monitor
+              → [×] rollback_all ∧ incident_response
+
+post_deployment:
+  verify_all_regions ∧ check_metrics ∧ validate_data
+  → [all_✓] → deployment_complete → notify_stakeholders
+  → [any_×] → partial_rollback ∧ emergency_response
+
+¶ Checkout_System_Logic
+cart_operations:
+  add_item → validate_stock → [available] → add_to_cart ⊕ update_ui
+                           → [unavailable] → show_error ∧ suggest_alternatives
+
+  calculate_total:
+    subtotal ← Σ(item.price × item.qty)
+    discount ← apply_promo_code ∨ member_discount
+    tax ← (subtotal ⊗ discount) × tax_rate[region]
+    shipping ← calculate_shipping(weight, region)
+    total ← subtotal ⊗ discount ⊕ tax ⊕ shipping
+
+  payment_flow:
+    validate_cart → [✓] → calculate_total → submit_payment
+                 → [×] → show_errors
+
+    submit_payment → [✓] → create_order → deduct_inventory → send_confirmation
+                  → [×] → retry(3x, exp_backoff)
+                       → [still_×] → manual_review ∧ contact_support
+
+¶ Order_Status_States
+states[6]{code,label,canCancel,nextStates}:
+  PEND,Pending,true,PROC|CANC
+  PROC,Processing,true,SHIP|FAIL|CANC
+  SHIP,Shipped,false,DELV|RETN
+  DELV,Delivered,false,COMP|RETN
+  COMP,Complete,false,RETN
+  CANC,Cancelled,false,""
+
+state_transitions:
+  PEND → [payment_confirmed] → PROC
+      → [payment_failed] → CANC
+      → [user_cancelled] → CANC
+
+  PROC → [items_picked] → SHIP
+      → [out_of_stock] → FAIL → [refunded] → CANC
+
+  SHIP → [delivered_confirmed] → DELV
+      → [return_requested] → RETN
+
+  DELV → [14_days_passed] → COMP
+      → [return_requested] → RETN
+
+¶ Performance_Targets
+response_times:
+  page_load: <2000ms [!p95]
+  api_calls: <500ms [!p95]
+  checkout: <3000ms [!p95]
+
+availability:
+  uptime: >99.95% ◆critical
+  error_rate: <0.1% ●required
+  successful_checkouts: >99% ◆critical
+
+capacity_planning:
+  current_rps: 2400
+  target_rps: 5000
+  scaling_trigger: 70% [cpu ∨ ram]
+  auto_scale ⇒ [trigger_reached]
+
+¶ Rollback_Criteria [!critical]
+immediate_rollback ⇐:
+  error_rate >5% ∨
+  response_time >10s ∨
+  database_errors >10/min ∨
+  failed_payments >20%
+
+gradual_rollback ⇐:
+  error_rate >1% ∧ <5% ∨
+  response_time >5s ∧ <10s ∨
+  user_complaints >threshold
+
+monitoring_windows:
+  critical: 5min [!immediate_action]
+  warning: 15min [!investigate]
+  normal: 60min [!routine_check]
+
+¶ Success_Criteria
+deployment_success ≡:
+  all_regions_deployed ∧
+  error_rate <0.1% ∧
+  response_times_nominal ∧
+  zero_data_loss ∧
+  zero_failed_payments
+
+business_success ≡:
+  conversion_rate ≥baseline ∧
+  cart_abandonment ≤baseline ∧
+  customer_satisfaction ≥4.5/5 ∧
+  revenue_impact ≥0%
+
+¶ Team_Assignments
+responsibilities[6]{role,tasks,oncall}:
+  DevOps,deployment + monitoring,primary
+  Backend,api + database,secondary
+  Frontend,web + mobile,tertiary
+  QA,testing + validation,support
+  Product,metrics + analysis,observer
+  Support,customer issues,responder
+
+¶ Timeline
+milestones[5]{phase,start,end,status}:
+  Preparation,2025-11-24,2025-11-25,[✓]
+  Testing,2025-11-26,2025-11-27,[○]
+  Deployment,2025-11-28,2025-11-28,[□]
+  Monitoring,2025-11-29,2025-11-30,[□]
+  Review,2025-12-01,2025-12-01,[□]
+
+deployment_schedule:
+  2025-11-28T02:00Z → stage_1 [us-east-1]
+  2025-11-28T04:00Z → stage_2 [eu-west-1]
+  2025-11-28T06:00Z → stage_3 [ap-south-1]
+  2025-11-28T08:00Z → final_validation
+  2025-11-28T09:00Z → go_live_announcement

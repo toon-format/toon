@@ -1,0 +1,120 @@
+# CALZOON Example: Plan Mode (Pure CALZONE)
+# This demonstrates CALZOON operating in pure plan mode
+
+§1 USER_AUTHENTICATION_SYSTEM
+
+¶ Overview
+System_Goal: Secure user authentication with multiple methods
+Target_Completion: 2025-12-15
+Team: Security Squad
+
+¶ Requirements
+●email_pwd_login
+  ▸ validates email format
+  ▸ enforces password policy
+  ▸ rate limits login attempts
+
+●oauth_integration
+  ├google [✓]
+  ├github [○]
+  ├microsoft [□]
+  └apple [□]
+
+○2fa_support [!high_security_contexts]
+  ├sms_verification
+  └totp_app_based
+
+●session_management
+  ▸ JWT tokens w/ 15min TTL
+  ▸ refresh tokens w/ 7day TTL
+  ▸ secure httpOnly cookies
+
+¶ Authentication_Flow
+user_login → validate_input
+          → [input_valid] → check_credentials
+          → [input_invalid] → show_error ∧ allow_retry
+
+check_credentials → [✓] → generate_tokens → set_session → redirect_dashboard
+                  → [×] → increment_failures → [failures<3] → allow_retry
+                                             → [failures≥3] → lock_account ∧ notify_admin
+
+¶ Security_Requirements
+password_policy:
+  min_length: 12 ●required
+  require_uppercase ∧ require_lowercase ∧ require_numbers
+  special_chars ○optional_but_recommended
+  no_common_passwords [!check_against_breach_db]
+
+rate_limiting:
+  login_attempts: 5/15min
+  password_reset: 3/hour
+  api_requests: 1000/hour
+
+session_security:
+  token_rotation ⇒ every_request
+  ip_validation ○optional
+  device_fingerprinting [?needs_privacy_review]
+
+¶ Dependencies
+AUTH_SYS ← DATABASE_LAYER
+AUTH_SYS ← EMAIL_SERVICE [!for_password_reset]
+AUTH_SYS ← SMS_SERVICE ← [2fa_enabled]
+AUTH_SYS ⇒ AUDIT_LOG [!compliance_requirement]
+
+¶ Implementation_Phases
+Phase_1 [#P1] → 2025-11-25 ← 2025-12-01
+  ●email_pwd_login
+  ●basic_session_management
+  ●rate_limiting
+
+Phase_2 [#P2] → 2025-12-02 ← 2025-12-08 [@depends #P1]
+  ●oauth_google
+  ●oauth_github
+  ○2fa_sms
+
+Phase_3 [#P3] → 2025-12-09 ← 2025-12-15 [@depends #P2]
+  ○oauth_microsoft
+  ○oauth_apple
+  ○2fa_totp
+  ◆security_audit [!critical]
+
+¶ Error_Handling
+validation_err → 400 ∧ error_details
+auth_failed → 401 ∧ www_authenticate_header
+forbidden → 403 ∧ reason_code
+rate_limited → 429 ∧ retry_after_header
+server_err → 500 ∧ error_log ∧ alert_team
+
+¶ Testing_Strategy
+unit_tests:
+  ●password_validation
+  ●token_generation
+  ●rate_limit_logic
+
+integration_tests:
+  ●full_login_flow
+  ●oauth_callback_handling
+  ●session_expiration
+
+security_tests:
+  ◆sql_injection_prevention [!critical]
+  ◆xss_prevention [!critical]
+  ◆csrf_protection [!critical]
+  ●brute_force_protection
+  ○penetration_testing [?external_team]
+
+¶ Success_Metrics
+target_performance:
+  login_time: <500ms [!p95]
+  oauth_redirect: <1000ms [!p95]
+  token_validation: <50ms [!p99]
+
+target_security:
+  zero_critical_vulns ◆required
+  zero_data_breaches ◆required
+  uptime: >99.95% ●required
+
+target_ux:
+  login_success_rate: >95%
+  support_tickets: <10/week
+  user_satisfaction: >4.0/5.0

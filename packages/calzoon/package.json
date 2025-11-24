@@ -1,0 +1,49 @@
+{
+  "name": "@calzoon/core",
+  "type": "module",
+  "version": "1.0.0",
+  "packageManager": "pnpm@10.23.0",
+  "description": "CALZOON - Compressed Algorithm Layout Zone for Optimized Object Notation. Hybrid format combining TOON's data encoding with CALZONE's plan compression.",
+  "author": "Drift Johnson",
+  "license": "MIT",
+  "homepage": "https://github.com/MushroomFleet/CALZOON",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MushroomFleet/CALZOON.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MushroomFleet/CALZOON/issues"
+  },
+  "keywords": [
+    "calzoon",
+    "calzone",
+    "toon",
+    "format",
+    "specification",
+    "llm",
+    "token-efficiency",
+    "data-format",
+    "plan-compression"
+  ],
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    }
+  },
+  "types": "./dist/index.d.mts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@toon-format/toon": "workspace:*"
+  },
+  "devDependencies": {
+    "@toon-format/spec": "^2.1.0"
+  }
+}

@@ -1,0 +1,32 @@
+# CALZOON Example: Data Mode (Pure TOON)
+# This demonstrates CALZOON operating in pure data mode
+
+context:
+  task: User analytics report
+  environment: production
+  date: 2025-11-24
+  region: global
+
+users[5]{id,name,email,role,active,signupDate}:
+  1,Alice Johnson,alice@example.com,admin,true,2024-01-15
+  2,Bob Smith,bob@example.com,user,true,2024-02-20
+  3,Charlie Brown,charlie@example.com,user,false,2024-03-10
+  4,Diana Prince,diana@example.com,moderator,true,2024-04-05
+  5,Eve Adams,eve@example.com,user,true,2024-05-12
+
+metrics[4]{timestamp,activeUsers,requests,avgResponseTime}:
+  2025-11-24T10:00:00Z,1250,5432,45.2
+  2025-11-24T11:00:00Z,1340,5891,43.8
+  2025-11-24T12:00:00Z,1180,4923,42.1
+  2025-11-24T13:00:00Z,1420,6234,46.5
+
+topFeatures[3]{feature,usageCount,satisfaction}:
+  Dashboard,892,4.5
+  Reports,645,4.2
+  Settings,234,3.8
+
+serverHealth:
+  status: healthy
+  uptime: 99.97
+  lastIncident: 2025-11-20T03:22:00Z
+  regions[3]: us-east,eu-west,ap-south

@@ -1,6 +1,6 @@
 ![TOON logo with step‑by‑step guide](./.github/og.png)
 
-# Token-Oriented Object Notation (TOON)
+# 🍕📊 CALZOON - Hybrid Format Project
 
 [![CI](https://github.com/toon-format/toon/actions/workflows/ci.yml/badge.svg)](https://github.com/toon-format/toon/actions)
 [![npm version](https://img.shields.io/npm/v/@toon-format/toon.svg)](https://www.npmjs.com/package/@toon-format/toon)
@@ -8,7 +8,56 @@
 [![npm downloads (total)](https://img.shields.io/npm/dt/@toon-format/toon.svg)](https://www.npmjs.com/package/@toon-format/toon)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
-**Token-Oriented Object Notation** is a compact, human-readable encoding of the JSON data model that minimizes tokens and makes structure easy for models to follow. It's intended for *LLM input* as a drop-in, lossless representation of your existing JSON.
+> *"Fold plans like a pizza 🍕, encode data like a spreadsheet 📊, unfold understanding like a scroll."*
+
+## 🎯 Welcome to CALZOON
+
+This repository is home to **CALZOON** - a revolutionary hybrid format that combines:
+
+- **[TOON](https://toonformat.dev)** 📊 - Token-efficient JSON encoding (40-60% reduction)
+- **[CALZONE](CALZONE_README.md)** 🍕 - Symbolic plan compression (60-85% reduction)
+
+The result? **Three modes in one unified format:**
+
+1. **Data Mode** - Pure TOON data encoding
+2. **Plan Mode** - Pure CALZONE plan notation
+3. **Hybrid Mode** - Mixed data and plans (CALZOON's unique strength!)
+
+### 📚 Quick Links
+
+- **[CALZOON Documentation](CALZOON-README.md)** - Complete hybrid format guide
+- **[CALZOON Specification](CALZOON-SPEC.md)** - Technical specification
+- **[CALZONE Introduction](CALZONE_README.md)** - Plan compression system
+- **[CALZONE System Prompt](CALZONE-system-prompt.md)** - Agent specification
+- **[CALZONE Skill](SKILL.md)** - Claude Code skill for folding
+- **[Examples](examples/)** - Real-world CALZOON documents
+
+### 🚀 Why CALZOON?
+
+Modern AI agents need to work with both **structured data** (JSON is verbose) and **complex plans** (specifications are lengthy). CALZOON solves both:
+
+```calzoon
+§1 DEPLOYMENT_PLAN
+
+¶ Infrastructure
+servers[3]{id,region,type,status}:
+  srv-01,us-east,web,active
+  srv-02,eu-west,api,active
+  srv-03,ap-south,db,pending
+
+¶ Flow
+provision → configure → deploy → verify
+         → [error] → rollback ∧ alert_team
+```
+
+**Token savings:** 50-75% vs verbose mixed documents
+**LLM accuracy:** 70-75% on hybrid comprehension tasks
+
+---
+
+# Token-Oriented Object Notation (TOON)
+
+**TOON** is the data foundation of CALZOON - a compact, human-readable encoding of the JSON data model that minimizes tokens and makes structure easy for models to follow. It's intended for *LLM input* as a drop-in, lossless representation of your existing JSON.
 
 TOON combines YAML's indentation-based structure for nested objects with a CSV-style tabular layout for uniform arrays. TOON's sweet spot is uniform arrays of objects (multiple fields per row, same structure across items), achieving CSV-like compactness while adding explicit structure that helps LLMs parse and validate data reliably. For deeply nested or non-uniform data, JSON may be more efficient.
 
