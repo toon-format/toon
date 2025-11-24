@@ -53,6 +53,7 @@ export default defineConfig({
           { text: 'API', link: '/reference/api' },
           { text: 'Syntax Cheatsheet', link: '/reference/syntax-cheatsheet' },
           { text: 'Specification', link: '/reference/spec' },
+          { text: 'Efficiency Formalization', link: '/reference/efficiency-formalization' },
         ],
       },
       {
@@ -98,6 +99,7 @@ export default defineConfig({
     config(md) {
       md.use(copyOrDownloadAsMarkdownButtons)
     },
+    math: true
   },
 })
 
@@ -131,6 +133,7 @@ function sidebarPrimary(): DefaultTheme.SidebarItem[] {
         { text: 'API (TypeScript)', link: '/reference/api' },
         { text: 'Syntax Cheatsheet', link: '/reference/syntax-cheatsheet' },
         { text: 'Specification', link: '/reference/spec' },
+        { text: 'Efficiency Formalization', link: '/reference/efficiency-formalization' },
       ],
     },
   ]

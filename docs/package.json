@@ -8,6 +8,7 @@
     "preview": "vitepress preview"
   },
   "devDependencies": {
+    "markdown-it-mathjax3": "^4.3.2",
     "unocss": "^66.5.9",
     "vitepress": "^1.6.4",
     "vitepress-plugin-llms": "^1.9.3"

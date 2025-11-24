@@ -6,3 +6,4 @@ docs/.vitepress/dist
 docs/.vitepress/cache
 packages/toon/test/fixtures/*.json
 packages/toon/test/fixtures/*.toon
+docs/package-lock.json
