@@ -3,13 +3,20 @@
 A mathematical analysis of TOON's byte efficiency compared to JSON across different data structures.
 
 > [!NOTE]
-> This page presents formal mathematical comparisons between TOON and JSON. For practical benchmarks and token counts, see [Benchmarks](/guide/benchmarks). If you're looking to learn how to use TOON, start with the [Getting Started](/guide/getting-started) guide instead.
+> This page presents formal mathematical comparisons between TOON and JSON. For practical benchmarks and token counts, see [Benchmarks](/guide/benchmarks). This is an **advanced** reference.
 
 ## Overview
 
-Large Language Models (LLMs) increasingly rely on structured data for inference and function calling. However, standard formats like JSON introduce significant verbosity that inflates token usage and inference costs. This analysis presents a formal mathematical comparison between TOON and JSON to evaluate whether TOON achieves quantifiable efficiency gains by eliminating structural redundancy.
+Large Language Models increasingly rely on structured data for inference and function calling. However, standard formats like JSON introduce significant verbosity that inflates token usage and inference costs. This analysis presents a formal mathematical comparison between TOON and JSON to evaluate whether TOON achieves quantifiable efficiency gains by eliminating structural redundancy.
 
-The findings demonstrate that **TOON objectively reduces the byte-size of structured data**, thereby decreasing the token count processed by LLMs and improving the economic efficiency of AI systems, with the exception of the "arrays of arrays" structure.
+Within this simplified model, and for the structure families analyzed here, **TOON is strictly shorter than compact JSON in all cases except arrays of arrays**.
+
+### Key Findings
+
+- **Tabular arrays** represent TOON's optimal use case, with efficiency gains scaling linearly with both row count and field count.
+- **Simple and primitive arrays** show consistent byte reduction, with savings proportional to the number of elements.
+- **Nested objects** benefit from reduced overhead, though efficiency decreases with depth due to indentation costs.
+- **Arrays of arrays** are the only structure where TOON is less efficient than JSON, due to TOON's explicit list markers and array length declarations.
 
 ## Methodology
 
@@ -19,7 +26,13 @@ $$
 \Delta = L_{\text{json}}(\Omega) - L_{\text{toon}}(\Omega)
 $$
 
-Where $\Omega$ represents the data structure under comparison. If $\Delta > 0$, TOON is more efficient in absolute terms. Since UTF-8 byte length serves as the base unit for tokenization, a reduction in byte count directly correlates to a decrease in token count.
+Where $\Omega$ represents the data structure under comparison. If $\Delta > 0$, TOON is more efficient in absolute terms.
+
+> [!NOTE] Assumptions
+> *   **Compact JSON**: In this analysis, JSON is assumed to be compact (no spaces or newlines outside strings). So, byte counts are computed on the compact form.
+> *   **Canonical TOON**: We assume canonical TOON formatting (indent=2, one space after `:`, no spaces after commas in arrays/field lists).
+> *   **ASCII/UTF-8**: For simplicity, we assume keys and structural tokens are ASCII, so byte length equals character count ($|x|_{\text{utf8}} = |x|_{\text{char}}$). Non-ASCII characters affect both formats similarly and don't change the structural conclusions.
+> *   **Byte vs Token Count**: Modern LLM tokenizers operate over UTF-8 bytes, so byte length is a good upper bound and first-order proxy for token count, even though the mapping isn't exactly linear.
 
 ## Formal Notation
 
@@ -48,18 +61,6 @@ Therefore: $v_i \in \{\omega, \mathcal{O}, \mathcal{A}\}$
 ### String Length
 
 Let $\mathcal{S}$ be the set of valid Unicode strings. For any string $x \in \mathcal{S}$, we denote $|x|_{\text{utf8}}$ as the byte-length of $x$ under UTF-8 encoding.
-
-If $x$ contains only ASCII characters:
-
-$$
-|x|_{\text{utf8}} = |x|_{\text{char}}
-$$
-
-If $x$ contains non-ASCII characters (accents, emojis, etc.):
-
-$$
-|x|_{\text{utf8}} \ge |x|_{\text{char}}
-$$
 
 ### Integer Length
 
@@ -133,6 +134,8 @@ When $v_i$ is a primitive data type $\omega$:
 
 ### Simple Arrays in TOON
 
+In this section, $L_{\text{toon}}(\mathcal{A})$ refers to the length of the whole field line `key[N]: ...`, not just the array value.
+
 When $v_i$ is a simple array $\mathcal{A}$:
 
 $$
@@ -150,6 +153,8 @@ L_{\text{toon}}(\mathcal{A}') = L_{\text{str}}(k_i) + \underbrace{1}_{\text{[}} 
 \underbrace{2n}_{\text{indents}} + \sum_{i=1}^{n}\sum_{j=1}^{m} L_{\text{toon}}(v_{ij}) + \underbrace{(m-1)n}_{\text{commas}} + \underbrace{n}_{\text{newlines}}
 \end{split}
 $$
+
+*Note: The term $2n$ assumes an indentation size of 2 spaces.*
 
 ## Efficiency Analysis by Structure
 
@@ -174,10 +179,7 @@ $$
 ::: code-group
 
 ```json [JSON (21 bytes)]
-{
-  "id": 1,
-  "name": "Ada"
-}
+{"id":1,"name":"Ada"}
 ```
 
 ```yaml [TOON (15 bytes)]
@@ -202,19 +204,14 @@ $$
 **Example:** For 1,000,000 nested objects (depth 1), TOON saves **1,000,005 bytes ≈ 0.95 MB**.
 
 > [!WARNING]
-> TOON becomes less efficient with increasing depth $d$ due to the cumulative cost of indentation.
+> TOON becomes less efficient with increasing depth $d$ due to the cumulative cost of indentation. This formula is for a single nesting level; deeper nesting adds 2 spaces per indented line (assuming indentSize=2).
 
 #### Empirical Validation
 
 ::: code-group
 
 ```json [JSON (30 bytes)]
-{
-  "user": {
-    "id": 1,
-    "name": "Ada"
-  }
-}
+{"user":{"id":1,"name":"Ada"}}
 ```
 
 ```yaml [TOON (25 bytes)]
@@ -250,13 +247,11 @@ $$
 ::: code-group
 
 ```json [JSON (28 bytes)]
-{
-  "tags": ["foo", "bar", "baz"]
-}
+{"tags":["foo","bar","baz"]}
 ```
 
 ```yaml [TOON (20 bytes)]
-tags[3]: foo, bar, baz
+tags[3]: foo,bar,baz
 ```
 
 :::
@@ -280,11 +275,11 @@ $$
 ::: code-group
 
 ```json [JSON (13 bytes)]
-["x", "y", "z"]
+["x","y","z"]
 ```
 
 ```yaml [TOON (10 bytes)]
-[3]: x, y, z
+[3]: x,y,z
 ```
 
 :::
@@ -310,16 +305,11 @@ This is TOON's sweet spot—the structure where it achieves maximum efficiency g
 ::: code-group
 
 ```json [JSON (45 bytes)]
-{
-  "items": [
-    {"id": 1, "qty": 5},
-    {"id": 2, "qty": 3}
-  ]
-}
+{"items":[{"id":1,"qty":5},{"id":2,"qty":3}]}
 ```
 
 ```yaml [TOON (29 bytes)]
-items[2]{id, qty}:
+items[2]{id,qty}:
   1,5
   2,3
 ```
@@ -357,9 +347,7 @@ $$
 ::: code-group
 
 ```json [JSON (23 bytes)]
-{
-  "pairs": [[1, 2], [3, 4]]
-}
+{"pairs":[[1,2],[3,4]]}
 ```
 
 ```yaml [TOON (35 bytes)]
@@ -389,10 +377,7 @@ $$
 ::: code-group
 
 ```json [JSON (34 bytes)]
-{
-  "version": "123",
-  "enabled": "true"
-}
+{"version":"123","enabled":"true"}
 ```
 
 ```yaml [TOON (30 bytes)]
@@ -441,18 +426,6 @@ TOON: `key[0]:` requires 2 bytes for the header plus key.
 ## Conclusion
 
 The formal mathematical comparison between TOON and JSON demonstrates that **TOON successfully achieves its design goal of minimizing tokenization overhead** through structural optimization.
-
-### Key Findings
-
-1. **Tabular arrays** represent TOON's optimal use case, with efficiency gains scaling linearly with both row count and field count.
-
-2. **Simple and primitive arrays** show consistent byte reduction, with savings proportional to the number of elements.
-
-3. **Nested objects** benefit from reduced overhead, though efficiency decreases with depth due to indentation costs.
-
-4. **Arrays of arrays** are the only structure where TOON is less efficient than JSON, due to TOON's explicit list markers and array length declarations.
-
-### Practical Implications
 
 Since UTF-8 byte length serves as the base unit for tokenization, the reduction in $L_{\text{toon}}$ directly correlates to a decrease in token count. Therefore, excluding the "arrays of arrays" edge case, **TOON provides an objective improvement in the economic efficiency of AI systems** by lowering inference and serialization costs.
 
