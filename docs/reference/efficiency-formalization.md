@@ -4,6 +4,8 @@ A mathematical analysis of TOON's byte efficiency compared to JSON across differ
 
 > [!NOTE]
 > This page presents formal mathematical comparisons between TOON and JSON. For practical benchmarks and token counts, see [Benchmarks](/guide/benchmarks). This is an **advanced** reference.
+>
+> This page is informative and non-normative; it does not change the TOON specification.
 
 ## Overview
 
@@ -64,7 +66,7 @@ Let $\mathcal{S}$ be the set of valid Unicode strings. For any string $x \in \ma
 
 ### Integer Length
 
-Let $n \in \mathbb{Z}$ be an integer. The number of bytes required to represent $n$ in decimal format is:
+Let $n \in \mathbb{Z}_{\ge 0}$ be a non-negative integer. The number of bytes required to represent $n$ in decimal format is:
 
 $$
 L_{\text{num}}(n) = \begin{cases}
@@ -93,10 +95,10 @@ When $v_i$ is a primitive data type $\omega$:
 
 | Type | Formula |
 |------|---------|
-| String | $L_{\text{str}}(v_i) = \|v_i\|_{\text{utf8}} + 2$ |
-| Number | $L_{\text{num}}(v_i) = \|v_i\|_{\text{utf8}}$ |
-| Boolean | $L_{\text{bool}}(v_i) = \|v_i\|_{\text{utf8}}$ |
-| Null | $L_{\text{null}}(v_i) = \|v_i\|_{\text{utf8}}$ |
+| String | $L_{\text{str}}(v_i) = |v_i|_{\text{utf8}} + 2$ |
+| Number | $L_{\text{num}}(v_i) = |v_i|_{\text{utf8}}$ |
+| Boolean | $L_{\text{bool}}(v_i) = |v_i|_{\text{utf8}}$ |
+| Null | $L_{\text{null}}(v_i) = |v_i|_{\text{utf8}}$ |
 
 ### Arrays in JSON
 
@@ -126,11 +128,11 @@ When $v_i$ is a primitive data type $\omega$:
 
 | Type | Formula |
 |------|---------|
-| String (normal) | $L_{\text{str}}(v_i) = \|v_i\|_{\text{utf8}}$ |
-| String (looks like number/boolean) | $L_{\text{str}}(v_i) = \|v_i\|_{\text{utf8}} + 2$ |
-| Number | $L_{\text{num}}(v_i) = \|v_i\|_{\text{utf8}}$ |
-| Boolean | $L_{\text{bool}}(v_i) = \|v_i\|_{\text{utf8}}$ |
-| Null | $L_{\text{null}}(v_i) = \|v_i\|_{\text{utf8}}$ |
+| String (normal) | $L_{\text{str}}(v_i) = |v_i|_{\text{utf8}}$ |
+| String (looks like number/boolean) | $L_{\text{str}}(v_i) = |v_i|_{\text{utf8}} + 2$ |
+| Number | $L_{\text{num}}(v_i) = |v_i|_{\text{utf8}}$ |
+| Boolean | $L_{\text{bool}}(v_i) = |v_i|_{\text{utf8}}$ |
+| Null | $L_{\text{null}}(v_i) = |v_i|_{\text{utf8}}$ |
 
 ### Simple Arrays in TOON
 
@@ -149,7 +151,7 @@ When $v_i$ is an array of objects with $m$ fields:
 $$
 \begin{split}
 L_{\text{toon}}(\mathcal{A}') = L_{\text{str}}(k_i) + \underbrace{1}_{\text{[}} + L_{\text{num}}(n) + \underbrace{1}_{\text{]}} + \underbrace{1}_{\{} + \\
-\sum_{i=1}^{m} L_{\text{toon}}(k_i) + \underbrace{(m-1)}_{\text{commas}} + \underbrace{1}_{\}} + \underbrace{1}_{:} + \\
+\sum_{i=1}^{m} L_{\text{str}}(k_i) + \underbrace{(m-1)}_{\text{commas}} + \underbrace{1}_{\}} + \underbrace{1}_{:} + \\
 \underbrace{2n}_{\text{indents}} + \sum_{i=1}^{n}\sum_{j=1}^{m} L_{\text{toon}}(v_{ij}) + \underbrace{(m-1)n}_{\text{commas}} + \underbrace{n}_{\text{newlines}}
 \end{split}
 $$
@@ -418,7 +420,7 @@ TOON: `key[0]:` requires 2 bytes for the header plus key.
 | Nested Objects | $f(n) = 5 + n$ | ✅ Yes (decreases with depth) |
 | Primitive Arrays | $f(n) = 2 + 2n - \lfloor \log_{10}(n) \rfloor$ | ✅ Yes |
 | Root Arrays | $f(n) = -3 + 2n - \lfloor \log_{10}(n) \rfloor$ | ✅ Yes |
-| Tabular Arrays | $f(n) = 1 + nm(3+\|k\|) - m(1+\|k\|) - \lfloor \log_{10}(n) \rfloor$ | ✅ **Best case** |
+| Tabular Arrays | $f(n) = 1 + nm(3+|k|) - m(1+|k|) - \lfloor \log_{10}(n) \rfloor$ | ✅ **Best case** |
 | Arrays of Arrays | $f(n) = 2 - 6n + 2nm - \text{overhead}$ | ❌ **No** |
 | String Literals | $f(n) = 2 + n$ | ✅ Yes |
 | Empty Structures | $\Delta = 2$ or $3$ | ✅ Yes |
@@ -427,7 +429,7 @@ TOON: `key[0]:` requires 2 bytes for the header plus key.
 
 The formal mathematical comparison between TOON and JSON demonstrates that **TOON successfully achieves its design goal of minimizing tokenization overhead** through structural optimization.
 
-Since UTF-8 byte length serves as the base unit for tokenization, the reduction in $L_{\text{toon}}$ directly correlates to a decrease in token count. Therefore, excluding the "arrays of arrays" edge case, **TOON provides an objective improvement in the economic efficiency of AI systems** by lowering inference and serialization costs.
+Since UTF-8 byte length serves as a good upper bound and first-order proxy for tokenization, the reduction in $L_{\text{toon}}$ typically leads to fewer tokens for the structure families analyzed in this model. Therefore, excluding the "arrays of arrays" edge case, TOON provides a significant efficiency improvement within this simplified model and the structure families considered here, lowering inference and serialization costs.
 
 ## Related Resources
 
