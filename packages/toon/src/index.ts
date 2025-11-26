@@ -18,6 +18,8 @@ export type {
   JsonPrimitive,
   JsonStreamEvent,
   JsonValue,
+  Replacer,
+  ReplacerFunction,
   ResolvedDecodeOptions,
   ResolvedEncodeOptions,
 } from './types'
@@ -95,7 +97,7 @@ export function decode(input: string, options?: DecodeOptions): JsonValue {
  * ```
  */
 export function encodeLines(input: unknown, options?: EncodeOptions): Iterable<string> {
-  const normalizedValue = normalizeValue(input)
+  const normalizedValue = normalizeValue(input, options?.replacer)
   const resolvedOptions = resolveOptions(options)
   return encodeJsonValue(normalizedValue, resolvedOptions, 0)
 }
@@ -210,6 +212,7 @@ function resolveOptions(options?: EncodeOptions): ResolvedEncodeOptions {
     delimiter: options?.delimiter ?? DEFAULT_DELIMITER,
     keyFolding: options?.keyFolding ?? 'off',
     flattenDepth: options?.flattenDepth ?? Number.POSITIVE_INFINITY,
+    replacer: options?.replacer,
   }
 }
 
