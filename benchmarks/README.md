@@ -3,7 +3,7 @@
 Benchmarks measuring TOON's **token efficiency** and **retrieval accuracy** compared to JSON, XML, YAML, and CSV.
 
 > [!NOTE]
-> Results are automatically embedded in the [main README](../packages/toon/README.md#benchmarks). This guide focuses on running the benchmarks locally.
+> Results are automatically embedded in the [main README](https://github.com/toon-format/toon/#benchmarks). This guide focuses on running the benchmarks locally.
 
 ## Quick Start
 
