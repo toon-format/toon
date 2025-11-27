@@ -95,10 +95,10 @@ When $v_i$ is a primitive data type $\omega$:
 
 | Type | Formula |
 |------|---------|
-| String | $L_{\text{str}}(v_i) = |v_i|_{\text{utf8}} + 2$ |
-| Number | $L_{\text{num}}(v_i) = |v_i|_{\text{utf8}}$ |
-| Boolean | $L_{\text{bool}}(v_i) = |v_i|_{\text{utf8}}$ |
-| Null | $L_{\text{null}}(v_i) = |v_i|_{\text{utf8}}$ |
+| String | $L_{\text{str}}(v_i) = \lvert v_i\rvert_{\text{utf8}} + 2$ |
+| Number | $L_{\text{num}}(v_i) = \lvert v_i\rvert_{\text{utf8}}$ |
+| Boolean | $L_{\text{bool}}(v_i) = \lvert v_i\rvert_{\text{utf8}}$ |
+| Null | $L_{\text{null}}(v_i) = \lvert v_i\rvert_{\text{utf8}}$ |
 
 ### Arrays in JSON
 
@@ -128,11 +128,11 @@ When $v_i$ is a primitive data type $\omega$:
 
 | Type | Formula |
 |------|---------|
-| String (normal) | $L_{\text{str}}(v_i) = |v_i|_{\text{utf8}}$ |
-| String (looks like number/boolean) | $L_{\text{str}}(v_i) = |v_i|_{\text{utf8}} + 2$ |
-| Number | $L_{\text{num}}(v_i) = |v_i|_{\text{utf8}}$ |
-| Boolean | $L_{\text{bool}}(v_i) = |v_i|_{\text{utf8}}$ |
-| Null | $L_{\text{null}}(v_i) = |v_i|_{\text{utf8}}$ |
+| String (normal) | $L_{\text{str}}(v_i) = \lvert v_i\rvert_{\text{utf8}}$ |
+| String (looks like number/boolean) | $L_{\text{str}}(v_i) = \lvert v_i\rvert_{\text{utf8}} + 2$ |
+| Number | $L_{\text{num}}(v_i) = \lvert v_i\rvert_{\text{utf8}}$ |
+| Boolean | $L_{\text{bool}}(v_i) = \lvert v_i\rvert_{\text{utf8}}$ |
+| Null | $L_{\text{null}}(v_i) = \lvert v_i\rvert_{\text{utf8}}$ |
 
 ### Simple Arrays in TOON
 
@@ -420,7 +420,7 @@ TOON: `key[0]:` requires 2 bytes for the header plus key.
 | Nested Objects | $f(n) = 5 + n$ | ✅ Yes (decreases with depth) |
 | Primitive Arrays | $f(n) = 2 + 2n - \lfloor \log_{10}(n) \rfloor$ | ✅ Yes |
 | Root Arrays | $f(n) = -3 + 2n - \lfloor \log_{10}(n) \rfloor$ | ✅ Yes |
-| Tabular Arrays | $f(n) = 1 + nm(3+|k|) - m(1+|k|) - \lfloor \log_{10}(n) \rfloor$ | ✅ **Best case** |
+| Tabular Arrays | $f(n) = 1 + nm(3+\lvert k\rvert) - m(1+\lvert k\rvert) - \lfloor \log_{10}(n) \rfloor$ | ✅ **Best case** |
 | Arrays of Arrays | $f(n) = 2 - 6n + 2nm - \text{overhead}$ | ❌ **No** |
 | String Literals | $f(n) = 2 + n$ | ✅ Yes |
 | Empty Structures | $\Delta = 2$ or $3$ | ✅ Yes |
