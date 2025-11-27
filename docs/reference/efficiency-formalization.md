@@ -1,4 +1,4 @@
-# Efficiency Formalization
+# TOON vs JSON: Byte-Level Efficiency Model
 
 A mathematical analysis of TOON's byte efficiency compared to JSON across different data structures.
 
@@ -500,4 +500,6 @@ This analysis is based on:
 
 ---
 
-*Have questions or found an error in the formalization? Open an issue on [GitHub](https://github.com/toon-format/spec) or contribute improvements to this analysis.*
+*This page was contributed by [Mateo Lafalce](https://github.com/mateolafalce) (@mateolafalce).
+
+Have questions or found an error in the formalization? Open an issue on [GitHub](https://github.com/toon-format/spec) or contribute improvements to this analysis.*
