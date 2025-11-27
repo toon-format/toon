@@ -1,4 +1,5 @@
 import type { InputSource } from './types'
+import { createReadStream } from 'node:fs'
 import * as fsp from 'node:fs/promises'
 import * as path from 'node:path'
 import process from 'node:process'
@@ -76,4 +77,33 @@ function readFromStdin(): Promise<string> {
     stdin.once('end', onEnd)
     stdin.resume()
   })
+}
+
+export async function* readLinesFromSource(source: InputSource): AsyncIterable<string> {
+  const stream = source.type === 'stdin'
+    ? process.stdin
+    : createReadStream(source.path, { encoding: 'utf-8' })
+
+  // Explicitly set encoding for stdin
+  if (source.type === 'stdin') {
+    stream.setEncoding('utf-8')
+  }
+
+  let buffer = ''
+
+  for await (const chunk of stream) {
+    buffer += chunk
+    let index: number
+
+    while ((index = buffer.indexOf('\n')) !== -1) {
+      const line = buffer.slice(0, index)
+      buffer = buffer.slice(index + 1)
+      yield line
+    }
+  }
+
+  // Emit last line if buffer is not empty and doesn't end with newline
+  if (buffer.length > 0) {
+    yield buffer
+  }
 }

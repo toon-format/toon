@@ -33,17 +33,20 @@ Benchmarks test LLM comprehension across different input formats using 209 data 
 
 #### Efficiency Ranking (Accuracy per 1K Tokens)
 
-Each format's overall performance, balancing accuracy against token cost:
+Each format ranked by efficiency (accuracy percentage per 1,000 tokens):
 
 ```
-TOON           ████████████████████   26.9  │  73.9% acc  │  2,744 tokens
-JSON compact   █████████████████░░░   22.9  │  70.7% acc  │  3,081 tokens
-YAML           ██████████████░░░░░░   18.6  │  69.0% acc  │  3,719 tokens
-JSON           ███████████░░░░░░░░░   15.3  │  69.7% acc  │  4,545 tokens
-XML            ██████████░░░░░░░░░░   13.0  │  67.1% acc  │  5,167 tokens
+TOON           ████████████████████   26.9 acc%/1K tok  │  73.9% acc  │  2,744 tokens
+JSON compact   █████████████████░░░   22.9 acc%/1K tok  │  70.7% acc  │  3,081 tokens
+YAML           ██████████████░░░░░░   18.6 acc%/1K tok  │  69.0% acc  │  3,719 tokens
+JSON           ███████████░░░░░░░░░   15.3 acc%/1K tok  │  69.7% acc  │  4,545 tokens
+XML            ██████████░░░░░░░░░░   13.0 acc%/1K tok  │  67.1% acc  │  5,167 tokens
 ```
 
-TOON achieves **73.9%** accuracy (vs JSON's 69.7%) while using **39.6% fewer tokens**.
+*Efficiency score = (Accuracy % ÷ Tokens) × 1,000. Higher is better.*
+
+> [!TIP]
+> TOON achieves **73.9%** accuracy (vs JSON's 69.7%) while using **39.6% fewer tokens**.
 
 **Note on CSV:** Excluded from ranking as it only supports 109 of 209 questions (flat tabular data only). While CSV is highly token-efficient for simple tabular data, it cannot represent nested structures that other formats handle.
 
@@ -85,7 +88,7 @@ grok-4-fast-non-reasoning
   CSV            ██████████░░░░░░░░░░    52.3% (57/109)
 ```
 
-> [!TIP] Results Summary
+> [!TIP]
 > TOON achieves **73.9% accuracy** (vs JSON's 69.7%) while using **39.6% fewer tokens** on these datasets.
 
 <details>

@@ -2,7 +2,6 @@ import type { Storage, StorageValue } from 'unstorage'
 import type { EvaluationResult } from './types'
 import * as path from 'node:path'
 import { createStorage } from 'unstorage'
-// @ts-expect-error: No types available
 import fsDriver from 'unstorage/drivers/fs'
 import { BENCHMARKS_DIR } from './constants'
 

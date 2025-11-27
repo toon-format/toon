@@ -9,25 +9,25 @@ export function parseArrayHeaderLine(
   content: string,
   defaultDelimiter: Delimiter,
 ): { header: ArrayHeaderInfo, inlineValues?: string } | undefined {
-  const trimmed = content.trimStart()
+  const trimmedToken = content.trimStart()
 
   // Find the bracket segment, accounting for quoted keys that may contain brackets
   let bracketStart = -1
 
   // For quoted keys, find bracket after closing quote (not inside the quoted string)
-  if (trimmed.startsWith(DOUBLE_QUOTE)) {
-    const closingQuoteIndex = findClosingQuote(trimmed, 0)
+  if (trimmedToken.startsWith(DOUBLE_QUOTE)) {
+    const closingQuoteIndex = findClosingQuote(trimmedToken, 0)
     if (closingQuoteIndex === -1) {
       return
     }
 
-    const afterQuote = trimmed.slice(closingQuoteIndex + 1)
+    const afterQuote = trimmedToken.slice(closingQuoteIndex + 1)
     if (!afterQuote.startsWith(OPEN_BRACKET)) {
       return
     }
 
     // Calculate position in original content and find bracket after the quoted key
-    const leadingWhitespace = content.length - trimmed.length
+    const leadingWhitespace = content.length - trimmedToken.length
     const keyEndIndex = leadingWhitespace + closingQuoteIndex + 1
     bracketStart = content.indexOf(OPEN_BRACKET, keyEndIndex)
   }
@@ -72,7 +72,6 @@ export function parseArrayHeaderLine(
   }
 
   const afterColon = content.slice(colonIndex + 1).trim()
-
   const bracketContent = content.slice(bracketStart + 1, bracketEnd)
 
   // Try to parse bracket segment
@@ -196,37 +195,37 @@ export function mapRowValuesToPrimitives(values: string[]): JsonPrimitive[] {
 // #region Primitive and key parsing
 
 export function parsePrimitiveToken(token: string): JsonPrimitive {
-  const trimmed = token.trim()
+  const trimmedToken = token.trim()
 
   // Empty token
-  if (!trimmed) {
+  if (!trimmedToken) {
     return ''
   }
 
   // Quoted string (if starts with quote, it MUST be properly quoted)
-  if (trimmed.startsWith(DOUBLE_QUOTE)) {
-    return parseStringLiteral(trimmed)
+  if (trimmedToken.startsWith(DOUBLE_QUOTE)) {
+    return parseStringLiteral(trimmedToken)
   }
 
   // Boolean or null literals
-  if (isBooleanOrNullLiteral(trimmed)) {
-    if (trimmed === TRUE_LITERAL)
+  if (isBooleanOrNullLiteral(trimmedToken)) {
+    if (trimmedToken === TRUE_LITERAL)
       return true
-    if (trimmed === FALSE_LITERAL)
+    if (trimmedToken === FALSE_LITERAL)
       return false
-    if (trimmed === NULL_LITERAL)
+    if (trimmedToken === NULL_LITERAL)
       return null
   }
 
   // Numeric literal
-  if (isNumericLiteral(trimmed)) {
-    const parsedNumber = Number.parseFloat(trimmed)
+  if (isNumericLiteral(trimmedToken)) {
+    const parsedNumber = Number.parseFloat(trimmedToken)
     // Normalize negative zero to positive zero
     return Object.is(parsedNumber, -0) ? 0 : parsedNumber
   }
 
   // Unquoted string
-  return trimmed
+  return trimmedToken
 }
 
 export function parseStringLiteral(token: string): string {
@@ -305,11 +304,11 @@ export function parseKeyToken(content: string, start: number): { key: string, en
 
 // #region Array content detection helpers
 
-export function isArrayHeaderAfterHyphen(content: string): boolean {
+export function isArrayHeaderContent(content: string): boolean {
   return content.trim().startsWith(OPEN_BRACKET) && findUnquotedChar(content, COLON) !== -1
 }
 
-export function isObjectFirstFieldAfterHyphen(content: string): boolean {
+export function isKeyValueContent(content: string): boolean {
   return findUnquotedChar(content, COLON) !== -1
 }
 

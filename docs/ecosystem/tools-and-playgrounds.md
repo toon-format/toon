@@ -19,13 +19,27 @@ npx @toon-format/cli input.json --stats -o output.toon
 
 ## Editor Support
 
-TOON syntax highlighting is available for popular editors:
+### VS Code
 
-- **VS Code**: Use YAML syntax highlighting as a close approximation (`.toon` files can be associated with YAML language mode).
-- **Vim/Neovim**: [toon.nvim](https://github.com/thalesgelinger/toon.nvim)
+[TOON Language Support](https://marketplace.visualstudio.com/items?itemName=vishalraut.vscode-toon) - Syntax highlighting, validation, conversion, and token analysis.
 
-> [!NOTE]
-> Native TOON syntax highlighting extensions are in development. Contributions welcome!
+Install from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=vishalraut.vscode-toon) or via command line:
+
+```bash
+code --install-extension vishalraut.vscode-toon
+```
+
+### Tree-sitter Grammar
+
+[tree-sitter-toon](https://github.com/3swordman/tree-sitter-toon) - Grammar for Tree-sitter-compatible editors (Neovim, Helix, Emacs, Zed).
+
+### Neovim
+
+[toon.nvim](https://github.com/thalesgelinger/toon.nvim) - Lua-based plugin for Neovim.
+
+### Other Editors
+
+Use YAML syntax highlighting as a close approximation. Most editors allow associating `.toon` files with YAML language mode.
 
 ## Web APIs
 
@@ -39,4 +53,4 @@ const toon = encode(data)
 const data = decode(toon)
 ```
 
-See the [API reference](/reference/api) for details.
+See the [API Reference](/reference/api) for details.

@@ -20,7 +20,7 @@ hero:
       text: CLI
       link: /cli/
     - theme: alt
-      text: Spec v2.0
+      text: Spec v3.0
       link: /reference/spec
 
 features:

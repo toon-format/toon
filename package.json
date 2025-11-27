@@ -1,9 +1,9 @@
 {
   "name": "@toon-format/monorepo",
   "type": "module",
-  "version": "1.0.0",
+  "version": "2.0.1",
   "private": true,
-  "packageManager": "pnpm@10.21.0",
+  "packageManager": "pnpm@10.23.0",
   "scripts": {
     "build": "pnpm -r --filter=./packages/** run build",
     "automd": "automd",
@@ -18,13 +18,13 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^6.2.0",
-    "@types/node": "^24.10.0",
+    "@types/node": "^24.10.1",
     "automd": "^0.4.2",
     "bumpp": "^10.3.1",
     "eslint": "^9.39.1",
-    "tsdown": "^0.16.2",
+    "tsdown": "^0.16.6",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.8"
+    "vitest": "^4.0.13"
   }
 }

@@ -1,6 +1,7 @@
-import type { ArrayHeaderInfo, BlankLineInfo, Delimiter, Depth, ResolvedDecodeOptions } from '../types'
-import type { LineCursor } from './scanner'
+import type { ArrayHeaderInfo, BlankLineInfo, Delimiter, Depth, ParsedLine } from '../types'
 import { COLON, LIST_ITEM_PREFIX } from '../constants'
+
+// #region Count and structure validation
 
 /**
  * Asserts that the actual count matches the expected count in strict mode.
@@ -9,7 +10,7 @@ export function assertExpectedCount(
   actual: number,
   expected: number,
   itemType: string,
-  options: ResolvedDecodeOptions,
+  options: { strict: boolean },
 ): void {
   if (options.strict && actual !== expected) {
     throw new RangeError(`Expected ${expected} ${itemType}, but got ${actual}`)
@@ -20,11 +21,10 @@ export function assertExpectedCount(
  * Validates that there are no extra list items beyond the expected count.
  */
 export function validateNoExtraListItems(
-  cursor: LineCursor,
+  nextLine: ParsedLine | undefined,
   itemDepth: Depth,
   expectedCount: number,
 ): void {
-  const nextLine = cursor.peek()
   if (nextLine?.depth === itemDepth && nextLine.content.startsWith(LIST_ITEM_PREFIX)) {
     throw new RangeError(`Expected ${expectedCount} list array items, but found more`)
   }
@@ -34,11 +34,10 @@ export function validateNoExtraListItems(
  * Validates that there are no extra tabular rows beyond the expected count.
  */
 export function validateNoExtraTabularRows(
-  cursor: LineCursor,
+  nextLine: ParsedLine | undefined,
   rowDepth: Depth,
   header: ArrayHeaderInfo,
 ): void {
-  const nextLine = cursor.peek()
   if (
     nextLine?.depth === rowDepth
     && !nextLine.content.startsWith(LIST_ITEM_PREFIX)
@@ -62,8 +61,6 @@ export function validateNoBlankLinesInRange(
     return
 
   // Find blank lines within the range
-  // Note: We don't filter by depth because ANY blank line between array items is an error,
-  // regardless of its indentation level
   const firstBlank = blankLines.find(
     blank => blank.lineNumber > startLine && blank.lineNumber < endLine,
   )
@@ -74,6 +71,10 @@ export function validateNoBlankLinesInRange(
     )
   }
 }
+
+// #endregion
+
+// #region Row classification helpers
 
 /**
  * Checks if a line is a data row (vs a key-value pair) in a tabular array.
@@ -95,3 +96,5 @@ function isDataRow(content: string, delimiter: Delimiter): boolean {
   // Colon before delimiter or no delimiter = key-value pair
   return false
 }
+
+// #endregion

@@ -101,7 +101,6 @@ export function* encodeKeyValuePairLines(
     }
   }
 
-  // No folding applied - use standard encoding
   const encodedKey = encodeKey(key)
 
   if (isJsonPrimitive(value)) {
@@ -189,11 +188,11 @@ export function* encodeArrayOfArraysAsListItemsLines(
 
 export function encodeInlineArrayLine(values: readonly JsonPrimitive[], delimiter: string, prefix?: string, quoteStrings?: boolean): string {
   const header = formatHeader(values.length, { key: prefix, delimiter })
-  const joinedValue = encodeAndJoinPrimitives(values, delimiter, quoteStrings)
-  // Only add space if there are values
-  if (values.length === 0) {
+  const joinedValue = encodeAndJoinPrimitives(values, delimiter)
+
+  if (values.length === 0)
     return header
-  }
+
   return `${header} ${joinedValue}`
 }
 
@@ -297,55 +296,64 @@ export function* encodeObjectAsListItemLines(
 
   const entries = Object.entries(obj)
   const [firstKey, firstValue] = entries[0]!
+  const restEntries = entries.slice(1)
+
+  // Check if first field is a tabular array
+  if (isJsonArray(firstValue) && isArrayOfObjects(firstValue)) {
+    const header = extractTabularHeader(firstValue)
+    if (header) {
+      // Tabular array as first field
+      const formattedHeader = formatHeader(firstValue.length, { key: firstKey, fields: header, delimiter: options.delimiter })
+      yield indentedListItem(depth, formattedHeader, options.indent)
+      yield* writeTabularRowsLines(firstValue, header, depth + 2, options)
+
+      if (restEntries.length > 0) {
+        const restObj: JsonObject = Object.fromEntries(restEntries)
+        yield* encodeObjectLines(restObj, depth + 1, options)
+      }
+      return
+    }
+  }
+
   const encodedKey = encodeKey(firstKey)
 
   if (isJsonPrimitive(firstValue)) {
-    yield indentedListItem(depth, `${encodedKey}: ${encodePrimitive(firstValue, options.delimiter)}`, options.indent)
+    // Primitive value: `- key: value`
+    const encodedValue = encodePrimitive(firstValue, options.delimiter)
+    yield indentedListItem(depth, `${encodedKey}: ${encodedValue}`, options.indent)
   }
   else if (isJsonArray(firstValue)) {
-    if (isArrayOfPrimitives(firstValue)) {
-      // Inline format for primitive arrays
-      const arrayPropertyLine = encodeInlineArrayLine(firstValue, options.delimiter, firstKey)
-      yield indentedListItem(depth, arrayPropertyLine, options.indent)
+    if (firstValue.length === 0) {
+      // Empty array: `- key[0]:`
+      const header = formatHeader(0, { delimiter: options.delimiter })
+      yield indentedListItem(depth, `${encodedKey}${header}`, options.indent)
     }
-    else if (isArrayOfObjects(firstValue)) {
-      // Check if array of objects can use tabular format
-      const header = extractTabularHeader(firstValue)
-      if (header) {
-        // Tabular format for uniform arrays of objects
-        const formattedHeader = formatHeader(firstValue.length, { key: firstKey, fields: header, delimiter: options.delimiter })
-        yield indentedListItem(depth, formattedHeader, options.indent)
-        yield* writeTabularRowsLines(firstValue, header, depth + 1, options)
-      }
-      else {
-        // Fall back to list format for non-uniform arrays of objects
-        yield indentedListItem(depth, `${encodedKey}[${firstValue.length}]:`, options.indent)
-        for (const item of firstValue) {
-          yield* encodeObjectAsListItemLines(item, depth + 1, options)
-        }
-      }
+    else if (isArrayOfPrimitives(firstValue)) {
+      // Inline primitive array: `- key[N]: values`
+      const arrayLine = encodeInlineArrayLine(firstValue, options.delimiter)
+      yield indentedListItem(depth, `${encodedKey}${arrayLine}`, options.indent)
     }
     else {
-      // Complex arrays on separate lines (array of arrays, etc.)
-      yield indentedListItem(depth, `${encodedKey}[${firstValue.length}]:`, options.indent)
+      // Non-inline array: `- key[N]:` with items at depth + 2
+      const header = formatHeader(firstValue.length, { delimiter: options.delimiter })
+      yield indentedListItem(depth, `${encodedKey}${header}`, options.indent)
 
-      // Encode array contents at depth + 1
       for (const item of firstValue) {
-        yield* encodeListItemValueLines(item, depth + 1, options)
+        yield* encodeListItemValueLines(item, depth + 2, options)
       }
     }
   }
   else if (isJsonObject(firstValue)) {
+    // Object value: `- key:` with fields at depth + 2
     yield indentedListItem(depth, `${encodedKey}:`, options.indent)
     if (!isEmptyObject(firstValue)) {
       yield* encodeObjectLines(firstValue, depth + 2, options)
     }
   }
 
-  // Remaining entries on indented lines
-  for (let i = 1; i < entries.length; i++) {
-    const [key, value] = entries[i]!
-    yield* encodeKeyValuePairLines(key, value, depth + 1, options)
+  if (restEntries.length > 0) {
+    const restObj: JsonObject = Object.fromEntries(restEntries)
+    yield* encodeObjectLines(restObj, depth + 1, options)
   }
 }
 
@@ -361,9 +369,18 @@ function* encodeListItemValueLines(
   if (isJsonPrimitive(value)) {
     yield indentedListItem(depth, encodePrimitive(value, options.delimiter), options.indent)
   }
-  else if (isJsonArray(value) && isArrayOfPrimitives(value)) {
-    const arrayLine = encodeInlineArrayLine(value, options.delimiter)
-    yield indentedListItem(depth, arrayLine, options.indent)
+  else if (isJsonArray(value)) {
+    if (isArrayOfPrimitives(value)) {
+      const arrayLine = encodeInlineArrayLine(value, options.delimiter)
+      yield indentedListItem(depth, arrayLine, options.indent)
+    }
+    else {
+      const header = formatHeader(value.length, { delimiter: options.delimiter })
+      yield indentedListItem(depth, header, options.indent)
+      for (const item of value) {
+        yield* encodeListItemValueLines(item, depth + 1, options)
+      }
+    }
   }
   else if (isJsonObject(value)) {
     yield* encodeObjectAsListItemLines(value, depth, options)

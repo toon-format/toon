@@ -60,19 +60,19 @@ Datasets with flat tabular structures where CSV is applicable.
 
 ⭐ Top 100 GitHub repositories  ┊  Tabular: 100%
    │
-   CSV                 ███████████████████░     8,513 tokens
-   TOON                ████████████████████     8,745 tokens   (+2.7% vs CSV)
-   ├─ vs JSON          (−42.3%)                15,145 tokens
-   ├─ vs JSON compact  (−23.7%)                11,455 tokens
-   ├─ vs YAML          (−33.4%)                13,129 tokens
-   └─ vs XML           (−48.8%)                17,095 tokens
+   CSV                 ███████████████████░     8,512 tokens
+   TOON                ████████████████████     8,744 tokens   (+2.7% vs CSV)
+   ├─ vs JSON          (−42.3%)                15,144 tokens
+   ├─ vs JSON compact  (−23.7%)                11,454 tokens
+   ├─ vs YAML          (−33.4%)                13,128 tokens
+   └─ vs XML           (−48.9%)                17,095 tokens
 
 ──────────────────────────────────── Total ────────────────────────────────────
-   CSV                 ███████████████████░    63,855 tokens
-   TOON                ████████████████████    67,696 tokens   (+6.0% vs CSV)
-   ├─ vs JSON          (−58.8%)               164,255 tokens
-   ├─ vs JSON compact  (−35.2%)               104,527 tokens
-   ├─ vs YAML          (−48.2%)               130,698 tokens
+   CSV                 ███████████████████░    63,854 tokens
+   TOON                ████████████████████    67,695 tokens   (+6.0% vs CSV)
+   ├─ vs JSON          (−58.8%)               164,254 tokens
+   ├─ vs JSON compact  (−35.2%)               104,526 tokens
+   ├─ vs YAML          (−48.2%)               130,697 tokens
    └─ vs XML           (−64.4%)               190,160 tokens
 ```
 
@@ -149,7 +149,7 @@ metrics[5]{date,views,clicks,conversions,revenue,bounceRate}:
 
 **Savings:** 6,400 tokens (42.3% reduction vs JSON)
 
-**JSON** (15,145 tokens):
+**JSON** (15,144 tokens):
 
 ```json
 {
@@ -197,7 +197,7 @@ metrics[5]{date,views,clicks,conversions,revenue,bounceRate}:
 }
 ```
 
-**TOON** (8,745 tokens):
+**TOON** (8,744 tokens):
 
 ```
 repositories[3]{id,name,repo,description,createdAt,updatedAt,pushedAt,stars,watchers,forks,defaultBranch}:

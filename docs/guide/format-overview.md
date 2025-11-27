@@ -107,6 +107,40 @@ items[3]:
 
 Each element starts with `- ` at one indentation level deeper than the parent array header.
 
+### Objects as List Items
+
+When an array element is an object, it appears as a list item:
+
+```yaml
+items[2]:
+  - id: 1
+    name: First
+  - id: 2
+    name: Second
+    extra: true
+```
+
+When a tabular array is the first field of a list-item object, the tabular header appears on the hyphen line, with rows indented two levels deeper and other fields indented one level deeper:
+
+```yaml
+items[1]:
+  - users[2]{id,name}:
+      1,Ada
+      2,Bob
+    status: active
+```
+
+When the object has only a single tabular field, the same pattern applies:
+
+```yaml
+items[1]:
+  - users[2]{id,name}:
+      1,Ada
+      2,Bob
+```
+
+This is the canonical encoding for list-item objects whose first field is a tabular array.
+
 ### Arrays of Arrays
 
 When you have arrays containing primitive inner arrays:

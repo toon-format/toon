@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { encodeLines } from '../src/index'
 
 describe('encodeLines', () => {
-  it('should yield lines without newline characters', () => {
+  it('yield lines without newline characters', () => {
     const value = { name: 'Alice', age: 30, city: 'Paris' }
     const lines = Array.from(encodeLines(value))
 
@@ -11,13 +11,13 @@ describe('encodeLines', () => {
     }
   })
 
-  it('should yield zero lines for empty object', () => {
+  it('yield zero lines for empty object', () => {
     const lines = Array.from(encodeLines({}))
 
     expect(lines.length).toBe(0)
   })
 
-  it('should be iterable with for-of loop', () => {
+  it('be iterable with for-of loop', () => {
     const value = { x: 10, y: 20 }
     const collectedLines: string[] = []
 
@@ -30,7 +30,7 @@ describe('encodeLines', () => {
     expect(collectedLines[1]).toBe('y: 20')
   })
 
-  it('should not have trailing spaces in lines', () => {
+  it('not have trailing spaces in lines', () => {
     const value = {
       user: {
         name: 'Alice',
@@ -47,7 +47,7 @@ describe('encodeLines', () => {
     }
   })
 
-  it('should yield correct number of lines', () => {
+  it('yield correct number of lines', () => {
     const value = { a: 1, b: 2, c: 3 }
     const lines = Array.from(encodeLines(value))
 

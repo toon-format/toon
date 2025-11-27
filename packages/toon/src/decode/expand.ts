@@ -12,7 +12,7 @@ import { isIdentifierSegment } from '../shared/validation'
 export const QUOTED_KEY_MARKER: unique symbol = Symbol('quotedKey')
 
 /**
- * Type for objects that may have quoted key metadata attached.
+ * Objects that may have quoted key metadata attached.
  */
 export interface ObjectWithQuotedKeys extends JsonObject {
   [QUOTED_KEY_MARKER]?: Set<string>
@@ -226,6 +226,10 @@ function mergeObjects(
 
 // #endregion
 
+// #region Type Guards
+
 function canMerge(a: JsonValue, b: JsonValue): a is JsonObject {
   return isJsonObject(a) && isJsonObject(b)
 }
+
+// #endregion

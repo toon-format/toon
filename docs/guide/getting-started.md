@@ -177,6 +177,10 @@ yarn global add @toon-format/cli
 
 For full CLI documentation, see the [CLI reference](/cli/).
 
+## Media Type & File Extension
+
+TOON files conventionally use the `.toon` extension. For HTTP transmission, the provisional media type is `text/toon`, always with UTF-8 encoding. While you may specify `charset=utf-8` explicitly, it's optional – UTF-8 is the default assumption. This follows the registration process outlined in [spec §18.2](https://github.com/toon-format/spec/blob/main/SPEC.md#182-provisional-media-type).
+
 ## Your First Example
 
 The examples below use the TypeScript library for demonstration, but the same operations work in any language with a TOON implementation.
@@ -236,4 +240,4 @@ Round-tripping is lossless: `decode(encode(x))` always equals `x` (after normali
 
 ## Where to Go Next
 
-Now that you've seen your first TOON document, read the [Format Overview](/guide/format-overview) for complete syntax details (objects, arrays, quoting rules, key folding), then explore [Using TOON with LLMs](/guide/llm-prompts) to see how to use it effectively in prompts. For implementation details, check the [API reference](/reference/api) (TypeScript) or the [specification](/reference/spec) (language-agnostic normative rules).
+Now that you've seen your first TOON document, read the [Format Overview](/guide/format-overview) for complete syntax details (objects, arrays, quoting rules, key folding), then explore [Using TOON with LLMs](/guide/llm-prompts) to see how to use it effectively in prompts. For implementation details, check the [API Reference](/reference/api) (TypeScript) or the [Specification](/reference/spec) (language-agnostic normative rules).

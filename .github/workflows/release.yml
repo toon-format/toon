@@ -1,43 +1,52 @@
-name: Release
+name: Release + Publish
 
 on:
   push:
     tags:
       - 'v*'
 
-permissions:
-  id-token: write
-  contents: write
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   release:
+    name: Release
     runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: write
+
     steps:
-      - uses: actions/checkout@v5
+      - name: Checkout
+        uses: actions/checkout@v5
         with:
-          fetch-depth: 0
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v6
+          fetch-depth: 0 # Required for fetching tags and generating release notes
+          persist-credentials: true
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org/
           cache: pnpm
 
-      - name: Publish changelog
+      - name: Generate changelog and create GitHub release
         run: npx changelogithub
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: pnpm install
-      - run: pnpm run build
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Copy READMEs for npm packages
-        run: |
-          cp README.md packages/toon/README.md
-          echo "✓ Copied root README to @toon-format/toon"
-          echo "✓ CLI package uses its own README"
+      - name: Build packages
+        run: pnpm run build
 
-      - name: Publish to npm
+      - name: Publish packages to npm
         run: npm install -g npm@latest && pnpm -r publish --access public --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

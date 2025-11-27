@@ -179,17 +179,22 @@ function generateEfficiencyRankingReport(
   if (csv) {
     // CSV totalCount is evaluations (questions × models), so divide by number of models to get question count
     const csvQuestionCount = csv.totalCount / modelCount
-    csvNote = `\n\n**Note on CSV:** Excluded from ranking as it only supports ${csvQuestionCount} of ${totalQuestions} questions (flat tabular data only). While CSV is highly token-efficient for simple tabular data, it cannot represent nested structures that other formats handle.`
+    csvNote = `**Note on CSV:** Excluded from ranking as it only supports ${csvQuestionCount} of ${totalQuestions} questions (flat tabular data only). While CSV is highly token-efficient for simple tabular data, it cannot represent nested structures that other formats handle.`
   }
 
   return `
-Each format's overall performance, balancing accuracy against token cost:
+Each format ranked by efficiency (accuracy percentage per 1,000 tokens):
 
 \`\`\`
 ${efficiencyChart}
 \`\`\`
 
-${summary}${csvNote}
+*Efficiency score = (Accuracy % ÷ Tokens) × 1,000. Higher is better.*
+
+> [!TIP]
+> ${summary}
+
+${csvNote}
 `.trim()
 }
 
@@ -396,7 +401,7 @@ function generateSummaryComparison(
     return ''
 
   return `
-> [!TIP] Results Summary
+> [!TIP]
 > TOON achieves **${(toon.accuracy * 100).toFixed(1)}% accuracy** (vs JSON's ${(json.accuracy * 100).toFixed(1)}%) while using **${((1 - toon.totalTokens / json.totalTokens) * 100).toFixed(1)}% fewer tokens** on these datasets.
 `.trim()
 }
@@ -566,7 +571,7 @@ function generateHorizontalEfficiencyChart(
       const accuracy = `${(r.accuracy * 100).toFixed(1)}%`.padStart(5)
       const tokens = r.tokens.toLocaleString('en-US').padStart(5)
 
-      return `${formatName}   ${bar}   ${efficiency}  │  ${accuracy} acc  │  ${tokens} tokens`
+      return `${formatName}   ${bar}   ${efficiency} acc%/1K tok  │  ${accuracy} acc  │  ${tokens} tokens`
     })
     .join('\n')
 }

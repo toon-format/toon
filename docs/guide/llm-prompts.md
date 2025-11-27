@@ -83,7 +83,7 @@ catch (error) {
 }
 ```
 
-Strict mode checks counts, indentation, and escaping so you can detect truncation or malformed TOON. For complete details, see the [API reference](/reference/api#decode).
+Strict mode checks counts, indentation, and escaping so you can detect truncation or malformed TOON. For complete details, see the [API Reference](/reference/api#decode).
 
 ## Delimiter Choices for Token Efficiency
 
@@ -94,6 +94,54 @@ const toon = encode(data, { delimiter: '\t' })
 ```
 
 Tell the model "fields are tab-separated" when using tabs. For more on delimiters, see the [Format Overview](/guide/format-overview#delimiter-options).
+
+## Streaming Large Outputs
+
+When working with large datasets (thousands of records or deeply nested structures), use `encodeLines()` to stream TOON output line-by-line instead of building the full string in memory.
+
+```ts
+import { encodeLines } from '@toon-format/toon'
+
+const largeData = await fetchThousandsOfRecords()
+
+// Stream large dataset without loading full string in memory
+for (const line of encodeLines(largeData, { delimiter: '\t' })) {
+  process.stdout.write(`${line}\n`)
+}
+```
+
+The CLI also supports streaming for memory-efficient JSON-to-TOON conversion:
+
+```bash
+toon large-dataset.json --output output.toon
+```
+
+This streaming approach prevents out-of-memory errors when preparing large context windows for LLMs. For complete details on `encodeLines()`, see the [API Reference](/reference/api#encodelines).
+
+**Consuming streaming LLM outputs:** If your LLM client exposes streaming text and you buffer by lines, you can decode TOON incrementally:
+
+```ts
+import { decodeFromLines } from '@toon-format/toon'
+
+// Buffer streaming response into lines
+const lines: string[] = []
+let buffer = ''
+
+for await (const chunk of modelStream) {
+  buffer += chunk
+  let index: number
+
+  while ((index = buffer.indexOf('\n')) !== -1) {
+    lines.push(buffer.slice(0, index))
+    buffer = buffer.slice(index + 1)
+  }
+}
+
+// Decode buffered lines
+const data = decodeFromLines(lines)
+```
+
+For streaming decode APIs, see [`decodeFromLines()`](/reference/api#decodeFromLines-lines-options) and [`decodeStream()`](/reference/api#decodeStream-source-options).
 
 ## Tips and Pitfalls
 

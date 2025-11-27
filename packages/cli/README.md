@@ -1,8 +1,8 @@
 # @toon-format/cli
 
-Command-line tool for converting between JSON and TOON formats.
+Command-line tool for converting JSON to TOON and back, with token analysis and streaming support.
 
-[TOON (Token-Oriented Object Notation)](https://toonformat.dev) is a compact, human-readable serialization format designed for passing structured data to Large Language Models with significantly reduced token usage.
+[TOON (Token-Oriented Object Notation)](https://toonformat.dev) is a compact, human-readable encoding of the JSON data model that minimizes tokens for LLM input. The CLI lets you test conversions, analyze token savings, and integrate TOON into shell pipelines with stdin/stdout support—no code required.
 
 ## Installation
 
@@ -79,11 +79,12 @@ toon data.json --stats -o output.toon
 ```
 
 Example output:
+
 ```
-✓ Encoded to TOON
-  Input:  15,145 tokens (JSON)
-  Output:  8,745 tokens (TOON)
-  Saved:   6,400 tokens (42.3% reduction)
+✔ Encoded data.json → output.toon
+
+ℹ Token estimates: ~15,145 (JSON) → ~8,745 (TOON)
+✔ Saved ~6,400 tokens (-42.3%)
 ```
 
 ### Alternative Delimiters
@@ -114,6 +115,31 @@ cat large-dataset.json | toon --delimiter "\t" > output.toon
 # Chain with other tools
 jq '.results' data.json | toon > filtered.toon
 ```
+
+### Large Dataset Processing
+
+The CLI uses streaming output for both encoding and decoding, writing incrementally without building the full output string in memory:
+
+```bash
+# Encode large JSON file with minimal memory usage
+toon huge-dataset.json -o output.toon
+
+# Decode large TOON file with streaming JSON output
+toon huge-dataset.toon -o output.json
+
+# Process millions of records efficiently via stdin
+cat million-records.json | toon > output.toon
+cat million-records.toon | toon --decode > output.json
+```
+
+**Memory efficiency:**
+- **Encode (JSON → TOON)**: Streams TOON lines to output without full string in memory
+- **Decode (TOON → JSON)**: Uses the same event-based streaming decoder as the `decodeStream` API in `@toon-format/toon`, streaming JSON tokens to output without full string in memory
+- Peak memory usage scales with data depth, not total size
+- When `--expand-paths safe` is enabled, decode falls back to non-streaming mode internally to apply deep-merge expansion before writing JSON
+
+> [!NOTE]
+> When using `--stats` with encode, the full output string is kept in memory for token counting. Omit `--stats` for maximum memory efficiency with very large datasets.
 
 ### Key Folding (Since v1.5)
 
@@ -190,6 +216,7 @@ toon data.json --key-folding safe --delimiter "\t" --stats -o output.toon
 - **Pipeline integration** with existing JSON-based workflows
 - **Flexible formatting** with delimiter and indentation options
 - **Key folding** to collapse nested wrappers for additional token savings
+- **Memory-efficient streaming** for both encode and decode operations - process large datasets without loading entire outputs into memory
 
 ## Related
 

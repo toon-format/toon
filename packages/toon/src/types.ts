@@ -75,6 +75,32 @@ export interface DecodeOptions {
 
 export type ResolvedDecodeOptions = Readonly<Required<DecodeOptions>>
 
+/**
+ * Options for streaming decode operations.
+ *
+ * @remarks
+ * Path expansion is not supported in streaming mode.
+ */
+export interface DecodeStreamOptions extends Omit<DecodeOptions, 'expandPaths'> {
+  /**
+   * Path expansion is not supported in streaming decode.
+   * This option is explicitly omitted.
+   */
+  expandPaths?: never
+}
+
+// #endregion
+
+// #region Streaming decoder types
+
+export type JsonStreamEvent
+  = | { type: 'startObject' }
+    | { type: 'endObject' }
+    | { type: 'startArray', length: number }
+    | { type: 'endArray' }
+    | { type: 'key', key: string, wasQuoted?: boolean }
+    | { type: 'primitive', value: JsonPrimitive }
+
 // #endregion
 
 // #region Decoder parsing types

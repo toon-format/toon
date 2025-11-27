@@ -30,7 +30,7 @@ export function normalizeValue(value: unknown): JsonValue {
     if (value >= Number.MIN_SAFE_INTEGER && value <= Number.MAX_SAFE_INTEGER) {
       return Number(value)
     }
-    // Otherwise convert to string (will be unquoted as it looks numeric)
+    // Otherwise convert to string (will be quoted in output)
     return value.toString()
   }
 
