@@ -33,7 +33,8 @@ const toon = encode(data, {
   indent: 2,
   delimiter: ',',
   keyFolding: 'off',
-  flattenDepth: Infinity
+  flattenDepth: Infinity,
+  replacer: (key, value) => key === 'password' ? undefined : value
 })
 ```
 
@@ -375,6 +376,7 @@ Configuration for [`encode()`](#encode-input-options) and [`encodeLines()`](#enc
 | `delimiter` | `','` \| `'\t'` \| `'\|'` | `','` | Delimiter for array values and tabular rows |
 | `keyFolding` | `'off'` \| `'safe'` | `'off'` | Enable key folding to collapse single-key wrapper chains into dotted paths |
 | `flattenDepth` | `number` | `Infinity` | Maximum number of segments to fold when `keyFolding` is enabled (values 0-1 have no practical effect) |
+| `replacer` | `Replacer?` | `undefined` | Transform or filter values during encoding (see [Replacer](#replacer)) |
 
 **Delimiter options:**
 
@@ -448,6 +450,17 @@ type JsonStreamEvent
 
 type JsonPrimitive = string | number | boolean | null
 ```
+
+### `Replacer`
+
+The replacer type for filtering and transforming values during encoding:
+
+```ts
+type ReplacerFunction = (key: string, value: unknown) => unknown
+type Replacer = ReplacerFunction | (string | number)[]
+```
+
+See [Replacer](#replacer) in Guides & Examples for usage patterns.
 
 ## Guides & Examples
 
@@ -530,6 +543,77 @@ When multiple expanded keys construct overlapping paths, the decoder merges them
 - **Object + Non-object** (array or primitive): Conflict
   - With `strict: true` (default): Error
   - With `strict: false`: Last-write-wins (LWW)
+
+### Replacer
+
+The `replacer` option works like `JSON.stringify`'s replacer parameter, letting you filter or transform values during encoding.
+
+**Function Replacer:**
+
+Return `undefined` to omit a key-value pair:
+
+```ts
+import { encode } from '@toon-format/toon'
+
+const user = {
+  id: 1,
+  name: 'Alice',
+  password: 'secret123',
+  email: 'alice@example.com'
+}
+
+// Omit sensitive fields
+const toon = encode(user, {
+  replacer: (key, value) => key === 'password' ? undefined : value
+})
+// id: 1
+// name: Alice
+// email: alice@example.com
+```
+
+Transform values by returning a different value:
+
+```ts
+const data = { price: 19.99, discount: 0.15 }
+
+const toon = encode(data, {
+  replacer: (key, value) => typeof value === 'number' ? Math.round(value * 100) / 100 : value
+})
+```
+
+**Array Replacer (Allowlist):**
+
+Pass an array of keys to include only those properties:
+
+```ts
+import { encode } from '@toon-format/toon'
+
+const user = {
+  id: 1,
+  name: 'Alice',
+  password: 'secret123',
+  email: 'alice@example.com'
+}
+
+// Only include specific fields
+const toon = encode(user, {
+  replacer: ['id', 'name', 'email']
+})
+// id: 1
+// name: Alice
+// email: alice@example.com
+```
+
+::: tip Combining with Key Folding
+The replacer is applied before key folding, so you can filter values and then fold the result:
+
+```ts
+encode(data, {
+  replacer: (key, value) => key.startsWith('_') ? undefined : value,
+  keyFolding: 'safe'
+})
+```
+:::
 
 ### Delimiter Strategies
 

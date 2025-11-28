@@ -9,6 +9,42 @@ export type JsonValue = JsonPrimitive | JsonObject | JsonArray
 
 // #endregion
 
+// #region Replacer types
+
+/**
+ * A function that transforms values during encoding, similar to JSON.stringify's replacer.
+ *
+ * @param key - The property key (empty string for root value)
+ * @param value - The value to transform
+ * @returns The transformed value, or undefined to omit the property
+ *
+ * @example
+ * ```ts
+ * // Omit sensitive fields
+ * const replacer: ReplacerFunction = (key, value) => {
+ *   if (key === 'password') return undefined
+ *   return value
+ * }
+ *
+ * // Transform values
+ * const replacer: ReplacerFunction = (key, value) => {
+ *   if (typeof value === 'string') return value.toUpperCase()
+ *   return value
+ * }
+ * ```
+ */
+export type ReplacerFunction = (key: string, value: unknown) => unknown
+
+/**
+ * Replacer for encoding - either a function or an array of allowed keys.
+ *
+ * - Function: Called for each value, return undefined to omit
+ * - Array: Allowlist of property names to include (only applies to objects)
+ */
+export type Replacer = ReplacerFunction | (string | number)[]
+
+// #endregion
+
 // #region Encoder options
 
 export type { Delimiter, DelimiterKey }
@@ -38,9 +74,32 @@ export interface EncodeOptions {
    * @default Infinity
    */
   flattenDepth?: number
+  /**
+   * A function or array that transforms values during encoding,
+   * similar to JSON.stringify's replacer parameter.
+   *
+   * - Function: Called for each value with (key, value). Return undefined to omit the property.
+   * - Array: Allowlist of property names to include (only applies to objects).
+   *
+   * @default undefined
+   *
+   * @example
+   * ```ts
+   * // Omit sensitive fields
+   * encode(user, {
+   *   replacer: (key, value) => key === 'password' ? undefined : value
+   * })
+   *
+   * // Include only specific fields
+   * encode(user, {
+   *   replacer: ['id', 'name', 'email']
+   * })
+   * ```
+   */
+  replacer?: Replacer
 }
 
-export type ResolvedEncodeOptions = Readonly<Required<EncodeOptions>>
+export type ResolvedEncodeOptions = Readonly<Required<Omit<EncodeOptions, 'replacer'>> & Pick<EncodeOptions, 'replacer'>>
 
 // #endregion
 
