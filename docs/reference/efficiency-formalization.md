@@ -488,7 +488,6 @@ At the same time, this is deliberately a simplified model. In real datasets, add
 
 - [Benchmarks](/guide/benchmarks) – Empirical token count and accuracy comparisons across formats
 - [Specification](/reference/spec) – Formal TOON specification
-- [Getting Started](/guide/getting-started) – Introduction to TOON format and when to use it
 
 ## References
 

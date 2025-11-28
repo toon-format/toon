@@ -63,8 +63,6 @@ TOON achieves **73.9%** accuracy (vs JSON's 69.7%) while using **39.6% fewer tok
 
 **Note on CSV:** Excluded from ranking as it only supports 109 of 209 questions (flat tabular data only). While CSV is highly token-efficient for simple tabular data, it cannot represent nested structures that other formats handle.
 
-
-
 #### Per-Model Accuracy
 
 Accuracy across 4 LLMs on 209 data retrieval questions:
@@ -577,6 +575,5 @@ repositories[3]{id,name,repo,description,createdAt,updatedAt,pushedAt,stars,watc
 
 ## Related Resources
 
-- [Formal Byte-Level Model](/reference/efficiency-formalization) - Mathematical analysis of efficiency
-- [Specification](/reference/spec) - Formal TOON specification
-- [Getting Started](/guide/getting-started) - Introduction to TOON
+- [Formal Byte-Level Model](/reference/efficiency-formalization) – Mathematical analysis of byte efficiency compared to JSON
+- [Specification](/reference/spec) – Formal TOON specification

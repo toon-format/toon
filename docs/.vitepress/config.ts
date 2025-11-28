@@ -99,7 +99,7 @@ export default defineConfig({
     config(md) {
       md.use(copyOrDownloadAsMarkdownButtons)
     },
-    math: true
+    math: true,
   },
 })
 

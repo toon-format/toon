@@ -89,12 +89,15 @@ importers:
 
   docs:
     devDependencies:
+      markdown-it-mathjax3:
+        specifier: ^5.2.0
+        version: 5.2.0
       unocss:
         specifier: ^66.5.9
         version: 66.5.9(postcss@8.5.6)(vite@7.2.4(@types/node@24.10.1)(jiti@2.6.1)(tsx@4.20.6)(yaml@2.8.1))
       vitepress:
         specifier: ^1.6.4
-        version: 1.6.4(@algolia/client-search@5.44.0)(@types/node@24.10.1)(change-case@5.4.4)(postcss@8.5.6)(search-insights@2.17.3)(typescript@5.9.3)
+        version: 1.6.4(@algolia/client-search@5.44.0)(@types/node@24.10.1)(change-case@5.4.4)(markdown-it-mathjax3@5.2.0)(postcss@8.5.6)(search-insights@2.17.3)(typescript@5.9.3)
       vitepress-plugin-llms:
         specifier: ^1.9.3
         version: 1.9.3
@@ -1111,6 +1114,58 @@ packages:
     resolution: {integrity: sha512-UhTd8u31dXadv0MopwGgNOBpUVROFKWVQgAg5N1ESyCz8AuBcMqm4AuTjrwgQKGDfoFuz02EuMRHQIw/frmYKQ==}
     cpu: [x64]
     os: [win32]
+
+  '@se-oss/deasync-darwin-arm64@1.0.1':
+    resolution: {integrity: sha512-0YWmIDEGQfW3GGopmZHhfA6mamsG0HFKZhmBzHVyFiMKkJts8kpQwGbGrWlK8eOAoPCihOsG6tCotYR3p7HZaQ==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@se-oss/deasync-darwin-x64@1.0.1':
+    resolution: {integrity: sha512-r3FRTLIXqGqOb1DjTLW3YhO/Dd1vA2qRLP0Ym3Wmk3yMv6c/nm15zg6UVoXbgBu8cjbvcsI/OfbHPdErmjMWsw==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [darwin]
+
+  '@se-oss/deasync-linux-arm64-gnu@1.0.1':
+    resolution: {integrity: sha512-657uRew7fZAx663Li03ilLV2lN09Dqb/NxawlDu8kKmboK1BLitHJRS+taiT5oFZqyIDrU45tlQKfCrW0p0sYA==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [linux]
+
+  '@se-oss/deasync-linux-arm64-musl@1.0.1':
+    resolution: {integrity: sha512-IE3fIQPIJtko4lx9sRam+Zz0P4xbpAPJgDCHaz6k9cP1yUvVI179B4IZRnFx0GyjyQpm0KhHoIGHJc4KUmA81Q==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [linux]
+
+  '@se-oss/deasync-linux-x64-gnu@1.0.1':
+    resolution: {integrity: sha512-XQl7etZESGIjIraCyxfAey8ZTIJUB4dUFU3rPR/xLVn9bKpZGlJLIms0z3hoHX9mipO+Cqo53vK4IVm6A7U/ww==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [linux]
+
+  '@se-oss/deasync-linux-x64-musl@1.0.1':
+    resolution: {integrity: sha512-vWgFAZlqImqMV6jhCWV7C9wcCS1eb1ajhlKduBRPfyUxxkoObe+EqTG2BKJAuafxp3/KS1aUsIMJma9mhwFvow==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [linux]
+
+  '@se-oss/deasync-win32-arm64-msvc@1.0.1':
+    resolution: {integrity: sha512-yk7lEE7Zd8GX7o6CuUbg3HnnmUhBx4tgfn5ff3eoq05CgBO6Z3ZtL4l+utAe1cxcFaXPhyvcgnHYyA4OF544tg==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [win32]
+
+  '@se-oss/deasync-win32-x64-msvc@1.0.1':
+    resolution: {integrity: sha512-ixizmuLGRPGyAesWUNWVzVOsvuunNb/qMqU8SmjfLR/vVgzdQEkSHFf+fkX9GXPN6FDv+DAz5uskTzhjUyCXFA==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [win32]
+
+  '@se-oss/deasync@1.0.1':
+    resolution: {integrity: sha512-Ha7P/xCNxOuH72BNdLRWs4TT8rsMMrERnHtfKWBeTWu+UFW9OBTrRgfZJOlbAAQFR0l4Q30cpAn8CuR7PXWcPg==}
+    engines: {node: '>= 10'}
 
   '@shikijs/core@2.5.0':
     resolution: {integrity: sha512-uu/8RExTKtavlpH7XqnVYBrfBkUc20ngXiX9NSrBhOVZYv/7XQRKUyhtkeflY5QsxC0GbJThCerruZfsUaSldg==}
@@ -2371,6 +2426,9 @@ packages:
   mark.js@8.11.1:
     resolution: {integrity: sha512-1I+1qpDt4idfgLQG+BNWmrqku+7/2bi5nLf4YwF8y8zXvmfiTBY3PV3ZibfrjBueCByROpuBjLLFCajqkgYoLQ==}
 
+  markdown-it-mathjax3@5.2.0:
+    resolution: {integrity: sha512-R+XAy5/7vSGuhG9Z0/cJm6zKxOzStcScfSKVwoarh4nBra+v1KClvbALr/xFTEe9iQhwfQM4SJnO68LXL+btMA==}
+
   markdown-it@14.1.0:
     resolution: {integrity: sha512-a54IwgWPaeBCAAsv13YgmALOF1elABB08FxO9i+r4VFk5Vl4pKokRPeX8u5TCgSsPi6ec1otfLjdOpVcgbpshg==}
     hasBin: true
@@ -2381,6 +2439,9 @@ packages:
   markdown-title@1.0.2:
     resolution: {integrity: sha512-MqIQVVkz+uGEHi3TsHx/czcxxCbRIL7sv5K5DnYw/tI+apY54IbPefV/cmgxp6LoJSEx/TqcHdLs/298afG5QQ==}
     engines: {node: '>=6'}
+
+  mathxyjax3@0.8.3:
+    resolution: {integrity: sha512-eXjFaiyQsTdVOeTFoFaFJ/r1FITpB1f9c5MW4FETfcoVV/+xa5SD9pS05AwugzL/gNuDtWXrTOSmoD2e0Du+UA==}
 
   md4w@0.2.7:
     resolution: {integrity: sha512-lFM7vwk3d4MzkV2mija7aPkK6OjKXZDQsH2beX+e2cvccBoqc6RraheMtAO0Wcr/gjj5L+WS5zhb+06AmuGZrg==}
@@ -3044,6 +3105,10 @@ packages:
   type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
     engines: {node: '>= 0.8.0'}
+
+  type-fest@4.41.0:
+    resolution: {integrity: sha512-TeTSQ6H5YHvpqVwBRcnLDCBnDOHWYu7IvGbHT6N8AOymcr9PJGjc1GTtiWZTYg0NCgYwvnYWEkVChQAr9bjfwA==}
+    engines: {node: '>=16'}
 
   typescript@5.9.3:
     resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
@@ -4208,6 +4273,43 @@ snapshots:
 
   '@rollup/rollup-win32-x64-msvc@4.53.3':
     optional: true
+
+  '@se-oss/deasync-darwin-arm64@1.0.1':
+    optional: true
+
+  '@se-oss/deasync-darwin-x64@1.0.1':
+    optional: true
+
+  '@se-oss/deasync-linux-arm64-gnu@1.0.1':
+    optional: true
+
+  '@se-oss/deasync-linux-arm64-musl@1.0.1':
+    optional: true
+
+  '@se-oss/deasync-linux-x64-gnu@1.0.1':
+    optional: true
+
+  '@se-oss/deasync-linux-x64-musl@1.0.1':
+    optional: true
+
+  '@se-oss/deasync-win32-arm64-msvc@1.0.1':
+    optional: true
+
+  '@se-oss/deasync-win32-x64-msvc@1.0.1':
+    optional: true
+
+  '@se-oss/deasync@1.0.1':
+    dependencies:
+      type-fest: 4.41.0
+    optionalDependencies:
+      '@se-oss/deasync-darwin-arm64': 1.0.1
+      '@se-oss/deasync-darwin-x64': 1.0.1
+      '@se-oss/deasync-linux-arm64-gnu': 1.0.1
+      '@se-oss/deasync-linux-arm64-musl': 1.0.1
+      '@se-oss/deasync-linux-x64-gnu': 1.0.1
+      '@se-oss/deasync-linux-x64-musl': 1.0.1
+      '@se-oss/deasync-win32-arm64-msvc': 1.0.1
+      '@se-oss/deasync-win32-x64-msvc': 1.0.1
 
   '@shikijs/core@2.5.0':
     dependencies:
@@ -5671,6 +5773,11 @@ snapshots:
 
   mark.js@8.11.1: {}
 
+  markdown-it-mathjax3@5.2.0:
+    dependencies:
+      '@se-oss/deasync': 1.0.1
+      mathxyjax3: 0.8.3
+
   markdown-it@14.1.0:
     dependencies:
       argparse: 2.0.1
@@ -5683,6 +5790,8 @@ snapshots:
   markdown-table@3.0.4: {}
 
   markdown-title@1.0.2: {}
+
+  mathxyjax3@0.8.3: {}
 
   md4w@0.2.7: {}
 
@@ -6545,6 +6654,8 @@ snapshots:
     dependencies:
       prelude-ls: 1.2.1
 
+  type-fest@4.41.0: {}
+
   typescript@5.9.3: {}
 
   uc.micro@2.1.0: {}
@@ -6730,7 +6841,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  vitepress@1.6.4(@algolia/client-search@5.44.0)(@types/node@24.10.1)(change-case@5.4.4)(postcss@8.5.6)(search-insights@2.17.3)(typescript@5.9.3):
+  vitepress@1.6.4(@algolia/client-search@5.44.0)(@types/node@24.10.1)(change-case@5.4.4)(markdown-it-mathjax3@5.2.0)(postcss@8.5.6)(search-insights@2.17.3)(typescript@5.9.3):
     dependencies:
       '@docsearch/css': 3.8.2
       '@docsearch/js': 3.8.2(@algolia/client-search@5.44.0)(search-insights@2.17.3)
@@ -6751,6 +6862,7 @@ snapshots:
       vite: 5.4.21(@types/node@24.10.1)
       vue: 3.5.24(typescript@5.9.3)
     optionalDependencies:
+      markdown-it-mathjax3: 5.2.0
       postcss: 8.5.6
     transitivePeerDependencies:
       - '@algolia/client-search'
