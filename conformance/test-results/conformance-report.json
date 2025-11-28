@@ -1,0 +1,36 @@
+{
+  "timestamp": "2025-11-17T22:28:33.071Z",
+  "specVersion": "2.0",
+  "totalTests": 4,
+  "totalImplementations": 1,
+  "summary": {
+    "testsRun": 4,
+    "testsPassed": 4,
+    "testsFailed": 0,
+    "passRate": 100
+  },
+  "implementations": [
+    {
+      "name": "typescript",
+      "displayName": "TypeScript/JavaScript (Reference)",
+      "language": "TypeScript",
+      "version": "1.0.0",
+      "testsRun": 4,
+      "testsPassed": 4,
+      "testsFailed": 0,
+      "passRate": 100,
+      "averageExecutionTime": 280.25,
+      "isConformant": true
+    }
+  ],
+  "categories": [
+    {
+      "category": "basic",
+      "totalTests": 4,
+      "totalPassed": 4,
+      "totalFailed": 0,
+      "passRate": 100
+    }
+  ],
+  "failures": []
+}

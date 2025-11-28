@@ -1,0 +1,255 @@
+{
+  "version": "1.0.0",
+  "description": "Cross-language TOON conformance test cases",
+  "specVersion": "2.0",
+  "testCases": [
+    {
+      "id": "basic_simple_object",
+      "name": "Simple Object",
+      "description": "Basic object with primitive values",
+      "category": "basic",
+      "input": {
+        "name": "test",
+        "age": 25,
+        "active": true
+      },
+      "expected": "name: test\nage: 25\nactive: true",
+      "options": {
+        "indent": 2,
+        "delimiter": ","
+      }
+    },
+    {
+      "id": "basic_simple_array",
+      "name": "Simple Array",
+      "description": "Array of primitive values",
+      "category": "basic",
+      "input": {
+        "items": ["a", "b", "c"]
+      },
+      "expected": "items[3]: a,b,c",
+      "options": {
+        "indent": 2,
+        "delimiter": ","
+      }
+    },
+    {
+      "id": "basic_nested_object",
+      "name": "Nested Object",
+      "description": "Object with nested structure",
+      "category": "basic",
+      "input": {
+        "user": {
+          "name": "Alice",
+          "profile": {
+            "age": 30,
+            "city": "NYC"
+          }
+        }
+      },
+      "expected": "user:\n  name: Alice\n  profile:\n    age: 30\n    city: NYC",
+      "options": {
+        "indent": 2,
+        "delimiter": ","
+      }
+    },
+    {
+      "id": "basic_tabular_array",
+      "name": "Tabular Array",
+      "description": "Array of uniform objects",
+      "category": "basic",
+      "input": {
+        "users": [
+          {"id": 1, "name": "Alice"},
+          {"id": 2, "name": "Bob"}
+        ]
+      },
+      "expected": "users[2]{id,name}:\n  1,Alice\n  2,Bob",
+      "options": {
+        "indent": 2,
+        "delimiter": ","
+      }
+    },
+    {
+      "id": "edge_empty_object",
+      "name": "Empty Object",
+      "description": "Empty object handling",
+      "category": "edge-cases",
+      "input": {},
+      "expected": "",
+      "options": {
+        "indent": 2,
+        "delimiter": ","
+      }
+    },
+    {
+      "id": "edge_empty_array",
+      "name": "Empty Array",
+      "description": "Empty array handling",
+      "category": "edge-cases",
+      "input": {
+        "items": []
+      },
+      "expected": "items[0]:",
+      "options": {
+        "indent": 2,
+        "delimiter": ","
+      }
+    },
+    {
+      "id": "edge_null_values",
+      "name": "Null Values",
+      "description": "Handling of null values",
+      "category": "edge-cases",
+      "input": {
+        "value": null,
+        "optional": null
+      },
+      "expected": "value: null\noptional: null",
+      "options": {
+        "indent": 2,
+        "delimiter": ","
+      }
+    },
+    {
+      "id": "edge_special_characters",
+      "name": "Special Characters",
+      "description": "Strings with special characters",
+      "category": "edge-cases",
+      "input": {
+        "text": "Hello, \"world\"!",
+        "symbols": "!@#$%^&*()",
+        "newlines": "line1\nline2"
+      },
+      "expected": "text: \"Hello, \\\"world\\\"!\"\nsymbols: \"!@#$%^&*()\"\nnewlines: \"line1\\nline2\"",
+      "options": {
+        "indent": 2,
+        "delimiter": ","
+      }
+    },
+    {
+      "id": "edge_unicode",
+      "name": "Unicode Characters",
+      "description": "Handling of Unicode characters",
+      "category": "edge-cases",
+      "input": {
+        "emoji": "🎉",
+        "chinese": "你好",
+        "arabic": "مرحبا"
+      },
+      "expected": "emoji: 🎉\nchinese: 你好\narabic: مرحبا",
+      "options": {
+        "indent": 2,
+        "delimiter": ","
+      }
+    },
+    {
+      "id": "edge_large_numbers",
+      "name": "Large Numbers",
+      "description": "Handling of large numeric values",
+      "category": "edge-cases",
+      "input": {
+        "small": 1,
+        "large": 9007199254740991,
+        "negative": -9007199254740991,
+        "float": 3.14159265359
+      },
+      "expected": "small: 1\nlarge: 9007199254740991\nnegative: -9007199254740991\nfloat: 3.14159265359",
+      "options": {
+        "indent": 2,
+        "delimiter": ","
+      }
+    },
+    {
+      "id": "optimization_tab_delimiter",
+      "name": "Tab Delimiter",
+      "description": "Using tab as array delimiter",
+      "category": "optimization",
+      "input": {
+        "items": ["a", "b", "c"]
+      },
+      "expected": "items[3]: a\tb\tc",
+      "options": {
+        "indent": 2,
+        "delimiter": "\t"
+      }
+    },
+    {
+      "id": "optimization_pipe_delimiter",
+      "name": "Pipe Delimiter",
+      "description": "Using pipe as array delimiter",
+      "category": "optimization",
+      "input": {
+        "items": ["a", "b", "c"]
+      },
+      "expected": "items[3]: a|b|c",
+      "options": {
+        "indent": 2,
+        "delimiter": "|"
+      }
+    },
+    {
+      "id": "optimization_key_folding",
+      "name": "Key Folding",
+      "description": "Key folding for nested single-key objects",
+      "category": "optimization",
+      "input": {
+        "data": {
+          "user": {
+            "name": "Alice"
+          }
+        }
+      },
+      "expected": "data.user.name: Alice",
+      "options": {
+        "indent": 2,
+        "delimiter": ",",
+        "keyFolding": "safe"
+      }
+    },
+    {
+      "id": "optimization_mixed_nesting",
+      "name": "Mixed Nesting",
+      "description": "Complex structure with various nesting patterns",
+      "category": "optimization",
+      "input": {
+        "config": {
+          "database": {
+            "hosts": ["db1", "db2"],
+            "settings": {
+              "timeout": 30,
+              "retries": 3
+            }
+          },
+          "features": [
+            {"name": "auth", "enabled": true},
+            {"name": "cache", "enabled": false}
+          ]
+        }
+      },
+      "expected": "config:\n  database:\n    hosts[2]: db1,db2\n    settings:\n      timeout: 30\n      retries: 3\n  features[2]{name,enabled}:\n    auth,true\n    cache,false",
+      "options": {
+        "indent": 2,
+        "delimiter": ","
+      }
+    },
+    {
+      "id": "optimization_repeated_keys",
+      "name": "Repeated Keys",
+      "description": "Objects with repeated key patterns",
+      "category": "optimization",
+      "input": {
+        "servers": [
+          {"host": "server1", "port": 8080, "active": true},
+          {"host": "server2", "port": 8081, "active": false},
+          {"host": "server3", "port": 8082, "active": true}
+        ]
+      },
+      "expected": "servers[3]{host,port,active}:\n  server1,8080,true\n  server2,8081,false\n  server3,8082,true",
+      "options": {
+        "indent": 2,
+        "delimiter": ","
+      }
+    }
+  ]
+}

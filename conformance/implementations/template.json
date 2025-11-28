@@ -1,0 +1,17 @@
+{
+  "name": "template",
+  "displayName": "Template Implementation",
+  "language": "YourLanguage",
+  "version": "1.0.0",
+  "command": "your-toon-command",
+  "args": ["--encode"],
+  "active": false,
+  "options": {
+    "inputMethod": "stdin",
+    "outputMethod": "stdout"
+  },
+  "workingDirectory": "./",
+  "environment": {
+    "EXAMPLE_VAR": "value"
+  }
+}
