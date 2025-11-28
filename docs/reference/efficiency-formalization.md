@@ -40,6 +40,7 @@ Where $\Omega$ represents the data structure under comparison. If $\Delta > 0$, 
 - **ASCII/UTF-8**: Keys and structural tokens are assumed ASCII, so byte length equals character count ($|x|_{\text{utf8}} = |x|_{\text{char}}$). Non-ASCII content affects both formats similarly and does not change the structural conclusions.
 - **Nesting depth**: Closed-form expressions are given for flat structures and a single level of nesting. Each additional nesting level in TOON adds 2 bytes of indentation per nested line. At sufficient depth, the braces of compact JSON can win over TOON's indentation (as seen in [When Not to Use TOON](/guide/getting-started#when-not-to-use-toon)).
 - **Byte vs token count**: Modern LLM tokenizers operate over UTF-8 bytes, so byte length is a good upper bound and first-order proxy for token count, even though the mapping is not exactly linear.
+:::
 
 Think of this as a simplified structural model: we strip away real-world noise and ask, "if you only count structural characters, how do JSON and TOON compare?"
 
@@ -224,7 +225,7 @@ $$
 
 **Example:** For 1,000,000 nested objects (depth 1), TOON saves **1,000,005 bytes ≈ 0.95 MB**.
 
-::: warning
+::: warning Caveat
 This formula is for a single nesting level. Each additional nesting level adds 2 spaces of indentation per nested line; at sufficient depth, compact JSON can become smaller, especially when tabular opportunities disappear (see [When Not to Use TOON](/guide/getting-started#when-not-to-use-toon) and the "Deeply nested configuration" dataset in [Benchmarks](/guide/benchmarks)).
 :::
 
@@ -352,7 +353,7 @@ $$
 
 Arrays of arrays of primitives are where TOON structurally loses: each inner array becomes a list item with its own header, so TOON pays a fixed overhead per inner array (`"- "` plus `"[m]: "`), while JSON just uses commas.
 
-::: tip
+::: tip Practical Note
 For arrays of arrays of primitives, this model predicts that JSON is more byte-efficient than TOON, because TOON pays ~6 extra bytes per inner array (2 for `"- "`, 4 for `"[m]: "`), plus the length marker.
 :::
 
@@ -499,6 +500,6 @@ This analysis is based on:
 
 ---
 
-*This page was contributed by [Mateo Lafalce](https://github.com/mateolafalce) (@mateolafalce).
+This page was contributed by Mateo Lafalce ([@mateolafalce](https://github.com/mateolafalce)).
 
-Have questions or found an error in the formalization? Open an issue on [GitHub](https://github.com/toon-format/spec) or contribute improvements to this analysis.*
+*Have questions or found an error in the formalization? Open an issue on [GitHub](https://github.com/toon-format/spec) or contribute improvements to this analysis.*
