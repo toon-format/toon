@@ -1,0 +1,4 @@
+contact_links:
+  - name: ⚙️ TOON Specification
+    url: https://github.com/toon-format/spec/issues/new/choose
+    about: Suggest changes to the TOON specification, report a bug or discuss the specification, etc.
