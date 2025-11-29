@@ -1,0 +1,25 @@
+.VPHero .container {
+    text-align: center !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.VPHero .container .heading .name {
+    margin: 0 auto;
+}
+
+.VPHero .actions {
+    justify-content: center !important;
+}
+
+.VPHero .image {
+    order: 0;
+}
+
+.VPHero .image-container {
+    transform: none;
+}
+
+
+
