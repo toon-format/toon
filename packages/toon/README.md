@@ -915,7 +915,7 @@ Comprehensive guides, references, and resources to help you get the most out of 
 - **Laravel Framework:** [laravel-toon](https://github.com/jobmetric/laravel-toon)
 - **R**: [toon](https://github.com/laresbernardo/toon)
 - **Ruby:** [toon-ruby](https://github.com/andrepcg/toon-ruby)
-- **Swift:** [TOONEncoder](https://github.com/mattt/TOONEncoder)
+- **Swift:** [TOONEncoder](https://github.com/mattt/TOONEncoder)/[TOONDecoder](https://github.com/alexey1312/TOONDecoder)
 - **Kotlin:** [Kotlin-Toon Encoder/Decoder](https://github.com/vexpera-br/kotlin-toon)
 
 ## Credits
