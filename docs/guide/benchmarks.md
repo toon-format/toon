@@ -575,3 +575,8 @@ repositories[3]{id,name,repo,description,createdAt,updatedAt,pushedAt,stars,watc
 </details>
 
 <!-- /automd -->
+
+## Related Resources
+
+- [Formal Byte-Level Model](/reference/efficiency-formalization) – Mathematical analysis of byte efficiency compared to JSON
+- [Specification](/reference/spec) – Formal TOON specification

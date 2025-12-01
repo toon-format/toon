@@ -141,7 +141,7 @@ for await (const chunk of modelStream) {
 const data = decodeFromLines(lines)
 ```
 
-For streaming decode APIs, see [`decodeFromLines()`](/reference/api#decodeFromLines-lines-options) and [`decodeStream()`](/reference/api#decodeStream-source-options).
+For streaming decode APIs, see [`decodeFromLines()`](/reference/api#decodefromlines-lines-options) and [`decodeStream()`](/reference/api#decodestream-source-options).
 
 ## Tips and Pitfalls
 

@@ -144,6 +144,124 @@ for (const line of encodeLines(data, { delimiter: '\t' })) {
 stream.end()
 ```
 
+### Replacer Function
+
+The `replacer` option allows you to transform or filter values during encoding. It works similarly to `JSON.stringify`'s replacer parameter, but with path tracking for more precise control.
+
+#### Type Signature
+
+```typescript
+type EncodeReplacer = (
+  key: string,
+  value: JsonValue,
+  path: readonly (string | number)[]
+) => unknown
+```
+
+#### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `key` | `string` | Property name, array index (as string), or empty string for root |
+| `value` | `JsonValue` | The normalized value at this location |
+| `path` | `readonly (string \| number)[]` | Path from root to current value |
+
+#### Return Value
+
+- Return the value unchanged to keep it
+- Return a different value to replace it (will be normalized)
+- Return `undefined` to omit properties/array elements
+- For root value, `undefined` means "no change" (root cannot be omitted)
+
+#### Examples
+
+**Filtering sensitive data:**
+
+```typescript
+import { encode } from '@toon-format/toon'
+
+const data = {
+  user: { name: 'Alice', password: 'secret123', email: 'alice@example.com' }
+}
+
+function replacer(key, value) {
+  if (key === 'password')
+    return undefined
+  return value
+}
+
+console.log(encode(data, { replacer }))
+```
+
+**Output:**
+
+```yaml
+user:
+  name: Alice
+  email: alice@example.com
+```
+
+**Transforming values:**
+
+```typescript
+const data = { user: 'alice', role: 'admin' }
+
+function replacer(key, value) {
+  if (typeof value === 'string')
+    return value.toUpperCase()
+  return value
+}
+
+console.log(encode(data, { replacer }))
+```
+
+**Output:**
+
+```yaml
+user: ALICE
+role: ADMIN
+```
+
+**Path-based transformations:**
+
+```typescript
+const data = {
+  metadata: { created: '2025-01-01' },
+  user: { created: '2025-01-02' }
+}
+
+function replacer(key, value, path) {
+  // Add timezone info only to top-level metadata
+  if (path.length === 1 && path[0] === 'metadata' && key === 'created') {
+    return `${value}T00:00:00Z`
+  }
+  return value
+}
+
+console.log(encode(data, { replacer }))
+```
+
+**Output:**
+
+```yaml
+metadata:
+  created: 2025-01-01T00:00:00Z
+user:
+  created: 2025-01-02
+```
+
+::: tip Replacer Execution Order
+The replacer is called in a depth-first manner:
+1. Root value first (key = `''`, path = `[]`)
+2. Then each property/element (with proper key and path)
+3. Values are re-normalized after replacement
+4. Children are processed after parent transformation
+:::
+
+::: warning Array Indices as Strings
+Following `JSON.stringify` behavior, array indices are passed as strings (`'0'`, `'1'`, `'2'`, etc.) to the replacer, not as numbers.
+:::
+
 ## Decoding Functions
 
 ### `decode(input, options?)`
@@ -375,6 +493,7 @@ Configuration for [`encode()`](#encode-input-options) and [`encodeLines()`](#enc
 | `delimiter` | `','` \| `'\t'` \| `'\|'` | `','` | Delimiter for array values and tabular rows |
 | `keyFolding` | `'off'` \| `'safe'` | `'off'` | Enable key folding to collapse single-key wrapper chains into dotted paths |
 | `flattenDepth` | `number` | `Infinity` | Maximum number of segments to fold when `keyFolding` is enabled (values 0-1 have no practical effect) |
+| `replacer` | `EncodeReplacer` | `undefined` | Optional hook to transform or omit values before encoding (see [Replacer Function](#replacer-function)) |
 
 **Delimiter options:**
 

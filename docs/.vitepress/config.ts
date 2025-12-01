@@ -33,6 +33,10 @@ export default defineConfig({
 
     nav: [
       {
+        text: 'Playground',
+        link: '/playground',
+      },
+      {
         text: 'Guide',
         activeMatch: '^/guide/',
         items: [
@@ -53,6 +57,7 @@ export default defineConfig({
           { text: 'API', link: '/reference/api' },
           { text: 'Syntax Cheatsheet', link: '/reference/syntax-cheatsheet' },
           { text: 'Specification', link: '/reference/spec' },
+          { text: 'Efficiency Formalization', link: '/reference/efficiency-formalization' },
         ],
       },
       {
@@ -98,6 +103,7 @@ export default defineConfig({
     config(md) {
       md.use(copyOrDownloadAsMarkdownButtons)
     },
+    math: true,
   },
 })
 
@@ -115,6 +121,7 @@ function sidebarPrimary(): DefaultTheme.SidebarItem[] {
     {
       text: 'Tooling',
       items: [
+        { text: 'Playground', link: '/playground' },
         { text: 'CLI Reference', link: '/cli/' },
         { text: 'Tools & Playgrounds', link: '/ecosystem/tools-and-playgrounds' },
       ],
@@ -131,6 +138,7 @@ function sidebarPrimary(): DefaultTheme.SidebarItem[] {
         { text: 'API (TypeScript)', link: '/reference/api' },
         { text: 'Syntax Cheatsheet', link: '/reference/syntax-cheatsheet' },
         { text: 'Specification', link: '/reference/spec' },
+        { text: 'Efficiency Formalization', link: '/reference/efficiency-formalization' },
       ],
     },
   ]

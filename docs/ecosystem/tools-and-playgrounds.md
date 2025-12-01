@@ -1,10 +1,14 @@
 # Tools & Playgrounds
 
-Experiment with TOON format interactively using these community-built tools for token comparison, format conversion, and validation.
+Experiment with TOON format interactively using these tools for token comparison, format conversion, and validation.
 
 ## Playgrounds
 
-Experiment with TOON format interactively using these community-built tools for token comparison, format conversion, and validation:
+### Official Playground
+
+The [TOON Playground](/playground) lets you convert JSON to TOON in real-time, compare token counts, and share your experiments via URL.
+
+### Community Playgrounds
 
 - [Format Tokenization Playground](https://www.curiouslychase.com/playground/format-tokenization-exploration)
 - [TOON Tools](https://toontools.vercel.app/)

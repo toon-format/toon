@@ -5,6 +5,7 @@ import { buildValueFromEvents } from './decode/event-builder'
 import { expandPathsSafe } from './decode/expand'
 import { encodeJsonValue } from './encode/encoders'
 import { normalizeValue } from './encode/normalize'
+import { applyReplacer } from './encode/replacer'
 
 export { DEFAULT_DELIMITER, DELIMITERS } from './constants'
 export type {
@@ -13,6 +14,7 @@ export type {
   Delimiter,
   DelimiterKey,
   EncodeOptions,
+  EncodeReplacer,
   JsonArray,
   JsonObject,
   JsonPrimitive,
@@ -97,7 +99,13 @@ export function decode(input: string, options?: DecodeOptions): JsonValue {
 export function encodeLines(input: unknown, options?: EncodeOptions): Iterable<string> {
   const normalizedValue = normalizeValue(input)
   const resolvedOptions = resolveOptions(options)
-  return encodeJsonValue(normalizedValue, resolvedOptions, 0)
+
+  // Apply replacer if provided
+  const maybeReplacedValue = resolvedOptions.replacer
+    ? applyReplacer(normalizedValue, resolvedOptions.replacer)
+    : normalizedValue
+
+  return encodeJsonValue(maybeReplacedValue, resolvedOptions, 0)
 }
 
 /**
@@ -211,6 +219,7 @@ function resolveOptions(options?: EncodeOptions): ResolvedEncodeOptions {
     keyFolding: options?.keyFolding ?? 'off',
     flattenDepth: options?.flattenDepth ?? Number.POSITIVE_INFINITY,
     quoteStrings: options?.quoteStrings ?? false,
+    replacer: options?.replacer,
   }
 }
 

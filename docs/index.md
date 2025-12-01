@@ -11,17 +11,17 @@ hero:
     alt: TOON Logo
   actions:
     - theme: brand
-      text: Get Started
+      text: What is TOON?
       link: /guide/getting-started
     - theme: alt
       text: Benchmarks
       link: /guide/benchmarks
     - theme: alt
+      text: Playground
+      link: /playground
+    - theme: alt
       text: CLI
       link: /cli/
-    - theme: alt
-      text: Spec v3.0
-      link: /reference/spec
 
 features:
   - title: Token-Efficient & Accurate
