@@ -1,11 +1,8 @@
 import type { Rule, UserConfig } from '@commitlint/types'
-import type { Commit } from 'conventional-commits-parser'
 import { RuleConfigSeverity } from '@commitlint/types'
 
-const COMMITLINT_HELP_URL
-  = 'https://github.com/okineadev/vitepress-plugin-llms/blob/main/CONTRIBUTING.md#conventional-pr-titles'
-
 // #region Rules
+
 /**
  * Rule to ensure the first letter of the commit subject is lowercase.
  *
@@ -13,14 +10,14 @@ const COMMITLINT_HELP_URL
  * @returns A tuple where the first element is a boolean indicating
  * if the rule passed, and the second is an optional error message.
  */
-const subjectLowercaseFirst: Rule = async (parsed: Commit) => {
-  // Find the first alphabetic character
-  const match = (parsed.subject as string).match(/[a-z]/i)
-  if (match && match[0] === match[0].toUpperCase()) {
+const subjectLowercaseFirst: Rule = async (parsed) => {
+  const firstChar = parsed.subject!.match(/[a-z]/i)?.[0]
+  if (firstChar && firstChar === firstChar.toUpperCase()) {
     return [false, 'Subject must start with a lowercase letter']
   }
   return [true]
 }
+
 // #endregion
 
 const Configuration: UserConfig = {
@@ -36,7 +33,6 @@ const Configuration: UserConfig = {
       },
     },
   ],
-  helpUrl: COMMITLINT_HELP_URL,
 }
 
 export default Configuration

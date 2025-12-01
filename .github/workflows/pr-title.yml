@@ -4,7 +4,8 @@ on:
   pull_request:
     types: [opened, edited]
 
-permissions: {}
+permissions:
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -17,12 +18,9 @@ jobs:
 
     if: ${{ (github.event.action == 'opened' || github.event.changes.title != null) && github.actor != 'renovate[bot]' }}
 
-    permissions:
-      contents: read
-
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           # Only fetch the config file from the repository
@@ -30,9 +28,9 @@ jobs:
           sparse-checkout: commitlint.config.ts
 
       - name: Install dependencies
-        run: npm install @commitlint/types @commitlint/config-conventional commitlint
+        run: npm install -D @commitlint/cli @commitlint/config-conventional
 
-      - name: Check PR title with commitlint
+      - name: Validate PR title with commitlint
+        run: echo "$PR_TITLE" | npx commitlint
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
-        run: echo "$PR_TITLE" | npx commitlint
