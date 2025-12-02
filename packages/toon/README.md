@@ -943,7 +943,7 @@ Comprehensive guides, references, and resources to help you get the most out of 
 - **Ruby:** [toon-ruby](https://github.com/andrepcg/toon-ruby)
 - **Swift:** [TOONEncoder](https://github.com/mattt/TOONEncoder)
 - **Kotlin:** [Kotlin-Toon Encoder/Decoder](https://github.com/vexpera-br/kotlin-toon)
-- **Kotlin:** [ktoon (Using kotlinx.serialization)](https://github.com/lukelast/ktoon)
+- **Kotlin:** [ktoon (using kotlinx.serialization)](https://github.com/lukelast/ktoon)
 
 ## Credits
 
