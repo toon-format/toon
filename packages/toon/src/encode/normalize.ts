@@ -8,6 +8,18 @@ export function normalizeValue(value: unknown): JsonValue {
     return null
   }
 
+  // toJSON method: check before other type-specific normalization
+  // This allows objects to override default serialization behavior
+  if (
+    typeof value === 'object'
+    && value !== null
+    && 'toJSON' in value
+    && typeof value.toJSON === 'function'
+  ) {
+    // Recursively normalize the result since toJSON can return any value
+    return normalizeValue(value.toJSON())
+  }
+
   // Primitives
   if (typeof value === 'string' || typeof value === 'boolean') {
     return value
