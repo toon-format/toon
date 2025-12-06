@@ -5,6 +5,7 @@ import PlaygroundLayout from './components/PlaygroundLayout.vue'
 import VPInput from './components/VPInput.vue'
 
 import './vars.css'
+import './style.css'
 import './overrides.css'
 import 'uno.css'
 
