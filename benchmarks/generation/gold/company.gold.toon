@@ -1,0 +1,12 @@
+id: 1
+name: Acme
+departments[2]:
+  - code: ENG
+    name: Engineering
+    employees[2]{id,name,title}:
+      1,Alice,engineer
+      2,Bob,manager
+  - code: OPS
+    name: Operations
+    employees[1]{id,name,title}:
+      3,Eve,analyst

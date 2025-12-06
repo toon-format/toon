@@ -1,0 +1,7 @@
+id: 101
+customer:
+  id: 9
+  name: Ada
+items[2]{sku,qty,price}:
+  A1,2,9.99
+  B2,1,14.5

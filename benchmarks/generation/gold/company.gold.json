@@ -1,0 +1,1 @@
+{"id":1,"name":"Acme","departments":[{"code":"ENG","name":"Engineering","employees":[{"id":1,"name":"Alice","title":"engineer"},{"id":2,"name":"Bob","title":"manager"}]},{"code":"OPS","name":"Operations","employees":[{"id":3,"name":"Eve","title":"analyst"}]}]}
