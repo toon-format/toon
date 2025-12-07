@@ -34,7 +34,7 @@ Community members have created implementations in additional languages:
 | **Elixir** | [toon_ex](https://github.com/kentaro/toon_ex) | [@kentaro](https://github.com/kentaro) |
 | **Gleam** | [toon_codec](https://github.com/axelbellec/toon_codec) | [@axelbellec](https://github.com/axelbellec) |
 | **Go** | [gotoon](https://github.com/alpkeskin/gotoon) | [@alpkeskin](https://github.com/alpkeskin) |
-| **Kotlin** | [kotlin-toon](https://github.com/vexpera-br/kotlin-toon) | [@vexpera-br](https://github.com/vexpera-br) |
+| **Kotlin** | [ktoon](https://github.com/lukelast/ktoon)| [@lukelast](https://github.com/lukelast) |
 | **Laravel Framework** | [laravel-toon](https://github.com/jobmetric/laravel-toon) | [@jobmetric](https://github.com/jobmetric) |
 | **Lua/Neovim** | [toon.nvim](https://github.com/thalesgelinger/toon.nvim) | [@thalesgelinger](https://github.com/thalesgelinger) |
 | **OCaml** | [ocaml-toon](https://github.com/davesnx/ocaml-toon) | [@davesnx](https://github.com/davesnx) |
