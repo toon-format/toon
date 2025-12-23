@@ -31,6 +31,7 @@ Community members have created implementations in additional languages:
 |----------|------------|------------|
 | **Apex** | [ApexToon](https://github.com/Eacaw/ApexToon) | [@Eacaw](https://github.com/Eacaw) |
 | **C++** | [ctoon](https://github.com/mohammadraziei/ctoon) | [@mohammadraziei](https://github.com/mohammadraziei) |
+| **C#** | [ToonEncoder](https://github.com/Cysharp/ToonEncoder) | [@Cysharp](https://github.com/Cysharp/ToonEncoder) |
 | **Clojure** | [toon](https://github.com/vadelabs/toon) | [@vadelabs](https://github.com/vadelabs) |
 | **Crystal** | [toon-crystal](https://github.com/mamantoha/toon-crystal) | [@mamantoha](https://github.com/mamantoha) |
 | **Elixir** | [toon_ex](https://github.com/kentaro/toon_ex) | [@kentaro](https://github.com/kentaro) |
