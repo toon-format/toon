@@ -930,6 +930,7 @@ Comprehensive guides, references, and resources to help you get the most out of 
 
 - **Apex:** [ApexToon](https://github.com/Eacaw/ApexToon)
 - **C++:** [ctoon](https://github.com/mohammadraziei/ctoon)
+- **C#:** [ToonEncoder](https://github.com/Cysharp/ToonEncoder)
 - **Clojure:** [toon](https://github.com/vadelabs/toon)
 - **Crystal:** [toon-crystal](https://github.com/mamantoha/toon-crystal)
 - **Elixir:** [toon_ex](https://github.com/kentaro/toon_ex)
