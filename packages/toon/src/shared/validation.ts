@@ -1,7 +1,7 @@
 import { DEFAULT_DELIMITER, LIST_ITEM_MARKER } from '../constants'
 import { isBooleanOrNullLiteral } from './literal-utils'
 
-const NUMERIC_LIKE_PATTERN = /^-?\d+(?:\.\d+)?(?:e[+-]?\d+)?$/i
+const NUMERIC_LIKE_PATTERN = /^[+-]?(\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i
 const LEADING_ZERO_PATTERN = /^0\d+$/
 
 /**
