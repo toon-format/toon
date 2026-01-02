@@ -30,6 +30,7 @@ Community members have created implementations in additional languages:
 | Language | Repository | Maintainer |
 |----------|------------|------------|
 | **Apex** | [ApexToon](https://github.com/Eacaw/ApexToon) | [@Eacaw](https://github.com/Eacaw) |
+| **C** | [TOONc](https://github.com/UsboKirishima/TOONc) | [@UsboKirishima](https://github.com/UsboKirishima) |
 | **C++** | [ctoon](https://github.com/mohammadraziei/ctoon) | [@mohammadraziei](https://github.com/mohammadraziei) |
 | **Clojure** | [toon](https://github.com/vadelabs/toon) | [@vadelabs](https://github.com/vadelabs) |
 | **Crystal** | [toon-crystal](https://github.com/mamantoha/toon-crystal) | [@mamantoha](https://github.com/mamantoha) |
