@@ -14,7 +14,7 @@ concurrency:
 jobs:
   lint-pr-title:
     name: Lint PR title
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
 
     if: ${{ (github.event.action == 'opened' || github.event.changes.title != null) && github.actor != 'renovate[bot]' }}
 
