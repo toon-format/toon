@@ -117,8 +117,15 @@ export function isPlainObject(value: unknown): value is Record<string, unknown> 
     return false
   }
 
-  const prototype = Object.getPrototypeOf(value)
-  return prototype === null || prototype === Object.prototype
+  // Walk up the prototype chain - accept if it ends at null or Object.prototype
+  let prototype = Object.getPrototypeOf(value)
+  while (prototype !== null) {
+    if (prototype === Object.prototype) {
+      return true
+    }
+    prototype = Object.getPrototypeOf(prototype)
+  }
+  return true
 }
 
 // #endregion
