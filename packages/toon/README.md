@@ -931,6 +931,7 @@ Comprehensive guides, references, and resources to help you get the most out of 
 - **Apex:** [ApexToon](https://github.com/Eacaw/ApexToon)
 - **C:** [TOONc](https://github.com/UsboKirishima/TOONc)
 - **C++:** [ctoon](https://github.com/mohammadraziei/ctoon)
+- **C#:** [ToonEncoder](https://github.com/Cysharp/ToonEncoder)
 - **Clojure:** [toon](https://github.com/vadelabs/toon)
 - **Crystal:** [toon-crystal](https://github.com/mamantoha/toon-crystal)
 - **Database:** [ToonStore (built on Rust)](https://github.com/Kalama-Tech/toonstoredb)

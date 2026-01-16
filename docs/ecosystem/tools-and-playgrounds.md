@@ -45,6 +45,12 @@ code --install-extension vishalraut.vscode-toon
 
 Use YAML syntax highlighting as a close approximation. Most editors allow associating `.toon` files with YAML language mode.
 
+## Databases
+
+### ToonStore
+
+[ToonStore](https://github.com/Kalama-Tech/toonstoredb) - Redis-compatible embedded database (Rust) that stores data in TOON format.
+
 ## Web APIs
 
 If you're building web applications that work with TOON, you can use the TypeScript library in the browser:
