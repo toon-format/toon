@@ -933,6 +933,7 @@ Comprehensive guides, references, and resources to help you get the most out of 
 - **C++:** [ctoon](https://github.com/mohammadraziei/ctoon)
 - **Clojure:** [toon](https://github.com/vadelabs/toon)
 - **Crystal:** [toon-crystal](https://github.com/mamantoha/toon-crystal)
+- **Database:** [ToonStore (built on Rust)](https://github.com/Kalama-Tech/toonstoredb)
 - **Elixir:** [toon_ex](https://github.com/kentaro/toon_ex)
 - **Gleam:** [toon_codec](https://github.com/axelbellec/toon_codec)
 - **Go:** [gotoon](https://github.com/alpkeskin/gotoon)
@@ -945,7 +946,6 @@ Comprehensive guides, references, and resources to help you get the most out of 
 - **R**: [toon](https://github.com/laresbernardo/toon)
 - **Ruby:** [toon-ruby](https://github.com/andrepcg/toon-ruby)
 - **Kotlin:** [ktoon (using kotlinx.serialization)](https://github.com/lukelast/ktoon)
-- **Database:** [ToonStore (built on Rust)](https://github.com/Kalama-Tech/toonstoredb)
 ## Credits
 
 - Logo design by [鈴木ックス(SZKX)](https://x.com/szkx_art)
