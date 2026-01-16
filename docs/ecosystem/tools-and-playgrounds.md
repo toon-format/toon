@@ -51,6 +51,13 @@ Use YAML syntax highlighting as a close approximation. Most editors allow associ
 
 [ToonStore](https://github.com/Kalama-Tech/toonstoredb) - Redis-compatible embedded database (Rust) that stores data in TOON format.
 
+## ORMs
+
+### TORM
+
+[TORM](https://github.com/Kalama-Tech/torm) - ORM that works with the ToonStore database, with SDKs for Node.js, Python, Go, and PHP.
+
+
 ## Web APIs
 
 If you're building web applications that work with TOON, you can use the TypeScript library in the browser:
