@@ -945,7 +945,7 @@ Comprehensive guides, references, and resources to help you get the most out of 
 - **R**: [toon](https://github.com/laresbernardo/toon)
 - **Ruby:** [toon-ruby](https://github.com/andrepcg/toon-ruby)
 - **Kotlin:** [ktoon (using kotlinx.serialization)](https://github.com/lukelast/ktoon)
-
+- **Database:** [ToonStore (built on Rust)](https://github.com/Kalama-Tech/toonstoredb)
 ## Credits
 
 - Logo design by [鈴木ックス(SZKX)](https://x.com/szkx_art)
