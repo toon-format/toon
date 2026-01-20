@@ -942,7 +942,7 @@ Comprehensive guides, references, and resources to help you get the most out of 
 - **OCaml:** [ocaml-toon](https://github.com/davesnx/ocaml-toon)
 - **Perl:** [Data::TOON](https://github.com/ytnobody/p5-Data-TOON)
 - **PHP:** [toon-php](https://github.com/HelgeSverre/toon-php)
-- **Laravel Framework:** [laravel-toon](https://github.com/jobmetric/laravel-toon)
+- **Laravel Framework:** [laravel-toon](https://github.com/mischasigtermans/laravel-toon)
 - **R**: [toon](https://github.com/laresbernardo/toon)
 - **Ruby:** [toon-ruby](https://github.com/andrepcg/toon-ruby)
 - **Kotlin:** [ktoon (using kotlinx.serialization)](https://github.com/lukelast/ktoon)
