@@ -946,6 +946,7 @@ Comprehensive guides, references, and resources to help you get the most out of 
 - **R**: [toon](https://github.com/laresbernardo/toon)
 - **Ruby:** [toon-ruby](https://github.com/andrepcg/toon-ruby)
 - **Kotlin:** [ktoon (using kotlinx.serialization)](https://github.com/lukelast/ktoon)
+- **Python** [toons (implemented in rust)](https://github.com/alesanfra/toons)
 
 ## Credits
 
