@@ -934,6 +934,7 @@ Comprehensive guides, references, and resources to help you get the most out of 
 - **C#:** [ToonEncoder](https://github.com/Cysharp/ToonEncoder)
 - **Clojure:** [toon](https://github.com/vadelabs/toon)
 - **Crystal:** [toon-crystal](https://github.com/mamantoha/toon-crystal)
+- **Delphi:** [delphi-toon](https://github.com/ernestoalconada/delphi-toon)
 - **Elixir:** [toon_ex](https://github.com/kentaro/toon_ex)
 - **Gleam:** [toon_codec](https://github.com/axelbellec/toon_codec)
 - **Go:** [gotoon](https://github.com/alpkeskin/gotoon)
