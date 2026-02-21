@@ -1,0 +1,13 @@
+number: INV-2025-001
+currency: USD
+customer:
+  id: 9
+  name: Ada
+items[2]{sku,qty,unit_price,line_total}:
+  A1,2,9.99,19.98
+  B2,1,14.5,14.5
+totals:
+  subtotal: 34.48
+  tax: 6.9
+  grand_total: 41.38
+notes: Thank you for your business.
