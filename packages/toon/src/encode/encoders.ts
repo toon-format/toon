@@ -186,9 +186,9 @@ export function* encodeArrayOfArraysAsListItemsLines(
   }
 }
 
-export function encodeInlineArrayLine(values: readonly JsonPrimitive[], delimiter: string, prefix?: string): string {
+export function encodeInlineArrayLine(values: readonly JsonPrimitive[], delimiter: string, prefix?: string, quoteStrings?: boolean): string {
   const header = formatHeader(values.length, { key: prefix, delimiter })
-  const joinedValue = encodeAndJoinPrimitives(values, delimiter)
+  const joinedValue = encodeAndJoinPrimitives(values, delimiter, quoteStrings)
 
   if (values.length === 0)
     return header
