@@ -898,8 +898,9 @@ Comprehensive guides, references, and resources to help you get the most out of 
 ### Tools & Integration
 
 - [CLI](https://toonformat.dev/cli/) – Command-line tool for JSON↔TOON conversions
-- [Using TOON with LLMs](https://toonformat.dev/guide/llm-prompts) – Prompting strategies & validation
 - [Playgrounds](https://toonformat.dev/ecosystem/tools-and-playgrounds) – Interactive tools
+- [Tooner](https://github.com/chaindead/tooner) – MCP proxy that converts JSON tool responses to TOON
+- [Using TOON with LLMs](https://toonformat.dev/guide/llm-prompts) – Prompting strategies & validation
 
 ### References
 
