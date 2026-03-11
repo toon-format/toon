@@ -5,7 +5,8 @@ import { isSafeUnquoted, isValidUnquotedKey } from '../shared/validation.ts'
 
 // #region Primitive encoding
 
-export function encodePrimitive(value: JsonPrimitive, delimiter?: string): string {
+
+export function encodePrimitive(value: JsonPrimitive, delimiter?: string, quoteStrings?: boolean): string {
   if (value === null) {
     return NULL_LITERAL
   }
@@ -18,14 +19,17 @@ export function encodePrimitive(value: JsonPrimitive, delimiter?: string): strin
     return String(value)
   }
 
-  return encodeStringLiteral(value, delimiter)
+  return encodeStringLiteral(value, delimiter, quoteStrings)
 }
 
-export function encodeStringLiteral(value: string, delimiter: string = DEFAULT_DELIMITER): string {
+
+export function encodeStringLiteral(value: string, delimiter: string = DEFAULT_DELIMITER, quoteStrings?: boolean): string {
+  if (quoteStrings) {
+    return `${DOUBLE_QUOTE}${escapeString(value)}${DOUBLE_QUOTE}`
+  }
   if (isSafeUnquoted(value, delimiter)) {
     return value
   }
-
   return `${DOUBLE_QUOTE}${escapeString(value)}${DOUBLE_QUOTE}`
 }
 
@@ -45,8 +49,8 @@ export function encodeKey(key: string): string {
 
 // #region Value joining
 
-export function encodeAndJoinPrimitives(values: readonly JsonPrimitive[], delimiter: string = DEFAULT_DELIMITER): string {
-  return values.map(v => encodePrimitive(v, delimiter)).join(delimiter)
+export function encodeAndJoinPrimitives(values: readonly JsonPrimitive[], delimiter: string = DEFAULT_DELIMITER, quoteStrings?: boolean): string {
+  return values.map(v => encodePrimitive(v, delimiter, quoteStrings)).join(delimiter)
 }
 
 // #endregion
