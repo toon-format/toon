@@ -37,6 +37,7 @@ export const MODEL_RPM_LIMITS: Record<string, number | undefined> = {
   'gemini-3-flash-preview': 25,
   'gpt-5-nano': 50,
   'grok-4-1-fast-non-reasoning': 25,
+  'MiniMax-M2.5': 50,
 }
 
 /**

@@ -1,11 +1,18 @@
 import type { LanguageModelV3 } from '@ai-sdk/provider'
 import type { EvaluationResult, Question } from './types.ts'
+import process from 'node:process'
 import { anthropic } from '@ai-sdk/anthropic'
 import { google } from '@ai-sdk/google'
-import { openai } from '@ai-sdk/openai'
+import { createOpenAI, openai } from '@ai-sdk/openai'
 import { xai } from '@ai-sdk/xai'
 import { generateText } from 'ai'
 import { compareAnswers } from './normalize.ts'
+
+const minimax = createOpenAI({
+  name: 'minimax',
+  baseURL: 'https://api.minimax.io/v1',
+  apiKey: process.env.MINIMAX_API_KEY,
+})
 
 /**
  * Models used for evaluation
@@ -13,6 +20,7 @@ import { compareAnswers } from './normalize.ts'
 export const models: LanguageModelV3[] = [
   anthropic('claude-haiku-4-5-20251001'),
   google('gemini-3-flash-preview'),
+  minimax('MiniMax-M2.5'),
   openai('gpt-5-nano'),
   xai('grok-4-1-fast-non-reasoning'),
 ]
