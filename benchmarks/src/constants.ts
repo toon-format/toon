@@ -38,6 +38,8 @@ export const MODEL_RPM_LIMITS: Record<string, number | undefined> = {
   'gpt-5-nano': 50,
   'grok-4-1-fast-non-reasoning': 25,
   'MiniMax-M2.5': 50,
+  'MiniMax-M2.7-highspeed': 50,
+  'MiniMax-M2.7': 50,
 }
 
 /**

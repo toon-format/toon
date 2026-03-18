@@ -20,7 +20,7 @@ const minimax = createOpenAI({
 export const models: LanguageModelV3[] = [
   anthropic('claude-haiku-4-5-20251001'),
   google('gemini-3-flash-preview'),
-  minimax('MiniMax-M2.5'),
+  minimax('MiniMax-M2.7'),
   openai('gpt-5-nano'),
   xai('grok-4-1-fast-non-reasoning'),
 ]
