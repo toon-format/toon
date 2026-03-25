@@ -49,6 +49,7 @@ Community members have created implementations in additional languages:
 | **Ruby** | [toon-ruby](https://github.com/andrepcg/toon-ruby) | [@andrepcg](https://github.com/andrepcg) |
 | **Scala** | [toon4s](https://github.com/vim89/toon4s) | [@vim89](https://github.com/vim89) |
 | **Python** (Rust backend) | [toons](https://github.com/alesanfra/toons) | [@alesanfra](https://github.com/alesanfra) |
+| **Zig** | [toonz](https://github.com/borakilicoglu/toonz) | [@borakilicoglu](https://github.com/borakilicoglu) |
 
 ## Contributing an Implementation
 
