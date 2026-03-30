@@ -17,7 +17,8 @@ Datasets with nested or semi-uniform structures. CSV excluded as it cannot prope
    ├─ vs JSON          (−15.0%)               181,201 tokens
    ├─ vs JSON compact  (+19.9%)               128,529 tokens
    ├─ vs YAML          (−0.8%)                155,397 tokens
-   └─ vs XML           (−25.2%)               205,859 tokens
+   ├─ vs XML           (−25.2%)               205,859 tokens
+   └─ vs TOON (normalized) (+61.0%)                95,675 tokens
 
 🧩 Deeply nested configuration  ┊  Tabular: 0%
    │
@@ -25,14 +26,34 @@ Datasets with nested or semi-uniform structures. CSV excluded as it cannot prope
    ├─ vs JSON          (−31.9%)                   911 tokens
    ├─ vs JSON compact  (+11.1%)                   558 tokens
    ├─ vs YAML          (−6.3%)                    662 tokens
-   └─ vs XML           (−38.2%)                 1,003 tokens
+   ├─ vs XML           (−38.2%)                 1,003 tokens
+   └─ vs TOON (normalized) (−0.0%)                    620 tokens
+
+🛍️ Semi-uniform orders with optional discount and shipping  ┊  Tabular: 40%
+   │
+   TOON                ███████████████░░░░░    31,467 tokens
+   ├─ vs JSON          (−25.3%)                42,124 tokens
+   ├─ vs JSON compact  (+22.6%)                25,674 tokens
+   ├─ vs YAML          (+0.0%)                 31,466 tokens
+   ├─ vs XML           (−35.0%)                48,414 tokens
+   └─ vs TOON (normalized) (+81.1%)                17,375 tokens
+
+🚨 Incidents with deep optional resolution  ┊  Tabular: 30%
+   │
+   TOON                ████████████████░░░░    37,031 tokens
+   ├─ vs JSON          (−19.0%)                45,721 tokens
+   ├─ vs JSON compact  (+12.6%)                32,893 tokens
+   ├─ vs YAML          (−0.1%)                 37,051 tokens
+   ├─ vs XML           (−29.3%)                52,414 tokens
+   └─ vs TOON (normalized) (+43.3%)                25,846 tokens
 
 ──────────────────────────────────── Total ────────────────────────────────────
-   TOON                ████████████████░░░░   227,830 tokens
-   ├─ vs JSON          (−21.9%)               291,711 tokens
-   ├─ vs JSON compact  (+14.7%)               198,546 tokens
-   ├─ vs YAML          (−5.7%)                241,474 tokens
-   └─ vs XML           (−31.0%)               330,206 tokens
+   TOON                ████████████████░░░░   296,328 tokens
+   ├─ vs JSON          (−21.9%)               379,556 tokens
+   ├─ vs JSON compact  (+15.3%)               257,113 tokens
+   ├─ vs YAML          (−4.4%)                309,991 tokens
+   ├─ vs XML           (−31.3%)               431,034 tokens
+   └─ vs TOON (normalized) (+112.4%)              139,516 tokens
 ```
 
 #### Flat-Only Track

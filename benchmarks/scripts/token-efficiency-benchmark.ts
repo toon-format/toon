@@ -78,7 +78,7 @@ function calculateTotalMetrics(datasets: BenchmarkResult[], formatNames: readonl
     return { name: formatName, tokens: totalTokens, savingsPercent }
   })
 
-  return { totalToonTokens, totals }
+  return { totalToonTokens, totals: totals.filter(t => t.tokens > 0) }
 }
 
 /**
@@ -147,13 +147,16 @@ function generateDatasetChart(result: BenchmarkResult): string {
   const line2 = `   │`
   const line3 = `   TOON                ${bar}   ${toonStr.padStart(TOKEN_PADDING)} tokens`
 
-  const comparisonLines = COMPARISON_FORMAT_ORDER.map((formatName, index, array) => {
-    const format = formats.find(f => f.name === formatName)
-    if (!format)
-      return undefined
-
-    return `   ${formatComparisonLine(format, index === array.length - 1)}`
-  }).filter(Boolean)
+  const comparisonLines = COMPARISON_FORMAT_ORDER
+    .map((formatName) => {
+      const format = formats.find(f => f.name === formatName)
+      if (!format) return undefined
+      return format
+    })
+    .filter((f): f is FormatMetrics => f !== undefined)
+    .map((format, index, arr) =>
+      `   ${formatComparisonLine(format, index === arr.length - 1)}`,
+    )
 
   return [line1, line2, line3, ...comparisonLines].join('\n')
 }
@@ -241,13 +244,16 @@ const flatCharts = flatOnlyDatasets
     const toonLine = `   TOON                ${toonBar}   ${toonStr.padStart(TOKEN_PADDING)} tokens   ${toonVsCSV}`
 
     // Other format comparisons (vs TOON)
-    const comparisonLines = COMPARISON_FORMAT_ORDER.map((formatName, index, array) => {
-      const format = result.formats.find(f => f.name === formatName)
-      if (!format)
-        return undefined
-
-      return `   ${formatComparisonLine(format, index === array.length - 1)}`
-    }).filter(Boolean)
+    const comparisonLines = COMPARISON_FORMAT_ORDER
+      .map((formatName) => {
+        const format = result.formats.find(f => f.name === formatName)
+        if (!format) return undefined
+        return format
+      })
+      .filter((f): f is FormatMetrics => f !== undefined)
+      .map((format, index, arr) =>
+        `   ${formatComparisonLine(format, index === arr.length - 1)}`,
+      )
 
     return [line1, line2, line3, toonLine, ...comparisonLines].join('\n')
   })
