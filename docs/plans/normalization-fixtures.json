@@ -1,0 +1,189 @@
+{
+  "description": "Semi-uniform normalization test fixtures — before/after pairs at various depth levels",
+
+  "case1_single_extras_1depth": {
+    "description": "1-depth: EventLog pattern — ~50% have optional error object",
+    "before": {
+      "logs": [
+        { "timestamp": "2025-03-15T10:00:00Z", "level": "info", "endpoint": "/api/users", "statusCode": 200, "responseTime": 45, "userId": 1001 },
+        { "timestamp": "2025-03-15T10:01:00Z", "level": "error", "endpoint": "/api/orders", "statusCode": 500, "responseTime": 3200, "userId": 1002, "error": { "message": "Database connection timeout", "stack": "Error: timeout\n  at connect\n  at query", "retryable": true } },
+        { "timestamp": "2025-03-15T10:02:00Z", "level": "info", "endpoint": "/api/products", "statusCode": 200, "responseTime": 120, "userId": 1003 },
+        { "timestamp": "2025-03-15T10:03:00Z", "level": "warn", "endpoint": "/api/auth", "statusCode": 429, "responseTime": 5000, "userId": 1004, "error": { "message": "Rate limit exceeded", "stack": "Error: rate limit\n  at check\n  at middleware", "retryable": true } },
+        { "timestamp": "2025-03-15T10:04:00Z", "level": "info", "endpoint": "/api/users", "statusCode": 200, "responseTime": 88, "userId": 1005 },
+        { "timestamp": "2025-03-15T10:05:00Z", "level": "error", "endpoint": "/api/payments", "statusCode": 502, "responseTime": 4100, "userId": 1006, "error": { "message": "Gateway timeout", "stack": "Error: ETIMEDOUT\n  at request\n  at handler", "retryable": false } }
+      ]
+    },
+    "after": {
+      "logs": [
+        { "timestamp": "2025-03-15T10:00:00Z", "level": "info", "endpoint": "/api/users", "statusCode": 200, "responseTime": 45, "userId": 1001 },
+        { "timestamp": "2025-03-15T10:01:00Z", "level": "error", "endpoint": "/api/orders", "statusCode": 500, "responseTime": 3200, "userId": 1002 },
+        { "timestamp": "2025-03-15T10:02:00Z", "level": "info", "endpoint": "/api/products", "statusCode": 200, "responseTime": 120, "userId": 1003 },
+        { "timestamp": "2025-03-15T10:03:00Z", "level": "warn", "endpoint": "/api/auth", "statusCode": 429, "responseTime": 5000, "userId": 1004 },
+        { "timestamp": "2025-03-15T10:04:00Z", "level": "info", "endpoint": "/api/users", "statusCode": 200, "responseTime": 88, "userId": 1005 },
+        { "timestamp": "2025-03-15T10:05:00Z", "level": "error", "endpoint": "/api/payments", "statusCode": 502, "responseTime": 4100, "userId": 1006 }
+      ],
+      "logs.error": [
+        { "idx": 1, "message": "Database connection timeout", "stack": "Error: timeout\n  at connect\n  at query", "retryable": true },
+        { "idx": 3, "message": "Rate limit exceeded", "stack": "Error: rate limit\n  at check\n  at middleware", "retryable": true },
+        { "idx": 5, "message": "Gateway timeout", "stack": "Error: ETIMEDOUT\n  at request\n  at handler", "retryable": false }
+      ]
+    }
+  },
+
+  "case2_multi_extras_2to3_depth": {
+    "description": "2-3 depth: Orders with independent optional discount (~33%) and shipping (~66%) — multi-extras",
+    "before": {
+      "orders": [
+        { "orderId": "ORD-001", "total": 150.00, "status": "delivered", "orderDate": "2025-03-01" },
+        { "orderId": "ORD-002", "total": 200.00, "status": "shipped", "orderDate": "2025-03-02", "discount": { "code": "SAVE20", "amount": 40.00 }, "shipping": { "carrier": "UPS", "tracking": "UP456", "address": { "city": "Seoul", "zip": "06100", "country": "KR" } } },
+        { "orderId": "ORD-003", "total": 80.00, "status": "processing", "orderDate": "2025-03-03", "shipping": { "carrier": "FedEx", "tracking": "FX789", "address": { "city": "Busan", "zip": "48058", "country": "KR" } } },
+        { "orderId": "ORD-004", "total": 300.00, "status": "delivered", "orderDate": "2025-03-04", "discount": { "code": "VIP10", "amount": 30.00 }, "shipping": { "carrier": "DHL", "tracking": "DH012", "address": { "city": "Incheon", "zip": "21554", "country": "KR" } } },
+        { "orderId": "ORD-005", "total": 95.00, "status": "pending", "orderDate": "2025-03-05", "shipping": { "carrier": "CJ", "tracking": "CJ345", "address": { "city": "Daegu", "zip": "41585", "country": "KR" } } },
+        { "orderId": "ORD-006", "total": 420.00, "status": "shipped", "orderDate": "2025-03-06", "shipping": { "carrier": "Hanjin", "tracking": "HJ678", "address": { "city": "Gwangju", "zip": "61477", "country": "KR" } } }
+      ]
+    },
+    "after": {
+      "orders": [
+        { "orderId": "ORD-001", "total": 150.00, "status": "delivered", "orderDate": "2025-03-01" },
+        { "orderId": "ORD-002", "total": 200.00, "status": "shipped", "orderDate": "2025-03-02" },
+        { "orderId": "ORD-003", "total": 80.00, "status": "processing", "orderDate": "2025-03-03" },
+        { "orderId": "ORD-004", "total": 300.00, "status": "delivered", "orderDate": "2025-03-04" },
+        { "orderId": "ORD-005", "total": 95.00, "status": "pending", "orderDate": "2025-03-05" },
+        { "orderId": "ORD-006", "total": 420.00, "status": "shipped", "orderDate": "2025-03-06" }
+      ],
+      "orders.discount": [
+        { "idx": 1, "code": "SAVE20", "amount": 40.00 },
+        { "idx": 3, "code": "VIP10", "amount": 30.00 }
+      ],
+      "orders.shipping": [
+        { "idx": 1, "carrier": "UPS", "tracking": "UP456", "address.city": "Seoul", "address.zip": "06100", "address.country": "KR" },
+        { "idx": 2, "carrier": "FedEx", "tracking": "FX789", "address.city": "Busan", "address.zip": "48058", "address.country": "KR" },
+        { "idx": 3, "carrier": "DHL", "tracking": "DH012", "address.city": "Incheon", "address.zip": "21554", "address.country": "KR" },
+        { "idx": 4, "carrier": "CJ", "tracking": "CJ345", "address.city": "Daegu", "address.zip": "41585", "address.country": "KR" },
+        { "idx": 5, "carrier": "Hanjin", "tracking": "HJ678", "address.city": "Gwangju", "address.zip": "61477", "address.country": "KR" }
+      ]
+    },
+    "notes": {
+      "discount": "2/6 = 33% — threshold(20%) 이상이고 순이익 양수 → 분리",
+      "shipping": "5/6 = 83% — threshold 이상이고 순이익 양수 → 분리",
+      "shipping_flatten": "address.city, address.zip, address.country로 2-depth flatten"
+    }
+  },
+
+  "case3_deep_extras_4plus_depth": {
+    "description": "4+ depth: Incidents with deep optional resolution.timeline.escalation",
+    "before": {
+      "incidents": [
+        { "id": "INC-001", "title": "Login page 500 error", "severity": "critical", "createdAt": "2025-03-15T08:00:00Z" },
+        { "id": "INC-002", "title": "Slow dashboard load", "severity": "major", "createdAt": "2025-03-15T09:00:00Z", "resolution": { "assignee": "alice@example.com", "timeline": { "startedAt": "2025-03-15T09:30:00Z", "resolvedAt": "2025-03-15T11:00:00Z", "escalation": { "level": 2, "approvedBy": "bob@example.com", "notes": "Required DB team involvement" } } } },
+        { "id": "INC-003", "title": "Payment timeout", "severity": "critical", "createdAt": "2025-03-15T10:00:00Z", "resolution": { "assignee": "charlie@example.com", "timeline": { "startedAt": "2025-03-15T10:15:00Z", "resolvedAt": "2025-03-15T12:00:00Z" } } },
+        { "id": "INC-004", "title": "CSS broken on mobile", "severity": "minor", "createdAt": "2025-03-15T11:00:00Z" },
+        { "id": "INC-005", "title": "API rate limit hit", "severity": "major", "createdAt": "2025-03-15T12:00:00Z", "resolution": { "assignee": "diana@example.com", "timeline": { "startedAt": "2025-03-15T12:30:00Z", "resolvedAt": "2025-03-15T14:00:00Z", "escalation": { "level": 3, "approvedBy": "eve@example.com", "notes": "Infra scaling required" } } } }
+      ]
+    },
+    "after": {
+      "incidents": [
+        { "id": "INC-001", "title": "Login page 500 error", "severity": "critical", "createdAt": "2025-03-15T08:00:00Z" },
+        { "id": "INC-002", "title": "Slow dashboard load", "severity": "major", "createdAt": "2025-03-15T09:00:00Z" },
+        { "id": "INC-003", "title": "Payment timeout", "severity": "critical", "createdAt": "2025-03-15T10:00:00Z" },
+        { "id": "INC-004", "title": "CSS broken on mobile", "severity": "minor", "createdAt": "2025-03-15T11:00:00Z" },
+        { "id": "INC-005", "title": "API rate limit hit", "severity": "major", "createdAt": "2025-03-15T12:00:00Z" }
+      ],
+      "incidents.resolution": [
+        { "idx": 1, "assignee": "alice@example.com", "timeline.startedAt": "2025-03-15T09:30:00Z", "timeline.resolvedAt": "2025-03-15T11:00:00Z", "timeline.escalation.level": 2, "timeline.escalation.approvedBy": "bob@example.com", "timeline.escalation.notes": "Required DB team involvement" },
+        { "idx": 2, "assignee": "charlie@example.com", "timeline.startedAt": "2025-03-15T10:15:00Z", "timeline.resolvedAt": "2025-03-15T12:00:00Z", "timeline.escalation.level": null, "timeline.escalation.approvedBy": null, "timeline.escalation.notes": null },
+        { "idx": 4, "assignee": "diana@example.com", "timeline.startedAt": "2025-03-15T12:30:00Z", "timeline.resolvedAt": "2025-03-15T14:00:00Z", "timeline.escalation.level": 3, "timeline.escalation.approvedBy": "eve@example.com", "timeline.escalation.notes": "Infra scaling required" }
+      ]
+    },
+    "notes": {
+      "resolution": "3/5 = 60% — threshold 이상, 순이익 양수 → 분리",
+      "flatten_depth": "resolution → assignee (1), timeline.startedAt (2), timeline.escalation.level (3) — maxFlattenDepth=3 이내",
+      "null_padding": "escalation이 없는 INC-003은 timeline.escalation.* 필드가 null로 패딩"
+    }
+  },
+
+  "case4_beyond_max_depth": {
+    "description": "maxFlattenDepth 초과 시 JSON string 직렬화 fallback",
+    "before": {
+      "tasks": [
+        { "id": "T-001", "name": "Deploy v2", "status": "done" },
+        { "id": "T-002", "name": "Fix auth bug", "status": "in-progress", "metadata": { "context": { "environment": { "region": "ap-northeast-2", "cluster": { "name": "prod-1", "nodes": 5 } }, "requester": "ops-team" }, "tags": ["urgent", "security"] } },
+        { "id": "T-003", "name": "Update docs", "status": "todo" },
+        { "id": "T-004", "name": "Scale DB", "status": "in-progress", "metadata": { "context": { "environment": { "region": "us-east-1", "cluster": { "name": "prod-2", "nodes": 12 } }, "requester": "infra-team" }, "tags": ["infra", "scaling"] } }
+      ]
+    },
+    "after_maxDepth3": {
+      "tasks": [
+        { "id": "T-001", "name": "Deploy v2", "status": "done" },
+        { "id": "T-002", "name": "Fix auth bug", "status": "in-progress" },
+        { "id": "T-003", "name": "Update docs", "status": "todo" },
+        { "id": "T-004", "name": "Scale DB", "status": "in-progress" }
+      ],
+      "tasks.metadata": [
+        { "idx": 1, "context.environment.region": "ap-northeast-2", "context.environment.cluster": "{\"name\":\"prod-1\",\"nodes\":5}", "context.requester": "ops-team", "tags": "[\"urgent\",\"security\"]" },
+        { "idx": 3, "context.environment.region": "us-east-1", "context.environment.cluster": "{\"name\":\"prod-2\",\"nodes\":12}", "context.requester": "infra-team", "tags": "[\"infra\",\"scaling\"]" }
+      ]
+    },
+    "notes": {
+      "cluster_serialized": "context.environment.cluster는 depth 4 → maxFlattenDepth=3 초과 → JSON string으로 직렬화",
+      "tags_serialized": "tags는 배열 → JSON string으로 직렬화",
+      "region_flattened": "context.environment.region은 depth 3 → 정상 flatten"
+    }
+  },
+
+  "case5_threshold_skip": {
+    "description": "extras 비율이 threshold(20%) 미만이면 분리하지 않음",
+    "before": {
+      "users": [
+        { "id": 1, "name": "Alice", "email": "alice@example.com" },
+        { "id": 2, "name": "Bob", "email": "bob@example.com" },
+        { "id": 3, "name": "Charlie", "email": "charlie@example.com" },
+        { "id": 4, "name": "Diana", "email": "diana@example.com" },
+        { "id": 5, "name": "Eve", "email": "eve@example.com" },
+        { "id": 6, "name": "Frank", "email": "frank@example.com" },
+        { "id": 7, "name": "Grace", "email": "grace@example.com" },
+        { "id": 8, "name": "Hank", "email": "hank@example.com" },
+        { "id": 9, "name": "Ivy", "email": "ivy@example.com" },
+        { "id": 10, "name": "Jack", "email": "jack@example.com", "bio": { "summary": "Engineer", "website": "https://jack.dev" } }
+      ]
+    },
+    "after": {
+      "users": [
+        { "id": 1, "name": "Alice", "email": "alice@example.com" },
+        { "id": 2, "name": "Bob", "email": "bob@example.com" },
+        { "id": 3, "name": "Charlie", "email": "charlie@example.com" },
+        { "id": 4, "name": "Diana", "email": "diana@example.com" },
+        { "id": 5, "name": "Eve", "email": "eve@example.com" },
+        { "id": 6, "name": "Frank", "email": "frank@example.com" },
+        { "id": 7, "name": "Grace", "email": "grace@example.com" },
+        { "id": 8, "name": "Hank", "email": "hank@example.com" },
+        { "id": 9, "name": "Ivy", "email": "ivy@example.com" },
+        { "id": 10, "name": "Jack", "email": "jack@example.com" }
+      ]
+    },
+    "notes": {
+      "bio_skipped": "bio는 1/10 = 10% — threshold(20%) 미만 → 분리하지 않고 base에서 필드 제거"
+    }
+  },
+
+  "case6_already_uniform": {
+    "description": "이미 uniform인 배열은 변경 없음 (passthrough)",
+    "before": {
+      "employees": [
+        { "id": 1, "name": "Alice", "department": "Engineering", "salary": 95000 },
+        { "id": 2, "name": "Bob", "department": "Sales", "salary": 72000 },
+        { "id": 3, "name": "Charlie", "department": "Marketing", "salary": 68000 }
+      ]
+    },
+    "after": {
+      "employees": [
+        { "id": 1, "name": "Alice", "department": "Engineering", "salary": 95000 },
+        { "id": 2, "name": "Bob", "department": "Sales", "salary": 72000 },
+        { "id": 3, "name": "Charlie", "department": "Marketing", "salary": 68000 }
+      ]
+    },
+    "notes": {
+      "no_extras": "모든 객체가 동일한 필드 → extras 없음 → 변경 없이 그대로 반환"
+    }
+  }
+}
