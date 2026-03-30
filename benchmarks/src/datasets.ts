@@ -73,6 +73,36 @@ export interface Repository {
 }
 
 /**
+ * Semi-uniform order structure with optional discount and shipping
+ */
+export interface SemiUniformOrder {
+  orderId: string
+  total: number
+  status: string
+  orderDate: string
+  discount?: { code: string, amount: number }
+  shipping?: { carrier: string, tracking: string, address: { city: string, zip: string, country: string } }
+}
+
+/**
+ * Incident structure with deep optional resolution
+ */
+export interface Incident {
+  id: string
+  title: string
+  severity: string
+  createdAt: string
+  resolution?: {
+    assignee: string
+    timeline: {
+      startedAt: string
+      resolvedAt: string
+      escalation?: { level: number, approvedBy: string, notes: string }
+    }
+  }
+}
+
+/**
  * Event log structure for semi-uniform dataset
  */
 export interface EventLog {
@@ -699,6 +729,86 @@ export const ACCURACY_DATASETS: Dataset[] = [
 ]
 
 /**
+ * Generate semi-uniform orders (~30% discount, ~60% shipping)
+ */
+const ORDER_STATUSES_SEMI = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'] as const
+const CARRIERS = ['UPS', 'FedEx', 'DHL', 'CJ', 'Hanjin'] as const
+const CITIES = ['Seoul', 'Busan', 'Incheon', 'Daegu', 'Gwangju', 'Daejeon'] as const
+const DISCOUNT_CODES = ['SAVE20', 'VIP10', 'WELCOME', 'FLASH30', 'LOYALTY15'] as const
+
+export function generateSemiUniformOrders(count: number): { orders: SemiUniformOrder[] } {
+  return {
+    orders: Array.from({ length: count }, (_, i): SemiUniformOrder => {
+      const order: SemiUniformOrder = {
+        orderId: `ORD-${String(i + 1).padStart(4, '0')}`,
+        total: Number(faker.commerce.price({ min: 50, max: 500 })),
+        status: ORDER_STATUSES_SEMI[i % ORDER_STATUSES_SEMI.length]!,
+        orderDate: faker.date.recent({ days: 90 }).toISOString().split('T')[0]!,
+      }
+      if (faker.datatype.boolean(0.3)) {
+        order.discount = {
+          code: faker.helpers.arrayElement([...DISCOUNT_CODES]),
+          amount: Number(faker.commerce.price({ min: 5, max: 50 })),
+        }
+      }
+      if (faker.datatype.boolean(0.6)) {
+        order.shipping = {
+          carrier: faker.helpers.arrayElement([...CARRIERS]),
+          tracking: faker.string.alphanumeric({ length: 8, casing: 'upper' }),
+          address: {
+            city: faker.helpers.arrayElement([...CITIES]),
+            zip: faker.location.zipCode('#####'),
+            country: 'KR',
+          },
+        }
+      }
+      return order
+    }),
+  }
+}
+
+/**
+ * Generate incidents with deep optional resolution (~40%)
+ */
+export function generateIncidents(count: number): { incidents: Incident[] } {
+  const severities = ['critical', 'major', 'minor', 'trivial'] as const
+  const titles = [
+    'Login page 500 error', 'Slow dashboard load', 'Payment timeout',
+    'CSS broken on mobile', 'API rate limit hit', 'Search index stale',
+    'Email delivery failure', 'Cache invalidation bug',
+  ] as const
+
+  return {
+    incidents: Array.from({ length: count }, (_, i): Incident => {
+      const incident: Incident = {
+        id: `INC-${String(i + 1).padStart(4, '0')}`,
+        title: faker.helpers.arrayElement([...titles]),
+        severity: faker.helpers.arrayElement([...severities]),
+        createdAt: faker.date.recent({ days: 30 }).toISOString(),
+      }
+      if (faker.datatype.boolean(0.4)) {
+        const hasEscalation = faker.datatype.boolean(0.5)
+        incident.resolution = {
+          assignee: faker.internet.email().toLowerCase(),
+          timeline: {
+            startedAt: faker.date.recent({ days: 7 }).toISOString(),
+            resolvedAt: faker.date.recent({ days: 3 }).toISOString(),
+            ...(hasEscalation && {
+              escalation: {
+                level: faker.number.int({ min: 1, max: 4 }),
+                approvedBy: faker.internet.email().toLowerCase(),
+                notes: faker.lorem.sentence(),
+              },
+            }),
+          },
+        }
+      }
+      return incident
+    }),
+  }
+}
+
+/**
  * Datasets for token efficiency benchmarks (larger sizes to amplify token differences)
  */
 export const TOKEN_EFFICIENCY_DATASETS: Dataset[] = [
@@ -750,4 +860,26 @@ export const TOKEN_EFFICIENCY_DATASETS: Dataset[] = [
   },
   // Nested config: 1 config (same as accuracy)
   nestedConfigDataset,
+  // Semi-uniform orders: 500 orders (~30% discount, ~60% shipping)
+  {
+    name: 'semi-uniform-orders',
+    description: 'Semi-uniform orders with optional discount and shipping',
+    data: generateSemiUniformOrders(500),
+    metadata: {
+      supportsCSV: false,
+      structureClass: 'semi-uniform',
+      tabularEligibility: 40,
+    },
+  },
+  // Deep incidents: 500 incidents (~40% with deep resolution)
+  {
+    name: 'deep-incidents',
+    description: 'Incidents with deep optional resolution',
+    data: generateIncidents(500),
+    metadata: {
+      supportsCSV: false,
+      structureClass: 'deep',
+      tabularEligibility: 30,
+    },
+  },
 ]
