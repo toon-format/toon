@@ -2,7 +2,7 @@ import type { Dataset } from './types.ts'
 import { stringify as stringifyCSV } from 'csv-stringify/sync'
 import { XMLBuilder } from 'fast-xml-parser'
 import { stringify as stringifyYAML } from 'yaml'
-import { encode as encodeToon } from '../../packages/toon/src/index.ts'
+import { encode as encodeToon, normalizeForToon } from '../../packages/toon/src/index.ts'
 
 /**
  * Format converters registry
@@ -16,6 +16,7 @@ export const formatters: Record<string, (data: unknown) => string> = {
   'json-pretty': data => JSON.stringify(data, undefined, 2),
   'json-compact': data => JSON.stringify(data),
   'toon': data => encodeToon(data),
+  'toon-normalized': data => encodeToon(normalizeForToon(data as Record<string, unknown>)),
   'csv': data => toCSV(data),
   'xml': data => toXML(data),
   'yaml': data => stringifyYAML(data),

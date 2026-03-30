@@ -32,7 +32,7 @@ const DATASET_ICONS: Record<string, string> = {
   'deep-incidents': '🚨',
 }
 
-const COMPARISON_FORMAT_ORDER = ['json-pretty', 'json-compact', 'yaml', 'xml'] as const
+const COMPARISON_FORMAT_ORDER = ['json-pretty', 'json-compact', 'yaml', 'xml', 'toon-normalized'] as const
 
 const PROGRESS_BAR_WIDTH = 20
 const TOKEN_PADDING = 7
@@ -169,6 +169,10 @@ for (const dataset of TOKEN_EFFICIENCY_DATASETS) {
   for (const [formatName, formatter] of Object.entries(formatters)) {
     // Skip CSV for datasets that don't support it
     if (formatName === 'csv' && !supportsCSV(dataset))
+      continue
+
+    // Skip toon-normalized for datasets that aren't semi-uniform or deep
+    if (formatName === 'toon-normalized' && dataset.metadata.structureClass !== 'semi-uniform' && dataset.metadata.structureClass !== 'deep')
       continue
 
     const formattedData = formatter(dataset.data)

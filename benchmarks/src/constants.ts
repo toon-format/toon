@@ -46,6 +46,7 @@ export const FORMATTER_DISPLAY_NAMES: Record<string, string> = {
   'json-pretty': 'JSON',
   'json-compact': 'JSON compact',
   'toon': 'TOON',
+  'toon-normalized': 'TOON (normalized)',
   'csv': 'CSV',
   'xml': 'XML',
   'yaml': 'YAML',
