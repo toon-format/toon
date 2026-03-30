@@ -43,3 +43,151 @@ incidents[300]{incidentId,title,severity,status,reporter,createdAt}:
   INC-0019,Tener mollitia cursim tam.,P4,open,Ian_Rutherford42@gmail.com,"2026-03-08T10:16:47.041Z"
 ...
 ```
+
+
+### Sample Data (5 rows)
+
+<details>
+<summary><strong>JSON (source)</strong></summary>
+
+```json
+{
+  "incidents": [
+    {
+      "incidentId": "INC-0001",
+      "title": "Virga synagoga patruus armarium armarium.",
+      "severity": "P1",
+      "status": "closed",
+      "reporter": "Warren.Deckow@hotmail.com",
+      "createdAt": "2026-02-23T23:23:15.872Z"
+    },
+    {
+      "incidentId": "INC-0002",
+      "title": "Perspiciatis apud claro copiose defleo.",
+      "severity": "P4",
+      "status": "open",
+      "reporter": "Lester_White80@hotmail.com",
+      "createdAt": "2026-02-03T22:02:05.468Z",
+      "resolution": {
+        "assignee": "Kathleen_Gerlach@yahoo.com",
+        "rootCause": "memory_leak",
+        "timeline": {
+          "acknowledgedAt": "2026-03-05T14:28:55.891Z",
+          "resolvedAt": "2026-03-29T14:26:14.035Z"
+        }
+      }
+    },
+    {
+      "incidentId": "INC-0003",
+      "title": "Vigor varius patrocinor verus alienus autus adipisci.",
+      "severity": "P2",
+      "status": "investigating",
+      "reporter": "Ed98@gmail.com",
+      "createdAt": "2026-02-09T23:32:15.221Z"
+    },
+    {
+      "incidentId": "INC-0004",
+      "title": "Tot suffragium suspendo tepidus.",
+      "severity": "P1",
+      "status": "investigating",
+      "reporter": "Erwin63@gmail.com",
+      "createdAt": "2026-02-26T09:22:35.027Z",
+      "resolution": {
+        "assignee": "Kelli.Ledner2@gmail.com",
+        "rootCause": "config_error",
+        "timeline": {
+          "acknowledgedAt": "2026-03-19T03:36:08.477Z",
+          "resolvedAt": "2026-03-19T18:33:18.364Z",
+          "escalation": {
+            "level": 3,
+            "approvedBy": "Harry16@hotmail.com",
+            "reason": "Required infrastructure team"
+          }
+        }
+      }
+    },
+    {
+      "incidentId": "INC-0005",
+      "title": "Recusandae ut thymbra audentia vapulus fugit timor vel.",
+      "severity": "P2",
+      "status": "open",
+      "reporter": "Sabrina.Johnson@gmail.com",
+      "createdAt": "2026-03-26T15:10:36.290Z"
+    }
+  ]
+}
+```
+
+</details>
+
+<details>
+<summary><strong>TOON (before)</strong></summary>
+
+```
+incidents[5]:
+  - incidentId: INC-0001
+    title: Virga synagoga patruus armarium armarium.
+    severity: P1
+    status: closed
+    reporter: Warren.Deckow@hotmail.com
+    createdAt: "2026-02-23T23:23:15.872Z"
+  - incidentId: INC-0002
+    title: Perspiciatis apud claro copiose defleo.
+    severity: P4
+    status: open
+    reporter: Lester_White80@hotmail.com
+    createdAt: "2026-02-03T22:02:05.468Z"
+    resolution:
+      assignee: Kathleen_Gerlach@yahoo.com
+      rootCause: memory_leak
+      timeline:
+        acknowledgedAt: "2026-03-05T14:28:55.891Z"
+        resolvedAt: "2026-03-29T14:26:14.035Z"
+  - incidentId: INC-0003
+    title: Vigor varius patrocinor verus alienus autus adipisci.
+    severity: P2
+    status: investigating
+    reporter: Ed98@gmail.com
+    createdAt: "2026-02-09T23:32:15.221Z"
+  - incidentId: INC-0004
+    title: Tot suffragium suspendo tepidus.
+    severity: P1
+    status: investigating
+    reporter: Erwin63@gmail.com
+    createdAt: "2026-02-26T09:22:35.027Z"
+    resolution:
+      assignee: Kelli.Ledner2@gmail.com
+      rootCause: config_error
+      timeline:
+        acknowledgedAt: "2026-03-19T03:36:08.477Z"
+        resolvedAt: "2026-03-19T18:33:18.364Z"
+        escalation:
+          level: 3
+          approvedBy: Harry16@hotmail.com
+          reason: Required infrastructure team
+  - incidentId: INC-0005
+    title: Recusandae ut thymbra audentia vapulus fugit timor vel.
+    severity: P2
+    status: open
+    reporter: Sabrina.Johnson@gmail.com
+    createdAt: "2026-03-26T15:10:36.290Z"
+```
+
+</details>
+
+<details>
+<summary><strong>TOON normalized (after)</strong></summary>
+
+```
+incidents[5]{incidentId,title,severity,status,reporter,createdAt}:
+  INC-0001,Virga synagoga patruus armarium armarium.,P1,closed,Warren.Deckow@hotmail.com,"2026-02-23T23:23:15.872Z"
+  INC-0002,Perspiciatis apud claro copiose defleo.,P4,open,Lester_White80@hotmail.com,"2026-02-03T22:02:05.468Z"
+  INC-0003,Vigor varius patrocinor verus alienus autus adipisci.,P2,investigating,Ed98@gmail.com,"2026-02-09T23:32:15.221Z"
+  INC-0004,Tot suffragium suspendo tepidus.,P1,investigating,Erwin63@gmail.com,"2026-02-26T09:22:35.027Z"
+  INC-0005,Recusandae ut thymbra audentia vapulus fugit timor vel.,P2,open,Sabrina.Johnson@gmail.com,"2026-03-26T15:10:36.290Z"
+incidents.resolution[2]{idx,assignee,rootCause,timeline.acknowledgedAt,timeline.resolvedAt,timeline.escalation.level,timeline.escalation.approvedBy,timeline.escalation.reason}:
+  1,Kathleen_Gerlach@yahoo.com,memory_leak,"2026-03-05T14:28:55.891Z","2026-03-29T14:26:14.035Z",null,null,null
+  3,Kelli.Ledner2@gmail.com,config_error,"2026-03-19T03:36:08.477Z","2026-03-19T18:33:18.364Z",3,Harry16@hotmail.com,Required infrastructure team
+```
+
+</details>

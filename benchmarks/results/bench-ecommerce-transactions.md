@@ -44,3 +44,190 @@ transactions[500]{txId,userId,amount,currency,status,createdAt}:
   TX-00019,5658,581.52,KRW,failed,2026-03-02
 ...
 ```
+
+
+### Sample Data (5 rows)
+
+<details>
+<summary><strong>JSON (source)</strong></summary>
+
+```json
+{
+  "transactions": [
+    {
+      "txId": "TX-00001",
+      "userId": 4370,
+      "amount": 950.26,
+      "currency": "KRW",
+      "status": "refunded",
+      "createdAt": "2026-03-04"
+    },
+    {
+      "txId": "TX-00002",
+      "userId": 2403,
+      "amount": 67.44,
+      "currency": "JPY",
+      "status": "refunded",
+      "createdAt": "2026-03-21",
+      "shipping": {
+        "carrier": "FedEx",
+        "tracking": "YPDBBIWQIB8I",
+        "address": {
+          "city": "South Ozella",
+          "state": "GA",
+          "zip": "50610-9983",
+          "country": "US"
+        }
+      }
+    },
+    {
+      "txId": "TX-00003",
+      "userId": 7158,
+      "amount": 445.31,
+      "currency": "USD",
+      "status": "pending",
+      "createdAt": "2026-03-01",
+      "discount": {
+        "code": "SAVE10",
+        "amount": 15,
+        "type": "fixed"
+      }
+    },
+    {
+      "txId": "TX-00004",
+      "userId": 9183,
+      "amount": 265.93,
+      "currency": "KRW",
+      "status": "pending",
+      "createdAt": "2026-03-15",
+      "shipping": {
+        "carrier": "UPS",
+        "tracking": "BYMWTBV5C2KO",
+        "address": {
+          "city": "Port Fletcher",
+          "state": "IA",
+          "zip": "18097-1087",
+          "country": "JP"
+        }
+      },
+      "discount": {
+        "code": "VIP20",
+        "amount": 20,
+        "type": "percentage"
+      }
+    },
+    {
+      "txId": "TX-00005",
+      "userId": 7941,
+      "amount": 83.23,
+      "currency": "EUR",
+      "status": "completed",
+      "createdAt": "2026-03-25",
+      "shipping": {
+        "carrier": "UPS",
+        "tracking": "K3JKJDTT7ILY",
+        "address": {
+          "city": "Kundestad",
+          "state": "MI",
+          "zip": "10635",
+          "country": "JP"
+        }
+      }
+    }
+  ]
+}
+```
+
+</details>
+
+<details>
+<summary><strong>TOON (before)</strong></summary>
+
+```
+transactions[5]:
+  - txId: TX-00001
+    userId: 4370
+    amount: 950.26
+    currency: KRW
+    status: refunded
+    createdAt: 2026-03-04
+  - txId: TX-00002
+    userId: 2403
+    amount: 67.44
+    currency: JPY
+    status: refunded
+    createdAt: 2026-03-21
+    shipping:
+      carrier: FedEx
+      tracking: YPDBBIWQIB8I
+      address:
+        city: South Ozella
+        state: GA
+        zip: 50610-9983
+        country: US
+  - txId: TX-00003
+    userId: 7158
+    amount: 445.31
+    currency: USD
+    status: pending
+    createdAt: 2026-03-01
+    discount:
+      code: SAVE10
+      amount: 15
+      type: fixed
+  - txId: TX-00004
+    userId: 9183
+    amount: 265.93
+    currency: KRW
+    status: pending
+    createdAt: 2026-03-15
+    shipping:
+      carrier: UPS
+      tracking: BYMWTBV5C2KO
+      address:
+        city: Port Fletcher
+        state: IA
+        zip: 18097-1087
+        country: JP
+    discount:
+      code: VIP20
+      amount: 20
+      type: percentage
+  - txId: TX-00005
+    userId: 7941
+    amount: 83.23
+    currency: EUR
+    status: completed
+    createdAt: 2026-03-25
+    shipping:
+      carrier: UPS
+      tracking: K3JKJDTT7ILY
+      address:
+        city: Kundestad
+        state: MI
+        zip: "10635"
+        country: JP
+```
+
+</details>
+
+<details>
+<summary><strong>TOON normalized (after)</strong></summary>
+
+```
+transactions[5]{txId,userId,amount,currency,status,createdAt}:
+  TX-00001,4370,950.26,KRW,refunded,2026-03-04
+  TX-00002,2403,67.44,JPY,refunded,2026-03-21
+  TX-00003,7158,445.31,USD,pending,2026-03-01
+  TX-00004,9183,265.93,KRW,pending,2026-03-15
+  TX-00005,7941,83.23,EUR,completed,2026-03-25
+transactions.shipping[3]{idx,carrier,tracking,address.city,address.state,address.zip,address.country}:
+  1,FedEx,YPDBBIWQIB8I,South Ozella,GA,50610-9983,US
+  3,UPS,BYMWTBV5C2KO,Port Fletcher,IA,18097-1087,JP
+  4,UPS,K3JKJDTT7ILY,Kundestad,MI,"10635",JP
+transactions.discount[2]{idx,code,amount,type}:
+  2,SAVE10,15,fixed
+  3,VIP20,20,percentage
+```
+
+</details>

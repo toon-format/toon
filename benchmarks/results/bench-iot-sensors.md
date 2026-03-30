@@ -43,3 +43,132 @@ readings[1000]{sensorId,timestamp,temperature,humidity,pressure,batteryPct}:
   SNS-0019,"2026-03-25T09:52:57.432Z",41.9,44.2,1010.8,72
 ...
 ```
+
+
+### Sample Data (5 rows)
+
+<details>
+<summary><strong>JSON (source)</strong></summary>
+
+```json
+{
+  "readings": [
+    {
+      "sensorId": "SNS-0001",
+      "timestamp": "2026-03-25T16:18:34.813Z",
+      "temperature": 42.3,
+      "humidity": 74.9,
+      "pressure": 1014,
+      "batteryPct": 19
+    },
+    {
+      "sensorId": "SNS-0002",
+      "timestamp": "2026-03-24T03:35:38.654Z",
+      "temperature": -6.8,
+      "humidity": 85,
+      "pressure": 1014.1,
+      "batteryPct": 72,
+      "anomaly": {
+        "type": "spike",
+        "severity": "critical",
+        "confidence": 0.917
+      }
+    },
+    {
+      "sensorId": "SNS-0003",
+      "timestamp": "2026-03-24T13:03:35.806Z",
+      "temperature": 0,
+      "humidity": 33.7,
+      "pressure": 1002.2,
+      "batteryPct": 55
+    },
+    {
+      "sensorId": "SNS-0004",
+      "timestamp": "2026-03-26T01:57:13.239Z",
+      "temperature": 6,
+      "humidity": 65.9,
+      "pressure": 995.5,
+      "batteryPct": 33,
+      "anomaly": {
+        "type": "drift",
+        "severity": "medium",
+        "confidence": 0.893
+      }
+    },
+    {
+      "sensorId": "SNS-0005",
+      "timestamp": "2026-03-24T10:55:55.827Z",
+      "temperature": 18.3,
+      "humidity": 64.4,
+      "pressure": 991.8,
+      "batteryPct": 63
+    }
+  ]
+}
+```
+
+</details>
+
+<details>
+<summary><strong>TOON (before)</strong></summary>
+
+```
+readings[5]:
+  - sensorId: SNS-0001
+    timestamp: "2026-03-25T16:18:34.813Z"
+    temperature: 42.3
+    humidity: 74.9
+    pressure: 1014
+    batteryPct: 19
+  - sensorId: SNS-0002
+    timestamp: "2026-03-24T03:35:38.654Z"
+    temperature: -6.8
+    humidity: 85
+    pressure: 1014.1
+    batteryPct: 72
+    anomaly:
+      type: spike
+      severity: critical
+      confidence: 0.917
+  - sensorId: SNS-0003
+    timestamp: "2026-03-24T13:03:35.806Z"
+    temperature: 0
+    humidity: 33.7
+    pressure: 1002.2
+    batteryPct: 55
+  - sensorId: SNS-0004
+    timestamp: "2026-03-26T01:57:13.239Z"
+    temperature: 6
+    humidity: 65.9
+    pressure: 995.5
+    batteryPct: 33
+    anomaly:
+      type: drift
+      severity: medium
+      confidence: 0.893
+  - sensorId: SNS-0005
+    timestamp: "2026-03-24T10:55:55.827Z"
+    temperature: 18.3
+    humidity: 64.4
+    pressure: 991.8
+    batteryPct: 63
+```
+
+</details>
+
+<details>
+<summary><strong>TOON normalized (after)</strong></summary>
+
+```
+readings[5]{sensorId,timestamp,temperature,humidity,pressure,batteryPct}:
+  SNS-0001,"2026-03-25T16:18:34.813Z",42.3,74.9,1014,19
+  SNS-0002,"2026-03-24T03:35:38.654Z",-6.8,85,1014.1,72
+  SNS-0003,"2026-03-24T13:03:35.806Z",0,33.7,1002.2,55
+  SNS-0004,"2026-03-26T01:57:13.239Z",6,65.9,995.5,33
+  SNS-0005,"2026-03-24T10:55:55.827Z",18.3,64.4,991.8,63
+readings.anomaly[2]{idx,type,severity,confidence}:
+  1,spike,critical,0.917
+  3,drift,medium,0.893
+```
+
+</details>

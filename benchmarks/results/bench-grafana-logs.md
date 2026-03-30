@@ -43,3 +43,182 @@ This is the **ideal use case** for normalization:
 Without normalization, TOON is **worse** than JSON compact (+17.4%) because the mixed
 field sets prevent tabular encoding. With normalization, all 4 tables (base + 3 extras) become
 100% uniform and get full tabular compression, achieving **-40.2%** vs JSON compact.
+
+
+### Sample Data (5 rows)
+
+<details>
+<summary><strong>JSON (source)</strong></summary>
+
+```json
+{
+  "logs": [
+    {
+      "timestamp": "2026-03-29T08:38:36.623Z",
+      "level": "info",
+      "job": "api-gateway",
+      "instance": "pod-g7h8i9",
+      "method": "PATCH",
+      "endpoint": "/api/v1/search",
+      "status_code": 204,
+      "duration_ms": 385,
+      "bytes_sent": 13533,
+      "message": "request completed successfully",
+      "auth": {
+        "userId": "usr-4AlZCGyg",
+        "sessionId": "sess-ndbobBSCfbOd",
+        "role": "service-account",
+        "ip": "132.188.36.90"
+      }
+    },
+    {
+      "timestamp": "2026-03-29T14:10:11.196Z",
+      "level": "debug",
+      "job": "api-gateway",
+      "instance": "pod-g7h8i9",
+      "method": "PATCH",
+      "endpoint": "/metrics",
+      "status_code": 200,
+      "duration_ms": 148,
+      "bytes_sent": 30640,
+      "message": "request completed successfully"
+    },
+    {
+      "timestamp": "2026-03-29T03:41:40.805Z",
+      "level": "info",
+      "job": "api-gateway",
+      "instance": "pod-d4e5f6",
+      "method": "GET",
+      "endpoint": "/api/v1/orders",
+      "status_code": 204,
+      "duration_ms": 44,
+      "bytes_sent": 40005,
+      "message": "request completed successfully"
+    },
+    {
+      "timestamp": "2026-03-29T19:49:33.524Z",
+      "level": "warn",
+      "job": "api-gateway",
+      "instance": "pod-j0k1l2",
+      "method": "PUT",
+      "endpoint": "/api/v1/orders",
+      "status_code": 408,
+      "duration_ms": 21268,
+      "bytes_sent": 17644,
+      "message": "upstream connect timeout",
+      "error": {
+        "type": "AuthenticationError",
+        "message": "connection refused to db-primary:5432",
+        "stack_trace": "at handleRequest (api-gateway/src/handler.ts:394)"
+      },
+      "trace": {
+        "traceId": "6818bfeCA5e8c14e034C96fD8b2fdBc0",
+        "spanId": "b29C9D27e8Da2695",
+        "parentSpanId": "520f60152f91109E"
+      }
+    },
+    {
+      "timestamp": "2026-03-29T09:32:13.883Z",
+      "level": "info",
+      "job": "notification-service",
+      "instance": "pod-d4e5f6",
+      "method": "POST",
+      "endpoint": "/metrics",
+      "status_code": 200,
+      "duration_ms": 84,
+      "bytes_sent": 37962,
+      "message": "request completed successfully"
+    }
+  ]
+}
+```
+
+</details>
+
+<details>
+<summary><strong>TOON (before normalization)</strong></summary>
+
+```
+logs[5]:
+  - timestamp: "2026-03-29T08:38:36.623Z"
+    level: info
+    job: api-gateway
+    instance: pod-g7h8i9
+    method: PATCH
+    endpoint: /api/v1/search
+    status_code: 204
+    duration_ms: 385
+    bytes_sent: 13533
+    message: request completed successfully
+    auth:
+      userId: usr-4AlZCGyg
+      sessionId: sess-ndbobBSCfbOd
+      role: service-account
+      ip: 132.188.36.90
+  - timestamp: "2026-03-29T14:10:11.196Z"
+    level: debug
+    job: api-gateway
+    instance: pod-g7h8i9
+    method: PATCH
+    endpoint: /metrics
+    status_code: 200
+    duration_ms: 148
+    bytes_sent: 30640
+    message: request completed successfully
+  - timestamp: "2026-03-29T03:41:40.805Z"
+    level: info
+    job: api-gateway
+    instance: pod-d4e5f6
+    method: GET
+    endpoint: /api/v1/orders
+    status_code: 204
+    duration_ms: 44
+    bytes_sent: 40005
+    message: request completed successfully
+  - timestamp: "2026-03-29T19:49:33.524Z"
+    level: warn
+    job: api-gateway
+    instance: pod-j0k1l2
+    method: PUT
+    endpoint: /api/v1/orders
+    status_code: 408
+    duration_ms: 21268
+    bytes_sent: 17644
+    message: upstream connect timeout
+    error:
+      type: AuthenticationError
+      message: "connection refused to db-primary:5432"
+      stack_trace: "at handleRequest (api-gateway/src/handler.ts:394)"
+    trace:
+      traceId: 6818bfeCA5e8c14e034C96fD8b2fdBc0
+      spanId: b29C9D27e8Da2695
+      parentSpanId: 520f60152f91109E
+  - timestamp: "2026-03-29T09:32:13.883Z"
+    level: info
+    job: notification-service
+    instance: pod-d4e5f6
+    method: POST
+    endpoint: /metrics
+    status_code: 200
+    duration_ms: 84
+    bytes_sent: 37962
+    message: request completed successfully
+```
+
+</details>
+
+<details>
+<summary><strong>TOON normalized (after)</strong></summary>
+
+```
+logs[5]{timestamp,level,job,instance,method,endpoint,status_code,duration_ms,bytes_sent,message}:
+  "2026-03-29T08:38:36.623Z",info,api-gateway,pod-g7h8i9,PATCH,/api/v1/search,204,385,13533,request completed successfully
+  "2026-03-29T14:10:11.196Z",debug,api-gateway,pod-g7h8i9,PATCH,/metrics,200,148,30640,request completed successfully
+  "2026-03-29T03:41:40.805Z",info,api-gateway,pod-d4e5f6,GET,/api/v1/orders,204,44,40005,request completed successfully
+  "2026-03-29T19:49:33.524Z",warn,api-gateway,pod-j0k1l2,PUT,/api/v1/orders,408,21268,17644,upstream connect timeout
+  "2026-03-29T09:32:13.883Z",info,notification-service,pod-d4e5f6,POST,/metrics,200,84,37962,request completed successfully
+logs.auth[1]{idx,userId,sessionId,role,ip}:
+  0,usr-4AlZCGyg,sess-ndbobBSCfbOd,service-account,132.188.36.90
+```
+
+</details>
