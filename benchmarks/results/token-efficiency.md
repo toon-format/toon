@@ -47,13 +47,22 @@ Datasets with nested or semi-uniform structures. CSV excluded as it cannot prope
    ├─ vs XML           (−29.3%)                52,414 tokens
    └─ vs TOON (normalized) (+43.3%)                25,846 tokens
 
+📋 Grafana/Loki-style logs with multi-extras  ┊  Tabular: 45%
+   │
+   TOON                █████████████████░░░   226,609 tokens
+   ├─ vs JSON          (−17.0%)               273,073 tokens
+   ├─ vs JSON compact  (+18.0%)               192,070 tokens
+   ├─ vs YAML          (+0.2%)                226,095 tokens
+   ├─ vs XML           (−26.8%)               309,612 tokens
+   └─ vs TOON (normalized) (+76.5%)               128,372 tokens
+
 ──────────────────────────────────── Total ────────────────────────────────────
-   TOON                ████████████████░░░░   296,328 tokens
-   ├─ vs JSON          (−21.9%)               379,556 tokens
-   ├─ vs JSON compact  (+15.3%)               257,113 tokens
-   ├─ vs YAML          (−4.4%)                309,991 tokens
-   ├─ vs XML           (−31.3%)               431,034 tokens
-   └─ vs TOON (normalized) (+112.4%)              139,516 tokens
+   TOON                ████████████████░░░░   522,937 tokens
+   ├─ vs JSON          (−19.9%)               652,629 tokens
+   ├─ vs JSON compact  (+16.4%)               449,183 tokens
+   ├─ vs YAML          (−2.5%)                536,086 tokens
+   ├─ vs XML           (−29.4%)               740,646 tokens
+   └─ vs TOON (normalized) (+95.2%)               267,888 tokens
 ```
 
 #### Flat-Only Track
