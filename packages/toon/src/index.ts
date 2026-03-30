@@ -7,6 +7,8 @@ import { encodeJsonValue } from './encode/encoders.ts'
 import { normalizeValue } from './encode/normalize.ts'
 import { applyReplacer } from './encode/replacer.ts'
 
+export { normalizeForToon } from './normalize-extras.ts'
+export type { NormalizeExtrasOptions } from './normalize-extras.ts'
 export { DEFAULT_DELIMITER, DELIMITERS } from './constants.ts'
 export type {
   DecodeOptions,
