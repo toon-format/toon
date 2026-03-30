@@ -809,6 +809,84 @@ export function generateIncidents(count: number): { incidents: Incident[] } {
 }
 
 /**
+ * Grafana/Loki-style log entry
+ */
+export interface GrafanaLog {
+  timestamp: string
+  level: string
+  job: string
+  instance: string
+  method: string
+  endpoint: string
+  status_code: number
+  duration_ms: number
+  bytes_sent: number
+  message: string
+  error?: { type: string, message: string, stack_trace: string }
+  trace?: { traceId: string, spanId: string, parentSpanId: string | null }
+  auth?: { userId: string, sessionId: string, role: string, ip: string }
+}
+
+/**
+ * Generate Grafana/Loki-style logs (~35% error, ~20% trace, ~15% auth)
+ */
+const LOG_LEVELS = ['info', 'info', 'info', 'info', 'warn', 'error', 'debug', 'info', 'info', 'info'] as const
+const LOG_JOBS = ['api-gateway', 'auth-service', 'order-service', 'payment-service', 'notification-service'] as const
+const LOG_INSTANCES = ['pod-a1b2c3', 'pod-d4e5f6', 'pod-g7h8i9', 'pod-j0k1l2', 'pod-m3n4o5'] as const
+const LOG_ENDPOINTS = ['/api/v1/users', '/api/v1/orders', '/api/v1/payments', '/api/v1/auth/login', '/api/v1/products', '/api/v1/notifications', '/healthz', '/metrics', '/api/v1/cart', '/api/v1/search'] as const
+const LOG_ERROR_TYPES = ['TimeoutError', 'ConnectionRefused', 'ValidationError', 'AuthenticationError', 'RateLimitExceeded', 'DatabaseError', 'ServiceUnavailable'] as const
+const LOG_ERROR_MSGS = ['upstream connect timeout', 'connection refused to db-primary:5432', 'invalid request body', 'token expired', 'rate limit exceeded: 100 req/min', 'deadlock detected on table orders', 'circuit breaker open'] as const
+const LOG_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'] as const
+
+export function generateGrafanaLogs(count: number): { logs: GrafanaLog[] } {
+  return {
+    logs: Array.from({ length: count }, (): GrafanaLog => {
+      const level = faker.helpers.arrayElement([...LOG_LEVELS])
+      const isError = level === 'error' || level === 'warn'
+      const job = faker.helpers.arrayElement([...LOG_JOBS])
+
+      const entry: GrafanaLog = {
+        timestamp: faker.date.recent({ days: 1 }).toISOString(),
+        level,
+        job,
+        instance: faker.helpers.arrayElement([...LOG_INSTANCES]),
+        method: faker.helpers.arrayElement([...LOG_METHODS]),
+        endpoint: faker.helpers.arrayElement([...LOG_ENDPOINTS]),
+        status_code: isError ? faker.helpers.arrayElement([400, 401, 403, 404, 408, 429, 500, 502, 503, 504]) : faker.helpers.arrayElement([200, 201, 204]),
+        duration_ms: isError ? faker.number.int({ min: 500, max: 30000 }) : faker.number.int({ min: 1, max: 500 }),
+        bytes_sent: faker.number.int({ min: 100, max: 50000 }),
+        message: isError ? faker.helpers.arrayElement([...LOG_ERROR_MSGS]) : 'request completed successfully',
+      }
+
+      if (isError) {
+        entry.error = {
+          type: faker.helpers.arrayElement([...LOG_ERROR_TYPES]),
+          message: faker.helpers.arrayElement([...LOG_ERROR_MSGS]),
+          stack_trace: `at handleRequest (${job}/src/handler.ts:${faker.number.int({ min: 10, max: 500 })})`,
+        }
+      }
+      if (faker.datatype.boolean(0.2)) {
+        entry.trace = {
+          traceId: faker.string.hexadecimal({ length: 32, prefix: '' }),
+          spanId: faker.string.hexadecimal({ length: 16, prefix: '' }),
+          parentSpanId: faker.datatype.boolean(0.7) ? faker.string.hexadecimal({ length: 16, prefix: '' }) : null,
+        }
+      }
+      if (faker.datatype.boolean(0.15)) {
+        entry.auth = {
+          userId: `usr-${faker.string.alphanumeric(8)}`,
+          sessionId: `sess-${faker.string.alphanumeric(12)}`,
+          role: faker.helpers.arrayElement(['admin', 'user', 'service-account', 'readonly']),
+          ip: faker.internet.ipv4(),
+        }
+      }
+
+      return entry
+    }),
+  }
+}
+
+/**
  * Datasets for token efficiency benchmarks (larger sizes to amplify token differences)
  */
 export const TOKEN_EFFICIENCY_DATASETS: Dataset[] = [
@@ -880,6 +958,17 @@ export const TOKEN_EFFICIENCY_DATASETS: Dataset[] = [
       supportsCSV: false,
       structureClass: 'deep',
       tabularEligibility: 30,
+    },
+  },
+  // Grafana/Loki-style logs: 2000 logs (~35% error, ~20% trace, ~15% auth)
+  {
+    name: 'grafana-logs',
+    description: 'Grafana/Loki-style logs with multi-extras',
+    data: generateGrafanaLogs(2000),
+    metadata: {
+      supportsCSV: false,
+      structureClass: 'semi-uniform',
+      tabularEligibility: 45,
     },
   },
 ]

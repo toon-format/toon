@@ -89,6 +89,7 @@ export const DATASET_NAMES = [
   'large-uniform',
   'semi-uniform-orders',
   'deep-incidents',
+  'grafana-logs',
   'structural-validation-control',
   'structural-validation-truncated',
   'structural-validation-extra-rows',

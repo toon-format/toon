@@ -30,6 +30,7 @@ const DATASET_ICONS: Record<string, string> = {
   'nested-config': '🧩',
   'semi-uniform-orders': '🛍️',
   'deep-incidents': '🚨',
+  'grafana-logs': '📋',
 }
 
 const COMPARISON_FORMAT_ORDER = ['json-pretty', 'json-compact', 'yaml', 'xml', 'toon-normalized'] as const
