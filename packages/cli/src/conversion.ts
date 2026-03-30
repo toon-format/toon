@@ -6,7 +6,7 @@ import * as path from 'node:path'
 import process from 'node:process'
 import { consola } from 'consola'
 import { estimateTokenCount } from 'tokenx'
-import { decode, decodeStream, encode, encodeLines } from '../../toon/src/index.ts'
+import { decode, decodeStream, encode, encodeLines, normalizeForToon } from '../../toon/src/index.ts'
 import { jsonStreamFromEvents } from './json-from-events.ts'
 import { jsonStringifyLines } from './json-stringify-stream.ts'
 import { formatInputLabel, readInput, readLinesFromSource } from './utils.ts'
@@ -19,6 +19,7 @@ export async function encodeToToon(config: {
   keyFolding?: NonNullable<EncodeOptions['keyFolding']>
   flattenDepth?: number
   printStats: boolean
+  normalize?: boolean
 }): Promise<void> {
   const jsonContent = await readInput(config.input)
 
@@ -28,6 +29,10 @@ export async function encodeToToon(config: {
   }
   catch (error) {
     throw new Error(`Failed to parse JSON: ${error instanceof Error ? error.message : String(error)}`)
+  }
+
+  if (config.normalize && typeof data === 'object' && data !== null && !Array.isArray(data)) {
+    data = normalizeForToon(data as Record<string, unknown>)
   }
 
   const encodeOptions: EncodeOptions = {

@@ -359,6 +359,57 @@ describe('toon CLI', () => {
         await context.cleanup()
       }
     })
+    it('encodes with --normalize for semi-uniform data', async () => {
+      const data = {
+        logs: [
+          { ts: '2025-01-01', level: 'info', code: 200 },
+          { ts: '2025-01-02', level: 'error', code: 500, error: { message: 'fail', retryable: true } },
+          { ts: '2025-01-03', level: 'error', code: 502, error: { message: 'timeout', retryable: false } },
+          { ts: '2025-01-04', level: 'info', code: 200 },
+        ],
+      }
+
+      const context = await createCliTestContext({
+        'input.json': JSON.stringify(data),
+      })
+
+      try {
+        await context.run(['input.json', '--normalize', '--output', 'output.toon'])
+
+        const output = await context.read('output.toon')
+        // Should contain tabular base table and extras table
+        expect(output).toContain('logs[4]{ts,level,code}:')
+        expect(output).toContain('logs.error[2]{idx,message,retryable}:')
+      }
+      finally {
+        await context.cleanup()
+      }
+    })
+
+    it('--normalize has no effect on already uniform data', async () => {
+      const data = {
+        items: [
+          { id: 1, name: 'a' },
+          { id: 2, name: 'b' },
+        ],
+      }
+
+      const context = await createCliTestContext({
+        'input.json': JSON.stringify(data),
+      })
+
+      try {
+        await context.run(['input.json', '--normalize', '--output', 'with-norm.toon'])
+        await context.run(['input.json', '--output', 'without-norm.toon'])
+
+        const withNorm = await context.read('with-norm.toon')
+        const withoutNorm = await context.read('without-norm.toon')
+        expect(withNorm).toBe(withoutNorm)
+      }
+      finally {
+        await context.cleanup()
+      }
+    })
   })
 
   describe('decode options', () => {

@@ -67,6 +67,12 @@ const args: ArgsDef = {
     description: 'Show token statistics',
     default: false,
   },
+  normalize: {
+    type: 'boolean',
+    description: 'Normalize semi-uniform arrays into base + extras tables before encoding',
+    alias: 'n',
+    default: false,
+  },
 } as const
 
 export const mainCommand: CommandDef<ArgsDef> = defineCommand({
@@ -129,6 +135,7 @@ export const mainCommand: CommandDef<ArgsDef> = defineCommand({
           keyFolding: keyFolding as NonNullable<EncodeOptions['keyFolding']>,
           flattenDepth,
           printStats: args.stats === true,
+          normalize: args.normalize === true,
         })
       }
       else {
