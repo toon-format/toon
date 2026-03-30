@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "benchmark:tokens": "node scripts/token-efficiency-benchmark.ts",
+    "benchmark:normalize": "node scripts/normalization-benchmark.ts",
     "benchmark:accuracy": "node --env-file=.env scripts/accuracy-benchmark.ts",
     "fetch:github-repos": "node scripts/fetch-github-repos.ts"
   },
