@@ -86,6 +86,8 @@ export const DATASET_NAMES = [
   'event-logs',
   'nested-config',
   'large-uniform',
+  'semi-uniform-orders',
+  'deep-incidents',
   'structural-validation-control',
   'structural-validation-truncated',
   'structural-validation-extra-rows',

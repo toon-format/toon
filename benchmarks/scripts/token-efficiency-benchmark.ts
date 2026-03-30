@@ -28,6 +28,8 @@ const DATASET_ICONS: Record<string, string> = {
   'github': '⭐',
   'event-logs': '🧾',
   'nested-config': '🧩',
+  'semi-uniform-orders': '🛍️',
+  'deep-incidents': '🚨',
 }
 
 const COMPARISON_FORMAT_ORDER = ['json-pretty', 'json-compact', 'yaml', 'xml'] as const
