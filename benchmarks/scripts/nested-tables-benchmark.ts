@@ -61,7 +61,7 @@ const md = `# TOON Nested Tables — Benchmark Results
 | Dataset | TOON | TOON + Nested | JSON Compact | Nested Savings | Nested vs JSON |
 |---------|------|---------------|-------------|----------------|---------------|
 ${results.map(r =>
-  `| ${r.dataset} | ${r.toonTokens.toLocaleString()} | ${r.toonWithNestedTokens.toLocaleString()} | ${r.jsonCompactTokens.toLocaleString()} | ${r.nestedSavings} | ${r.nestedVsJson} |`
+  `| ${r.dataset} | ${r.toonTokens.toLocaleString()} | ${r.toonWithNestedTokens.toLocaleString()} | ${r.jsonCompactTokens.toLocaleString()} | ${r.nestedSavings} | ${r.nestedVsJson} |`,
 ).join('\n')}
 
 ## Key Findings

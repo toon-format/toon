@@ -1,9 +1,9 @@
 import type { Depth, FieldDescriptor, JsonArray, JsonObject, JsonPrimitive, JsonValue, ResolvedEncodeOptions } from '../types.ts'
 import { DOT, LIST_ITEM_MARKER, LIST_ITEM_PREFIX } from '../constants.ts'
 import { tryFoldKeyChain } from './folding.ts'
+import { inferNestedFieldDescriptors } from './nested-fields.ts'
 import { isArrayOfArrays, isArrayOfObjects, isArrayOfPrimitives, isEmptyObject, isJsonArray, isJsonObject, isJsonPrimitive } from './normalize.ts'
 import { encodeAndJoinPrimitives, encodeKey, encodePrimitive, formatHeader } from './primitives.ts'
-import { inferNestedFieldDescriptors } from './nested-fields.ts'
 
 // #region Encode normalized JsonValue
 
@@ -404,14 +404,17 @@ function* encodeListItemValueLines(
 function extractNestedTabularHeader(
   rows: readonly JsonObject[],
 ): { flatHeader: string[], descriptors: FieldDescriptor[] } | undefined {
-  if (rows.length === 0) return undefined
+  if (rows.length === 0)
+    return undefined
 
   const firstRow = rows[0]!
   const topKeys = Object.keys(firstRow)
-  if (topKeys.length === 0) return undefined
+  if (topKeys.length === 0)
+    return undefined
 
   const descriptors = inferNestedFieldDescriptors(rows, topKeys)
-  if (!descriptors) return undefined
+  if (!descriptors)
+    return undefined
 
   // Build flat header from descriptors (leaf field names in order)
   const flatHeader = flattenDescriptorKeys(descriptors)

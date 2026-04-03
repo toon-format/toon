@@ -330,10 +330,13 @@ export function parseKeyToken(content: string, start: number): { key: string, en
 function findMatchingBrace(content: string, openIndex: number): number {
   let depth = 0
   for (let i = openIndex; i < content.length; i++) {
-    if (content[i] === OPEN_BRACE) depth++
+    if (content[i] === OPEN_BRACE) {
+      depth++
+    }
     else if (content[i] === CLOSE_BRACE) {
       depth--
-      if (depth === 0) return i
+      if (depth === 0)
+        return i
     }
   }
   return -1
@@ -356,7 +359,8 @@ export function parseFieldDescriptors(
 
   for (const raw of rawFields) {
     const trimmed = raw.trim()
-    if (!trimmed) continue
+    if (!trimmed)
+      continue
 
     // Check for nested fields: fieldName{sub1,sub2}
     const braceIdx = trimmed.indexOf(OPEN_BRACE)
@@ -406,8 +410,16 @@ function splitTopLevel(content: string, delimiter: Delimiter): string[] {
     }
 
     if (!inQuotes) {
-      if (ch === OPEN_BRACE) { braceDepth++; current += ch; continue }
-      if (ch === CLOSE_BRACE) { braceDepth--; current += ch; continue }
+      if (ch === OPEN_BRACE) {
+        braceDepth++
+        current += ch
+        continue
+      }
+      if (ch === CLOSE_BRACE) {
+        braceDepth--
+        current += ch
+        continue
+      }
       if (ch === delimiter && braceDepth === 0) {
         parts.push(current)
         current = ''

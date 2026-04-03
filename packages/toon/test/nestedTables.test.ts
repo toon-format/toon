@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { decode, encode } from '../src/index'
 
-describe('Nested table syntax', () => {
+describe('nested table syntax', () => {
   describe('encoder', () => {
     it('flattens uniform nested objects into inline syntax', () => {
       const data = {
@@ -94,7 +94,7 @@ describe('Nested table syntax', () => {
   })
 
   describe('round-trip', () => {
-    it('JSON → TOON (nested) → JSON is lossless', () => {
+    it('jSON → TOON (nested) → JSON is lossless', () => {
       const original = {
         orders: [
           { id: 1, customer: { name: 'Alice', country: 'DK' }, total: 99 },
