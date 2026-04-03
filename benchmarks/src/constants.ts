@@ -85,6 +85,7 @@ export const DATASET_NAMES = [
   'github',
   'event-logs',
   'nested-config',
+  'uniform-nested',
   'large-uniform',
   'structural-validation-control',
   'structural-validation-truncated',
