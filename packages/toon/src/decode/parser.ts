@@ -1,4 +1,4 @@
-import type { ArrayHeaderInfo, Delimiter, JsonPrimitive } from '../types.ts'
+import type { ArrayHeaderInfo, Delimiter, FieldDescriptor, JsonPrimitive } from '../types.ts'
 import { BACKSLASH, CLOSE_BRACE, CLOSE_BRACKET, COLON, DELIMITERS, DOUBLE_QUOTE, FALSE_LITERAL, NULL_LITERAL, OPEN_BRACE, OPEN_BRACKET, PIPE, TAB, TRUE_LITERAL } from '../constants.ts'
 import { isBooleanOrNullLiteral, isNumericLiteral } from '../shared/literal-utils.ts'
 import { findClosingQuote, findUnquotedChar, unescapeString } from '../shared/string-utils.ts'
@@ -51,16 +51,18 @@ export function parseArrayHeaderLine(
 
   // Check for fields segment (braces come after bracket)
   const braceStart = content.indexOf(OPEN_BRACE, bracketEnd)
-  if (braceStart !== -1 && braceStart < content.indexOf(COLON, bracketEnd)) {
+  if (braceStart !== -1) {
     // Validate: no extraneous content between bracket end and brace start
     const gapBeforeBrace = content.slice(bracketEnd + 1, braceStart)
     if (gapBeforeBrace.trim() !== '') {
-      return
+      // Brace exists but has content before it — not a fields segment, skip
     }
-
-    const foundBraceEnd = content.indexOf(CLOSE_BRACE, braceStart)
-    if (foundBraceEnd !== -1) {
-      braceEnd = foundBraceEnd + 1
+    else {
+      // Use matching brace finder to handle nested braces (e.g., customer{name,country})
+      const foundBraceEnd = findMatchingBrace(content, braceStart)
+      if (foundBraceEnd !== -1) {
+        braceEnd = foundBraceEnd + 1
+      }
     }
   }
 
@@ -100,11 +102,15 @@ export function parseArrayHeaderLine(
 
   // Check for fields segment
   let fields: string[] | undefined
+  let fieldDescriptors: FieldDescriptor[] | undefined
   if (braceStart !== -1 && braceStart < colonIndex) {
-    const foundBraceEnd = content.indexOf(CLOSE_BRACE, braceStart)
+    // Find the matching closing brace (accounting for nested braces)
+    const foundBraceEnd = findMatchingBrace(content, braceStart)
     if (foundBraceEnd !== -1 && foundBraceEnd < colonIndex) {
       const fieldsContent = content.slice(braceStart + 1, foundBraceEnd)
-      fields = parseDelimitedValues(fieldsContent, delimiter).map(field => parseStringLiteral(field.trim()))
+      const parsed = parseFieldDescriptors(fieldsContent, delimiter)
+      fieldDescriptors = parsed.descriptors
+      fields = parsed.flatNames
     }
   }
 
@@ -114,6 +120,7 @@ export function parseArrayHeaderLine(
       length,
       delimiter,
       fields,
+      fieldDescriptors: fieldDescriptors?.some(d => d.subfields) ? fieldDescriptors : undefined,
     },
     inlineValues: afterColon || undefined,
   }
@@ -311,6 +318,157 @@ export function parseKeyToken(content: string, start: number): { key: string, en
     ? parseQuotedKey(content, start)
     : parseUnquotedKey(content, start)
   return { ...result, isQuoted }
+}
+
+// #endregion
+
+// #region Field descriptor parsing
+
+/**
+ * Find the matching closing brace, accounting for nested braces.
+ */
+function findMatchingBrace(content: string, openIndex: number): number {
+  let depth = 0
+  for (let i = openIndex; i < content.length; i++) {
+    if (content[i] === OPEN_BRACE) {
+      depth++
+    }
+    else if (content[i] === CLOSE_BRACE) {
+      depth--
+      if (depth === 0)
+        return i
+    }
+  }
+  return -1
+}
+
+/**
+ * Parse field descriptors from the content inside `{...}` of a header.
+ * Handles nested fields (field{sub1,sub2}) and strips type hint suffixes (field:type) for forward compatibility.
+ * Returns both structured descriptors and flat leaf field names.
+ */
+export function parseFieldDescriptors(
+  content: string,
+  delimiter: Delimiter,
+): { descriptors: FieldDescriptor[], flatNames: string[] } {
+  const descriptors: FieldDescriptor[] = []
+  const flatNames: string[] = []
+
+  // Split top-level fields by delimiter, respecting nested braces
+  const rawFields = splitTopLevel(content, delimiter)
+
+  for (const raw of rawFields) {
+    const trimmed = raw.trim()
+    if (!trimmed)
+      continue
+
+    // Check for nested fields: fieldName{sub1,sub2}
+    const braceIdx = trimmed.indexOf(OPEN_BRACE)
+    if (braceIdx !== -1) {
+      const matchEnd = findMatchingBrace(trimmed, braceIdx)
+      if (matchEnd !== -1) {
+        const name = parseFieldName(trimmed.slice(0, braceIdx))
+        const subContent = trimmed.slice(braceIdx + 1, matchEnd)
+        const subParsed = parseFieldDescriptors(subContent, delimiter)
+        descriptors.push({ name, subfields: subParsed.descriptors })
+        flatNames.push(...subParsed.flatNames)
+        continue
+      }
+    }
+
+    // Check for type hint: fieldName:type
+    const { name } = parseFieldNameWithHint(trimmed)
+    descriptors.push({ name })
+    flatNames.push(name)
+  }
+
+  return { descriptors, flatNames }
+}
+
+/**
+ * Split a string by delimiter at the top level only (not inside braces or quotes).
+ */
+function splitTopLevel(content: string, delimiter: Delimiter): string[] {
+  const parts: string[] = []
+  let current = ''
+  let braceDepth = 0
+  let inQuotes = false
+
+  for (let i = 0; i < content.length; i++) {
+    const ch = content[i]!
+
+    if (ch === BACKSLASH && inQuotes && i + 1 < content.length) {
+      current += ch + content[i + 1]
+      i++
+      continue
+    }
+
+    if (ch === DOUBLE_QUOTE) {
+      inQuotes = !inQuotes
+      current += ch
+      continue
+    }
+
+    if (!inQuotes) {
+      if (ch === OPEN_BRACE) {
+        braceDepth++
+        current += ch
+        continue
+      }
+      if (ch === CLOSE_BRACE) {
+        braceDepth--
+        current += ch
+        continue
+      }
+      if (ch === delimiter && braceDepth === 0) {
+        parts.push(current)
+        current = ''
+        continue
+      }
+    }
+
+    current += ch
+  }
+
+  if (current || parts.length > 0) {
+    parts.push(current)
+  }
+
+  return parts
+}
+
+const TOON_TYPE_HINTS = new Set(['int', 'float', 'str', 'bool', 'enum', 'date', 'null'])
+
+/**
+ * Parse a field name, stripping any type hint suffix (e.g., `:int`, `:str`).
+ * Type hints are recognized and stripped for forward compatibility but not stored.
+ */
+function parseFieldNameWithHint(raw: string): { name: string } {
+  const trimmed = raw.trim()
+
+  // Handle quoted field names
+  if (trimmed.startsWith(DOUBLE_QUOTE)) {
+    const closingIdx = findClosingQuote(trimmed, 0)
+    if (closingIdx !== -1) {
+      const name = parseStringLiteral(trimmed.slice(0, closingIdx + 1))
+      return { name }
+    }
+  }
+
+  // Unquoted: look for :type suffix and strip it
+  const colonIdx = trimmed.lastIndexOf(COLON)
+  if (colonIdx !== -1) {
+    const possibleHint = trimmed.slice(colonIdx + 1).trim()
+    if (TOON_TYPE_HINTS.has(possibleHint)) {
+      return { name: trimmed.slice(0, colonIdx).trim() }
+    }
+  }
+
+  return { name: parseStringLiteral(trimmed) }
+}
+
+function parseFieldName(raw: string): string {
+  return parseFieldNameWithHint(raw).name
 }
 
 // #endregion

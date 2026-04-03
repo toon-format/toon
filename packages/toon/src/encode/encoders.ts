@@ -1,6 +1,7 @@
-import type { Depth, JsonArray, JsonObject, JsonPrimitive, JsonValue, ResolvedEncodeOptions } from '../types.ts'
+import type { Depth, FieldDescriptor, JsonArray, JsonObject, JsonPrimitive, JsonValue, ResolvedEncodeOptions } from '../types.ts'
 import { DOT, LIST_ITEM_MARKER, LIST_ITEM_PREFIX } from '../constants.ts'
 import { tryFoldKeyChain } from './folding.ts'
+import { inferNestedFieldDescriptors } from './nested-fields.ts'
 import { isArrayOfArrays, isArrayOfObjects, isArrayOfPrimitives, isEmptyObject, isJsonArray, isJsonObject, isJsonPrimitive } from './normalize.ts'
 import { encodeAndJoinPrimitives, encodeKey, encodePrimitive, formatHeader } from './primitives.ts'
 
@@ -151,6 +152,15 @@ export function* encodeArrayLines(
 
   // Array of objects
   if (isArrayOfObjects(value)) {
+    // Try nested table encoding first (when enabled)
+    if (options.nestedTables) {
+      const nestedHeader = extractNestedTabularHeader(value)
+      if (nestedHeader) {
+        yield* encodeNestedTabularLines(key, value, nestedHeader.flatHeader, nestedHeader.descriptors, depth, options)
+        return
+      }
+    }
+
     const header = extractTabularHeader(value)
     if (header) {
       yield* encodeArrayOfObjectsAsTabularLines(key, value, header, depth, options)
@@ -385,6 +395,76 @@ function* encodeListItemValueLines(
   else if (isJsonObject(value)) {
     yield* encodeObjectAsListItemLines(value, depth, options)
   }
+}
+
+// #endregion
+
+// #region Nested table encoding
+
+function extractNestedTabularHeader(
+  rows: readonly JsonObject[],
+): { flatHeader: string[], descriptors: FieldDescriptor[] } | undefined {
+  if (rows.length === 0)
+    return undefined
+
+  const firstRow = rows[0]!
+  const topKeys = Object.keys(firstRow)
+  if (topKeys.length === 0)
+    return undefined
+
+  const descriptors = inferNestedFieldDescriptors(rows, topKeys)
+  if (!descriptors)
+    return undefined
+
+  // Build flat header from descriptors (leaf field names in order)
+  const flatHeader = flattenDescriptorKeys(descriptors)
+  return { flatHeader, descriptors }
+}
+
+function flattenDescriptorKeys(descriptors: readonly FieldDescriptor[]): string[] {
+  const keys: string[] = []
+  for (const desc of descriptors) {
+    if (desc.subfields && desc.subfields.length > 0) {
+      keys.push(...flattenDescriptorKeys(desc.subfields))
+    }
+    else {
+      keys.push(desc.name)
+    }
+  }
+  return keys
+}
+
+function* encodeNestedTabularLines(
+  prefix: string | undefined,
+  rows: readonly JsonObject[],
+  _flatHeader: string[],
+  descriptors: FieldDescriptor[],
+  depth: Depth,
+  options: ResolvedEncodeOptions,
+): Generator<string> {
+  const formattedHeader = formatHeader(rows.length, { key: prefix, fieldDescriptors: descriptors, delimiter: options.delimiter })
+  yield indentedLine(depth, formattedHeader, options.indent)
+
+  // Write flattened rows
+  for (const row of rows) {
+    const flatValues = flattenRowValues(row, descriptors)
+    const joinedValue = encodeAndJoinPrimitives(flatValues, options.delimiter)
+    yield indentedLine(depth + 1, joinedValue, options.indent)
+  }
+}
+
+function flattenRowValues(row: JsonObject, descriptors: readonly FieldDescriptor[]): JsonPrimitive[] {
+  const values: JsonPrimitive[] = []
+  for (const desc of descriptors) {
+    if (desc.subfields && desc.subfields.length > 0) {
+      const nestedObj = row[desc.name] as JsonObject
+      values.push(...flattenRowValues(nestedObj, desc.subfields))
+    }
+    else {
+      values.push(row[desc.name] as JsonPrimitive)
+    }
+  }
+  return values
 }
 
 // #endregion

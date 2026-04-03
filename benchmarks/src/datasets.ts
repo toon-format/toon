@@ -699,6 +699,51 @@ export const ACCURACY_DATASETS: Dataset[] = [
 ]
 
 /**
+ * Generate shipment records with uniform nested objects.
+ * Every row has identical nested structure (sender, receiver, dimensions)
+ * with only primitive values — the ideal case for nested table encoding.
+ */
+function generateShipments(count: number): { shipments: Array<{
+  id: number
+  sender: { name: string, city: string, country: string, zip: string }
+  receiver: { name: string, city: string, country: string, zip: string }
+  dimensions: { weight: number, length: number, width: number, height: number }
+  carrier: string
+  status: string
+  cost: number
+}> } {
+  const carriers = ['FedEx', 'UPS', 'DHL', 'USPS'] as const
+  const statuses = ['pending', 'in_transit', 'delivered', 'returned'] as const
+  const countries = ['US', 'UK', 'DE', 'DK', 'FR', 'JP', 'AU', 'CA'] as const
+  return {
+    shipments: Array.from({ length: count }, (_, i) => ({
+      id: i + 1,
+      sender: {
+        name: faker.person.fullName(),
+        city: faker.location.city(),
+        country: countries[i % countries.length]!,
+        zip: faker.location.zipCode(),
+      },
+      receiver: {
+        name: faker.person.fullName(),
+        city: faker.location.city(),
+        country: countries[(i + 3) % countries.length]!,
+        zip: faker.location.zipCode(),
+      },
+      dimensions: {
+        weight: faker.number.float({ min: 0.5, max: 50, fractionDigits: 1 }),
+        length: faker.number.int({ min: 10, max: 120 }),
+        width: faker.number.int({ min: 10, max: 80 }),
+        height: faker.number.int({ min: 5, max: 60 }),
+      },
+      carrier: carriers[i % carriers.length]!,
+      status: statuses[i % statuses.length]!,
+      cost: faker.number.float({ min: 5, max: 200, fractionDigits: 2 }),
+    })),
+  }
+}
+
+/**
  * Datasets for token efficiency benchmarks (larger sizes to amplify token differences)
  */
 export const TOKEN_EFFICIENCY_DATASETS: Dataset[] = [
@@ -750,4 +795,15 @@ export const TOKEN_EFFICIENCY_DATASETS: Dataset[] = [
   },
   // Nested config: 1 config (same as accuracy)
   nestedConfigDataset,
+  // Uniform nested: 500 shipments with sender/receiver/dimensions objects
+  {
+    name: 'uniform-nested',
+    description: 'Shipment records with uniform nested objects (sender, receiver, dimensions)',
+    data: generateShipments(500),
+    metadata: {
+      supportsCSV: false,
+      structureClass: 'nested',
+      tabularEligibility: 0, // Has nested objects, not tabular without nested table support
+    },
+  },
 ]

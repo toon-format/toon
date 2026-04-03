@@ -1,4 +1,4 @@
-import type { JsonPrimitive } from '../types.ts'
+import type { FieldDescriptor, JsonPrimitive } from '../types.ts'
 import { COMMA, DEFAULT_DELIMITER, DOUBLE_QUOTE, NULL_LITERAL } from '../constants.ts'
 import { escapeString } from '../shared/string-utils.ts'
 import { isSafeUnquoted, isValidUnquotedKey } from '../shared/validation.ts'
@@ -58,11 +58,13 @@ export function formatHeader(
   options?: {
     key?: string
     fields?: readonly string[]
+    fieldDescriptors?: readonly FieldDescriptor[]
     delimiter?: string
   },
 ): string {
   const key = options?.key
   const fields = options?.fields
+  const fieldDescriptors = options?.fieldDescriptors
   const delimiter = options?.delimiter ?? COMMA
 
   let header = ''
@@ -74,7 +76,10 @@ export function formatHeader(
   // Only include delimiter if it's not the default (comma)
   header += `[${length}${delimiter !== DEFAULT_DELIMITER ? delimiter : ''}]`
 
-  if (fields) {
+  if (fieldDescriptors) {
+    header += `{${fieldDescriptors.map(d => formatFieldDescriptor(d, delimiter)).join(delimiter)}}`
+  }
+  else if (fields) {
     const quotedFields = fields.map(f => encodeKey(f))
     header += `{${quotedFields.join(delimiter)}}`
   }
@@ -82,6 +87,17 @@ export function formatHeader(
   header += ':'
 
   return header
+}
+
+function formatFieldDescriptor(desc: FieldDescriptor, delimiter: string): string {
+  const name = encodeKey(desc.name)
+
+  if (desc.subfields && desc.subfields.length > 0) {
+    const subfieldsStr = desc.subfields.map(s => formatFieldDescriptor(s, delimiter)).join(delimiter)
+    return `${name}{${subfieldsStr}}`
+  }
+
+  return name
 }
 
 // #endregion
