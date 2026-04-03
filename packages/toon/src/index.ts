@@ -15,6 +15,7 @@ export type {
   DelimiterKey,
   EncodeOptions,
   EncodeReplacer,
+  FieldDescriptor,
   JsonArray,
   JsonObject,
   JsonPrimitive,
@@ -219,6 +220,7 @@ function resolveOptions(options?: EncodeOptions): ResolvedEncodeOptions {
     keyFolding: options?.keyFolding ?? 'off',
     flattenDepth: options?.flattenDepth ?? Number.POSITIVE_INFINITY,
     replacer: options?.replacer,
+    nestedTables: options?.nestedTables ?? false,
   }
 }
 
