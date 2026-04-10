@@ -8,6 +8,21 @@ import { assertExpectedCount, validateNoBlankLinesInRange, validateNoExtraListIt
 
 interface DecoderContext { indent: number, strict: boolean }
 
+/**
+ * Adds line number context to an error message if a line number is available.
+ * Preserves the original error type (SyntaxError, TypeError, etc.).
+ */
+function addLineContext(error: unknown, lineNumber?: number): unknown {
+  if (lineNumber == null || !(error instanceof Error))
+    return error
+  const suffix = ` (line ${lineNumber})`
+  if (error.message.includes(suffix))
+    return error
+  const newError = new (error.constructor as new (msg: string) => Error)(`${error.message}${suffix}`)
+  newError.stack = error.stack
+  return newError
+}
+
 // #region Streaming line cursor
 
 class StreamingLineCursor {
@@ -160,7 +175,7 @@ export function* decodeStreamSync(
 
   // Root object
   yield { type: 'startObject' }
-  yield* decodeKeyValueSync(first.content, cursor, 0, resolvedOptions)
+  yield* decodeKeyValueSync(first.content, cursor, 0, resolvedOptions, first.lineNumber)
 
   // Process remaining object fields
   while (!cursor.atEndSync()) {
@@ -170,7 +185,7 @@ export function* decodeStreamSync(
     }
 
     cursor.advanceSync()
-    yield* decodeKeyValueSync(line.content, cursor, 0, resolvedOptions)
+    yield* decodeKeyValueSync(line.content, cursor, 0, resolvedOptions, line.lineNumber)
   }
 
   yield { type: 'endObject' }
@@ -181,6 +196,7 @@ function* decodeKeyValueSync(
   cursor: StreamingLineCursor,
   baseDepth: Depth,
   options: DecoderContext,
+  lineNumber?: number,
 ): Generator<JsonStreamEvent> {
   // Check for array header first
   const arrayHeader = parseArrayHeaderLine(content, DEFAULT_DELIMITER)
@@ -191,7 +207,14 @@ function* decodeKeyValueSync(
   }
 
   // Regular key-value pair
-  const { key, isQuoted } = parseKeyToken(content, 0)
+  let keyResult: { key: string, isQuoted: boolean }
+  try {
+    keyResult = parseKeyToken(content, 0)
+  }
+  catch (error) {
+    throw addLineContext(error, lineNumber)
+  }
+  const { key, isQuoted } = keyResult
   const colonIndex = content.indexOf(COLON, key.length)
   const rest = colonIndex >= 0 ? content.slice(colonIndex + 1).trim() : ''
 
@@ -236,7 +259,7 @@ function* decodeObjectFieldsSync(
 
     if (line.depth === computedDepth) {
       cursor.advanceSync()
-      yield* decodeKeyValueSync(line.content, cursor, computedDepth, options)
+      yield* decodeKeyValueSync(line.content, cursor, computedDepth, options, line.lineNumber)
     }
     else {
       break
@@ -414,7 +437,7 @@ function* decodeListItemSync(
     afterHyphen = line.content.slice(LIST_ITEM_PREFIX.length)
   }
   else {
-    throw new SyntaxError(`Expected list item to start with "${LIST_ITEM_PREFIX}"`)
+    throw new SyntaxError(`Expected list item to start with "${LIST_ITEM_PREFIX}" (line ${line.lineNumber})`)
   }
 
   if (!afterHyphen.trim()) {
@@ -453,7 +476,7 @@ function* decodeListItemSync(
 
       if (nextLine.depth === followDepth && !nextLine.content.startsWith(LIST_ITEM_PREFIX)) {
         cursor.advanceSync()
-        yield* decodeKeyValueSync(nextLine.content, cursor, followDepth, options)
+        yield* decodeKeyValueSync(nextLine.content, cursor, followDepth, options, nextLine.lineNumber)
       }
       else {
         break
@@ -467,7 +490,7 @@ function* decodeListItemSync(
   // Check for object first field after hyphen
   if (isKeyValueContent(afterHyphen)) {
     yield { type: 'startObject' }
-    yield* decodeKeyValueSync(afterHyphen, cursor, baseDepth + 1, options)
+    yield* decodeKeyValueSync(afterHyphen, cursor, baseDepth + 1, options, line.lineNumber)
 
     // Read subsequent fields
     const followDepth = baseDepth + 1
@@ -479,7 +502,7 @@ function* decodeListItemSync(
 
       if (nextLine.depth === followDepth && !nextLine.content.startsWith(LIST_ITEM_PREFIX)) {
         cursor.advanceSync()
-        yield* decodeKeyValueSync(nextLine.content, cursor, followDepth, options)
+        yield* decodeKeyValueSync(nextLine.content, cursor, followDepth, options, nextLine.lineNumber)
       }
       else {
         break
@@ -562,7 +585,7 @@ export async function* decodeStream(
 
     // Root object
     yield { type: 'startObject' }
-    yield* decodeKeyValueAsync(first.content, cursor, 0, resolvedOptions)
+    yield* decodeKeyValueAsync(first.content, cursor, 0, resolvedOptions, first.lineNumber)
 
     // Process remaining object fields
     while (!(await cursor.atEnd())) {
@@ -571,7 +594,7 @@ export async function* decodeStream(
         break
       }
       await cursor.advance()
-      yield* decodeKeyValueAsync(line.content, cursor, 0, resolvedOptions)
+      yield* decodeKeyValueAsync(line.content, cursor, 0, resolvedOptions, line.lineNumber)
     }
 
     yield { type: 'endObject' }
@@ -587,6 +610,7 @@ async function* decodeKeyValueAsync(
   cursor: StreamingLineCursor,
   baseDepth: Depth,
   options: DecoderContext,
+  lineNumber?: number,
 ): AsyncGenerator<JsonStreamEvent> {
   // Check for array header first
   const arrayHeader = parseArrayHeaderLine(content, DEFAULT_DELIMITER)
@@ -597,7 +621,14 @@ async function* decodeKeyValueAsync(
   }
 
   // Regular key-value pair
-  const { key, isQuoted } = parseKeyToken(content, 0)
+  let keyResult: { key: string, isQuoted: boolean }
+  try {
+    keyResult = parseKeyToken(content, 0)
+  }
+  catch (error) {
+    throw addLineContext(error, lineNumber)
+  }
+  const { key, isQuoted } = keyResult
   const colonIndex = content.indexOf(COLON, key.length)
   const rest = colonIndex >= 0 ? content.slice(colonIndex + 1).trim() : ''
 
@@ -642,7 +673,7 @@ async function* decodeObjectFieldsAsync(
 
     if (line.depth === computedDepth) {
       await cursor.advance()
-      yield* decodeKeyValueAsync(line.content, cursor, computedDepth, options)
+      yield* decodeKeyValueAsync(line.content, cursor, computedDepth, options, line.lineNumber)
     }
     else {
       break
@@ -800,7 +831,7 @@ async function* decodeListItemAsync(
     afterHyphen = line.content.slice(LIST_ITEM_PREFIX.length)
   }
   else {
-    throw new SyntaxError(`Expected list item to start with "${LIST_ITEM_PREFIX}"`)
+    throw new SyntaxError(`Expected list item to start with "${LIST_ITEM_PREFIX}" (line ${line.lineNumber})`)
   }
 
   if (!afterHyphen.trim()) {
@@ -839,7 +870,7 @@ async function* decodeListItemAsync(
 
       if (nextLine.depth === followDepth && !nextLine.content.startsWith(LIST_ITEM_PREFIX)) {
         await cursor.advance()
-        yield* decodeKeyValueAsync(nextLine.content, cursor, followDepth, options)
+        yield* decodeKeyValueAsync(nextLine.content, cursor, followDepth, options, nextLine.lineNumber)
       }
       else {
         break
@@ -853,7 +884,7 @@ async function* decodeListItemAsync(
   // Check for object first field after hyphen
   if (isKeyValueContent(afterHyphen)) {
     yield { type: 'startObject' }
-    yield* decodeKeyValueAsync(afterHyphen, cursor, baseDepth + 1, options)
+    yield* decodeKeyValueAsync(afterHyphen, cursor, baseDepth + 1, options, line.lineNumber)
 
     // Read subsequent fields
     const followDepth = baseDepth + 1
@@ -865,7 +896,7 @@ async function* decodeListItemAsync(
 
       if (nextLine.depth === followDepth && !nextLine.content.startsWith(LIST_ITEM_PREFIX)) {
         await cursor.advance()
-        yield* decodeKeyValueAsync(nextLine.content, cursor, followDepth, options)
+        yield* decodeKeyValueAsync(nextLine.content, cursor, followDepth, options, nextLine.lineNumber)
       }
       else {
         break
