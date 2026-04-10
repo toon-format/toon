@@ -413,6 +413,107 @@ const value = decodeFromLines(rl)
 console.log(value)
 ```
 
+### Reviver Function
+
+The `reviver` option allows you to transform or filter values during decoding. It works similarly to `JSON.parse`'s reviver parameter, but with path tracking for more precise control.
+
+#### Type Signature
+
+```typescript
+type DecodeReviver = (
+  key: string,
+  value: JsonValue,
+  path: readonly (string | number)[]
+) => unknown
+```
+
+#### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `key` | `string` | Property name, array index (as string), or empty string for root |
+| `value` | `JsonValue` | The decoded value at this location |
+| `path` | `readonly (string \| number)[]` | Path from root to current value |
+
+#### Return Value
+
+- Return the value unchanged to keep it
+- Return a different value to replace it (will be normalized)
+- Return `undefined` to omit properties/array elements
+- For root value, `undefined` means "no change" (root cannot be omitted)
+
+#### Examples
+
+**Filtering sensitive data:**
+
+```typescript
+import { decode } from '@toon-format/toon'
+
+const toon = `user:
+  name: Alice
+  password: secret123
+  email: alice@example.com`
+
+function reviver(key, value) {
+  if (key === 'password')
+    return undefined
+  return value
+}
+
+console.log(decode(toon, { reviver }))
+// { user: { name: 'Alice', email: 'alice@example.com' } }
+```
+
+**Transforming values:**
+
+```typescript
+const toon = `user: alice
+role: admin`
+
+function reviver(key, value) {
+  if (typeof value === 'string')
+    return value.toUpperCase()
+  return value
+}
+
+console.log(decode(toon, { reviver }))
+// { user: 'ALICE', role: 'ADMIN' }
+```
+
+**Path-based transformations:**
+
+```typescript
+const toon = `metadata:
+  created: 2025-01-01
+user:
+  created: 2025-01-02`
+
+function reviver(key, value, path) {
+  // Add timezone info only to top-level metadata
+  if (path.length === 2 && path[0] === 'metadata' && key === 'created') {
+    return `${value}T00:00:00Z`
+  }
+  return value
+}
+
+console.log(decode(toon, { reviver }))
+// {
+//   metadata: { created: '2025-01-01T00:00:00Z' },
+//   user: { created: '2025-01-02' }
+// }
+```
+
+::: tip Reviver Execution Order
+The reviver is called in a depth-first, bottom-up manner:
+1. Each property/element is processed after its children
+2. The root value is processed last (key = `''`, path = `[]`)
+3. Values are normalized after replacement
+:::
+
+::: warning Array Indices as Strings
+Following `JSON.parse` behavior, array indices are passed as strings (`'0'`, `'1'`, `'2'`, etc.) to the reviver, not as numbers.
+:::
+
 ### Choosing the Right Decoder
 
 | Function | Input | Output | Async | Use When |
@@ -610,6 +711,7 @@ Configuration for [`decode()`](#decode-input-options) and [`decodeFromLines()`](
 |--------|------|---------|-------------|
 | `indentSize` | `number` | `2` | Expected number of spaces per indentation level |
 | `strict` | `boolean` | `true` | Enable strict validation (array counts, indentation, delimiter consistency) |
+| `reviver` | `DecodeReviver` | `undefined` | Optional hook to transform or omit values after decoding (see [Reviver Function](#reviver-function)) |
 
 By default (`strict: true`), the decoder validates input strictly:
 

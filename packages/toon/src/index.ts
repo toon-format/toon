@@ -2,6 +2,7 @@ import type { DecodeOptions, DecodeStreamOptions, EncodeOptions, JsonStreamEvent
 import { DEFAULT_DELIMITER } from './constants.ts'
 import { decodeStream as decodeStreamCore, decodeStreamSync as decodeStreamSyncCore } from './decode/decoders.ts'
 import { buildValueFromEvents } from './decode/event-builder.ts'
+import { applyReviver } from './decode/reviver.ts'
 import { encodeJsonValue } from './encode/encoders.ts'
 import { normalizeValue } from './encode/normalize.ts'
 import { applyReplacer } from './encode/replacer.ts'
@@ -14,6 +15,7 @@ export type { RawString } from './encode/raw-string.ts'
 export { escapeString } from './shared/string-utils.ts'
 export type {
   DecodeOptions,
+  DecodeReviver,
   DecodeStreamOptions,
   Delimiter,
   DelimiterKey,
@@ -137,7 +139,13 @@ export function encodeLines(input: unknown, options?: EncodeOptions): Iterable<s
 export function decodeFromLines(lines: Iterable<string>, options?: DecodeOptions): JsonValue {
   const resolvedOptions = resolveDecodeOptions(options)
   const events = decodeStreamSyncCore(lines, resolvedOptions)
-  return buildValueFromEvents(events)
+  const decodedValue = buildValueFromEvents(events)
+
+  if (resolvedOptions.reviver) {
+    return applyReviver(decodedValue, resolvedOptions.reviver)
+  }
+
+  return decodedValue
 }
 
 /**
@@ -213,5 +221,6 @@ function resolveDecodeOptions(options?: DecodeOptions): ResolvedDecodeOptions {
   return {
     indentSize: options?.indentSize ?? options?.indent ?? 2,
     strict: options?.strict ?? true,
+    reviver: options?.reviver,
   }
 }
