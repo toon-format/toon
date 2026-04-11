@@ -344,7 +344,7 @@ function findMatchingBrace(content: string, openIndex: number): number {
 
 /**
  * Parse field descriptors from the content inside `{...}` of a header.
- * Handles nested fields (field{sub1,sub2}) and strips type hint suffixes (field:type) for forward compatibility.
+ * Handles nested fields (field{sub1,sub2}).
  * Returns both structured descriptors and flat leaf field names.
  */
 export function parseFieldDescriptors(
@@ -354,7 +354,6 @@ export function parseFieldDescriptors(
   const descriptors: FieldDescriptor[] = []
   const flatNames: string[] = []
 
-  // Split top-level fields by delimiter, respecting nested braces
   const rawFields = splitTopLevel(content, delimiter)
 
   for (const raw of rawFields) {
@@ -362,12 +361,11 @@ export function parseFieldDescriptors(
     if (!trimmed)
       continue
 
-    // Check for nested fields: fieldName{sub1,sub2}
     const braceIdx = trimmed.indexOf(OPEN_BRACE)
     if (braceIdx !== -1) {
       const matchEnd = findMatchingBrace(trimmed, braceIdx)
       if (matchEnd !== -1) {
-        const name = parseFieldName(trimmed.slice(0, braceIdx))
+        const name = parseStringLiteral(trimmed.slice(0, braceIdx).trim())
         const subContent = trimmed.slice(braceIdx + 1, matchEnd)
         const subParsed = parseFieldDescriptors(subContent, delimiter)
         descriptors.push({ name, subfields: subParsed.descriptors })
@@ -376,8 +374,7 @@ export function parseFieldDescriptors(
       }
     }
 
-    // Check for type hint: fieldName:type
-    const { name } = parseFieldNameWithHint(trimmed)
+    const name = parseStringLiteral(trimmed)
     descriptors.push({ name })
     flatNames.push(name)
   }
@@ -435,40 +432,6 @@ function splitTopLevel(content: string, delimiter: Delimiter): string[] {
   }
 
   return parts
-}
-
-const TOON_TYPE_HINTS = new Set(['int', 'float', 'str', 'bool', 'enum', 'date', 'null'])
-
-/**
- * Parse a field name, stripping any type hint suffix (e.g., `:int`, `:str`).
- * Type hints are recognized and stripped for forward compatibility but not stored.
- */
-function parseFieldNameWithHint(raw: string): { name: string } {
-  const trimmed = raw.trim()
-
-  // Handle quoted field names
-  if (trimmed.startsWith(DOUBLE_QUOTE)) {
-    const closingIdx = findClosingQuote(trimmed, 0)
-    if (closingIdx !== -1) {
-      const name = parseStringLiteral(trimmed.slice(0, closingIdx + 1))
-      return { name }
-    }
-  }
-
-  // Unquoted: look for :type suffix and strip it
-  const colonIdx = trimmed.lastIndexOf(COLON)
-  if (colonIdx !== -1) {
-    const possibleHint = trimmed.slice(colonIdx + 1).trim()
-    if (TOON_TYPE_HINTS.has(possibleHint)) {
-      return { name: trimmed.slice(0, colonIdx).trim() }
-    }
-  }
-
-  return { name: parseStringLiteral(trimmed) }
-}
-
-function parseFieldName(raw: string): string {
-  return parseFieldNameWithHint(raw).name
 }
 
 // #endregion

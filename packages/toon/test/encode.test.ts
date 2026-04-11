@@ -49,5 +49,6 @@ function resolveEncodeOptions(options?: TestCase['options']): ResolvedEncodeOpti
     delimiter: options?.delimiter ?? DEFAULT_DELIMITER,
     keyFolding: options?.keyFolding ?? 'off',
     flattenDepth: options?.flattenDepth ?? Number.POSITIVE_INFINITY,
+    nestedTables: false,
   }
 }

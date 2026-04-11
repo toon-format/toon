@@ -71,17 +71,6 @@ describe('nested table syntax', () => {
       })
     })
 
-    it('strips type hints in nested headers (forward compat)', () => {
-      const toon = 'orders[2]{id:int,customer{name:str,country:str},total:float}:\n  1,Alice,DK,99.5\n  2,Bob,UK,149.0'
-      const result = decode(toon)
-      expect(result).toEqual({
-        orders: [
-          { id: 1, customer: { name: 'Alice', country: 'DK' }, total: 99.5 },
-          { id: 2, customer: { name: 'Bob', country: 'UK' }, total: 149 },
-        ],
-      })
-    })
-
     it('handles multiple nested fields', () => {
       const toon = 'data[1]{a{x,y},b{m,n}}:\n  1,2,3,4'
       const result = decode(toon)

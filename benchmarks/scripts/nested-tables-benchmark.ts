@@ -1,7 +1,7 @@
 /**
  * Benchmark comparing token counts for TOON with and without nested tables.
  *
- * Usage: node benchmarks/scripts/type-hints-benchmark.ts
+ * Usage: node benchmarks/scripts/nested-tables-benchmark.ts
  */
 import * as fsp from 'node:fs/promises'
 import * as path from 'node:path'
