@@ -1,4 +1,4 @@
-import type { ArrayHeaderInfo, DecodeStreamOptions, Depth, JsonPrimitive, JsonStreamEvent, ParsedLine } from '../types.ts'
+import type { ArrayHeaderInfo, DecodeStreamOptions, Depth, FieldDescriptor, JsonPrimitive, JsonStreamEvent, ParsedLine } from '../types.ts'
 import type { StreamingScanState } from './scanner.ts'
 import { COLON, DEFAULT_DELIMITER, LIST_ITEM_MARKER, LIST_ITEM_PREFIX } from '../constants.ts'
 import { findClosingQuote } from '../shared/string-utils.ts'
@@ -320,7 +320,7 @@ function* decodeTabularArraySync(
       assertExpectedCount(values.length, header.fields!.length, 'tabular row values', options)
 
       const primitives = mapRowValuesToPrimitives(values)
-      yield* yieldObjectFromFields(header.fields!, primitives)
+      yield* yieldObjectFromFields(header.fields!, primitives, header.fieldDescriptors)
 
       rowCount++
     }
@@ -706,7 +706,7 @@ async function* decodeTabularArrayAsync(
       assertExpectedCount(values.length, header.fields!.length, 'tabular row values', options)
 
       const primitives = mapRowValuesToPrimitives(values)
-      yield* yieldObjectFromFields(header.fields!, primitives)
+      yield* yieldObjectFromFields(header.fields!, primitives, header.fieldDescriptors)
 
       rowCount++
     }
@@ -887,11 +887,37 @@ async function* decodeListItemAsync(
 function* yieldObjectFromFields(
   fields: string[],
   primitives: JsonPrimitive[],
+  fieldDescriptors?: FieldDescriptor[],
 ): Generator<JsonStreamEvent> {
+  // If we have nested field descriptors, use them to reconstruct nested objects
+  if (fieldDescriptors && fieldDescriptors.some(d => d.subfields)) {
+    yield* yieldObjectFromDescriptors(fieldDescriptors, primitives, { offset: 0 })
+    return
+  }
+
   yield { type: 'startObject' }
   for (let i = 0; i < fields.length; i++) {
     yield { type: 'key', key: fields[i]! }
     yield { type: 'primitive', value: primitives[i]! }
+  }
+  yield { type: 'endObject' }
+}
+
+function* yieldObjectFromDescriptors(
+  descriptors: FieldDescriptor[],
+  primitives: JsonPrimitive[],
+  cursor: { offset: number },
+): Generator<JsonStreamEvent> {
+  yield { type: 'startObject' }
+  for (const desc of descriptors) {
+    yield { type: 'key', key: desc.name }
+    if (desc.subfields && desc.subfields.length > 0) {
+      yield* yieldObjectFromDescriptors(desc.subfields, primitives, cursor)
+    }
+    else {
+      yield { type: 'primitive', value: primitives[cursor.offset]! }
+      cursor.offset++
+    }
   }
   yield { type: 'endObject' }
 }

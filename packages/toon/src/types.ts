@@ -81,6 +81,14 @@ export interface EncodeOptions {
    * @default undefined
    */
   replacer?: EncodeReplacer
+  /**
+   * When true, flatten uniform nested objects in tabular arrays into inline
+   * nested field syntax: `{id,customer{name,country},total}`
+   * Nesting depth is limited to 2 levels. Non-uniform nested objects fall back
+   * to the default key-value syntax.
+   * @default false
+   */
+  nestedTables?: boolean
 }
 
 export type ResolvedEncodeOptions = Readonly<Required<Omit<EncodeOptions, 'replacer'>>> & Pick<EncodeOptions, 'replacer'>
@@ -140,6 +148,15 @@ export type JsonStreamEvent
 
 // #endregion
 
+// #region Field descriptors (for nested tables)
+
+export interface FieldDescriptor {
+  name: string
+  subfields?: FieldDescriptor[]
+}
+
+// #endregion
+
 // #region Decoder parsing types
 
 export interface ArrayHeaderInfo {
@@ -147,6 +164,7 @@ export interface ArrayHeaderInfo {
   length: number
   delimiter: Delimiter
   fields?: string[]
+  fieldDescriptors?: FieldDescriptor[]
 }
 
 export interface ParsedLine {

@@ -811,6 +811,50 @@ const transformed = encode(data, {
 > [!TIP]
 > The `replacer` function provides fine-grained control over encoding, similar to `JSON.stringify`'s replacer but with path tracking. See the [API Reference](https://toonformat.dev/reference/api#replacer-function) for more examples.
 
+**Nested tables (opt-in):**
+
+Flatten uniform nested objects into the tabular format for better token efficiency:
+
+```ts
+import { encode } from '@toon-format/toon'
+
+const data = {
+  orders: [
+    { id: 1, customer: { name: 'Alice', country: 'DK' }, total: 99 },
+    { id: 2, customer: { name: 'Bob', country: 'UK' }, total: 149 },
+  ]
+}
+
+console.log(encode(data, { nestedTables: true }))
+// orders[2]{id,customer{name,country},total}:
+//   1,Alice,DK,99
+//   2,Bob,UK,149
+```
+
+Nested tables require uniform nested objects (same keys in every row). Non-uniform structures fall back to list syntax automatically. Nesting depth is limited to 2 levels.
+
+**Encoder options:**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `indent` | `number` | `2` | Spaces per indentation level |
+| `delimiter` | `Delimiter` | `','` | Delimiter for tabular rows and inline arrays |
+| `keyFolding` | `'off' \| 'safe'` | `'off'` | Collapse single-key wrapper chains into dotted paths |
+| `flattenDepth` | `number` | `Infinity` | Max segments to fold when keyFolding is enabled |
+| `replacer` | `EncodeReplacer` | `undefined` | Transform or filter values during encoding |
+| `nestedTables` | `boolean` | `false` | Flatten uniform nested objects in tabular arrays |
+
+**Decoder options:**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `indent` | `number` | `2` | Spaces per indentation level |
+| `strict` | `boolean` | `true` | Enforce strict validation of array lengths and row counts |
+| `expandPaths` | `'off' \| 'safe'` | `'off'` | Reconstruct dotted keys into nested objects |
+
+> [!NOTE]
+> **Backwards compatibility:** `nestedTables` is opt-in. When disabled (default), encoder output is identical to previous versions. The decoder always handles nested table syntax regardless of options, so TOON with nested tables can be decoded by any conforming parser.
+
 ## Playgrounds
 
 Experiment with TOON format interactively using these tools for token comparison, format conversion, and validation.
