@@ -3,6 +3,7 @@ import { DEFAULT_DELIMITER } from './constants.ts'
 import { decodeStream as decodeStreamCore, decodeStreamSync as decodeStreamSyncCore } from './decode/decoders.ts'
 import { buildValueFromEvents } from './decode/event-builder.ts'
 import { expandPathsSafe } from './decode/expand.ts'
+import { applyReviver } from './decode/reviver.ts'
 import { encodeJsonValue } from './encode/encoders.ts'
 import { normalizeValue } from './encode/normalize.ts'
 import { applyReplacer } from './encode/replacer.ts'
@@ -10,6 +11,7 @@ import { applyReplacer } from './encode/replacer.ts'
 export { DEFAULT_DELIMITER, DELIMITERS } from './constants.ts'
 export type {
   DecodeOptions,
+  DecodeReviver,
   DecodeStreamOptions,
   Delimiter,
   DelimiterKey,
@@ -136,11 +138,16 @@ export function decodeFromLines(lines: Iterable<string>, options?: DecodeOptions
   }
 
   const events = decodeStreamSyncCore(lines, streamOptions)
-  const decodedValue = buildValueFromEvents(events)
+  let decodedValue = buildValueFromEvents(events)
 
   // Apply path expansion if enabled
   if (resolvedOptions.expandPaths === 'safe') {
-    return expandPathsSafe(decodedValue, resolvedOptions.strict)
+    decodedValue = expandPathsSafe(decodedValue, resolvedOptions.strict)
+  }
+
+  // Apply reviver if provided
+  if (resolvedOptions.reviver) {
+    return applyReviver(decodedValue, resolvedOptions.reviver)
   }
 
   return decodedValue
@@ -227,5 +234,6 @@ function resolveDecodeOptions(options?: DecodeOptions): ResolvedDecodeOptions {
     indent: options?.indent ?? 2,
     strict: options?.strict ?? true,
     expandPaths: options?.expandPaths ?? 'off',
+    reviver: options?.reviver,
   }
 }

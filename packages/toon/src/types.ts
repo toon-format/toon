@@ -89,6 +89,43 @@ export type ResolvedEncodeOptions = Readonly<Required<Omit<EncodeOptions, 'repla
 
 // #region Decoder options
 
+/**
+ * A function that transforms or filters values during decoding.
+ *
+ * Called for every value (root, object properties, array elements) after the decode is complete.
+ * Similar to `JSON.parse`'s reviver, but with path tracking.
+ *
+ * Values are visited bottom-up: leaf values first, then their parent containers.
+ *
+ * @param key - The property key or array index (as string). Empty string (`''`) for root value.
+ * @param value - The decoded `JsonValue` at this location.
+ * @param path - Array representing the path from root to this value.
+ *
+ * @returns The replacement value, or `undefined` to omit.
+ *          For root value, returning `undefined` means "no change" (don't omit root).
+ *
+ * @example
+ * ```ts
+ * // Parse date strings into Date-like objects
+ * const reviver = (key, value) => {
+ *   if (key === 'createdAt' && typeof value === 'string')
+ *     return { _date: value }
+ *   return value
+ * }
+ *
+ * // Remove internal fields
+ * const reviver = (key, value) => {
+ *   if (key.startsWith('_')) return undefined
+ *   return value
+ * }
+ * ```
+ */
+export type DecodeReviver = (
+  key: string,
+  value: JsonValue,
+  path: readonly (string | number)[],
+) => unknown
+
 export interface DecodeOptions {
   /**
    * Number of spaces per indentation level.
@@ -108,9 +145,17 @@ export interface DecodeOptions {
    * @default 'off'
    */
   expandPaths?: 'off' | 'safe'
+  /**
+   * A function to transform or filter values during decoding.
+   * Called for the root value and every nested property/element after decoding.
+   * Values are visited bottom-up (leaves first, then parents).
+   * Return `undefined` to omit properties/elements (root cannot be omitted).
+   * @default undefined
+   */
+  reviver?: DecodeReviver
 }
 
-export type ResolvedDecodeOptions = Readonly<Required<DecodeOptions>>
+export type ResolvedDecodeOptions = Readonly<Required<Omit<DecodeOptions, 'reviver'>>> & Pick<DecodeOptions, 'reviver'>
 
 /**
  * Options for streaming decode operations.
