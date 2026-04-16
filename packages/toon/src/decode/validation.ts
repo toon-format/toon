@@ -26,7 +26,7 @@ export function validateNoExtraListItems(
   expectedCount: number,
 ): void {
   if (nextLine?.depth === itemDepth && nextLine.content.startsWith(LIST_ITEM_PREFIX)) {
-    throw new RangeError(`Expected ${expectedCount} list array items, but found more`)
+    throw new RangeError(`Expected ${expectedCount} list array items, but found more (line ${nextLine.lineNumber})`)
   }
 }
 
@@ -43,7 +43,7 @@ export function validateNoExtraTabularRows(
     && !nextLine.content.startsWith(LIST_ITEM_PREFIX)
     && isDataRow(nextLine.content, header.delimiter)
   ) {
-    throw new RangeError(`Expected ${header.length} tabular rows, but found more`)
+    throw new RangeError(`Expected ${header.length} tabular rows, but found more (line ${nextLine.lineNumber})`)
   }
 }
 
