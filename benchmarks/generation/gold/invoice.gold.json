@@ -1,0 +1,1 @@
+{"number":"INV-2025-001","currency":"USD","customer":{"id":9,"name":"Ada"},"items":[{"sku":"A1","qty":2,"unit_price":9.99,"line_total":19.98},{"sku":"B2","qty":1,"unit_price":14.5,"line_total":14.5}],"totals":{"subtotal":34.48,"tax":6.9,"grand_total":41.38},"notes":"Thank you for your business."}
