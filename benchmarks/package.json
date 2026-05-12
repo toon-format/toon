@@ -13,6 +13,7 @@
     "@ai-sdk/openai": "^3.0.63",
     "@ai-sdk/provider": "^3.0.10",
     "@ai-sdk/xai": "^3.0.89",
+    "@bgotink/kdl": "^0.1.6",
     "@clack/prompts": "^1.3.0",
     "@faker-js/faker": "^10.4.0",
     "ai": "^6.0.177",
