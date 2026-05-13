@@ -136,8 +136,14 @@ export function parseBracketSegment(
     content = content.slice(0, -1)
   }
 
+  // Reject non-decimal-integer strings: hex (0x…), floats (3.7), leading
+  // junk, etc.  parseInt is too permissive — it accepts all of these.
+  if (!/^-?\d+$/.test(content)) {
+    throw new TypeError(`Invalid array length: ${seg}`)
+  }
+
   const length = Number.parseInt(content, 10)
-  if (Number.isNaN(length)) {
+  if (Number.isNaN(length) || length < 0) {
     throw new TypeError(`Invalid array length: ${seg}`)
   }
 
@@ -191,8 +197,10 @@ export function parseDelimitedValues(input: string, delimiter: Delimiter): strin
     i++
   }
 
-  // Add last value
-  if (valueBuffer || values.length > 0) {
+  // Add last value only when there is actual content or a non-trailing
+  // delimiter was seen.  A trailing delimiter (e.g. "a,b,") must not produce
+  // a spurious empty final element.
+  if (valueBuffer.trim() || values.length === 0) {
     values.push(valueBuffer.trim())
   }
 

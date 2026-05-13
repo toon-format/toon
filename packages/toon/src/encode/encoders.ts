@@ -183,6 +183,11 @@ export function* encodeArrayOfArraysAsListItemsLines(
       const arrayLine = encodeInlineArrayLine(arr, options.delimiter)
       yield indentedListItem(depth + 1, arrayLine, options.indent)
     }
+    else {
+      // Non-primitive sub-arrays fall back to the mixed/expanded path so no
+      // rows are silently dropped from the declared header count.
+      yield* encodeMixedArrayAsListItemsLines(undefined, arr, depth + 1, options)
+    }
   }
 }
 
