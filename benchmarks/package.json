@@ -5,7 +5,11 @@
   "scripts": {
     "benchmark:tokens": "node scripts/token-efficiency-benchmark.ts",
     "benchmark:accuracy": "node --env-file=.env scripts/accuracy-benchmark.ts",
-    "fetch:github-repos": "node scripts/fetch-github-repos.ts"
+    "fetch:github-repos": "node scripts/fetch-github-repos.ts",
+    "benchmark:tokenizers": "node --import tsx/esm tokenizer-comparison/run-benchmark.ts"
+  },
+  "dependencies": {
+    "tiktoken": "^1.0.22"
   },
   "devDependencies": {
     "@ai-sdk/anthropic": "^3.0.76",
@@ -22,6 +26,7 @@
     "ofetch": "^1.5.1",
     "p-map": "^7.0.4",
     "p-queue": "^9.2.0",
+    "tsx": "^4.21.0",
     "unstorage": "^1.17.5",
     "yaml": "^2.8.4"
   }

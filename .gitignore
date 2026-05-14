@@ -6,3 +6,6 @@ docs/.vitepress/dist
 docs/.vitepress/cache
 packages/toon/test/fixtures/*.json
 packages/toon/test/fixtures/*.toon
+benchmarks/results/tokenizer-comparison/
+benchmarks/tokenizer-comparison/temp/
+benchmarks/venv/
