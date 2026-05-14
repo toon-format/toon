@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "vitepress dev",
     "build": "vitepress build",
-    "preview": "vitepress preview"
+    "preview": "vitepress preview",
+    "test": "vitest run"
   },
   "devDependencies": {
     "@vueuse/core": "^14.3.0",
@@ -15,6 +16,8 @@
     "uint8array-extras": "^1.5.0",
     "unocss": "^66.6.8",
     "vitepress": "^1.6.4",
-    "vitepress-plugin-llms": "^1.12.2"
+    "vitepress-plugin-llms": "^1.12.2",
+    "vitest": "^4.1.5",
+    "yaml": "^2.8.4"
   }
 }

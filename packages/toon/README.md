@@ -817,7 +817,7 @@ Experiment with TOON format interactively using these tools for token comparison
 
 ### Official Playground
 
-The [TOON Playground](https://toonformat.dev/playground) lets you convert JSON to TOON in real-time, compare token counts, and share your experiments via URL.
+The [TOON Playground](https://toonformat.dev/playground) lets you convert JSON or YAML to TOON in real time, compare token counts, and share your experiments via URL.
 
 ### Community Playgrounds
 
