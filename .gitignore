@@ -9,3 +9,4 @@ packages/toon/test/fixtures/*.toon
 benchmarks/results/tokenizer-comparison/
 benchmarks/tokenizer-comparison/temp/
 benchmarks/venv/
+benchmarks/tokenizer-comparison/tokenizers/__pycache__/
