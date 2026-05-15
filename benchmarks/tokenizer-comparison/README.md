@@ -34,6 +34,43 @@ claims hold across the broader LLM ecosystem.
 | `event-logs` | 2000 semi-structured logs | Semi-uniform |
 | `nested-config` | Deeply nested config | Deep |
 
+## Reproducibility
+
+### Environment
+
+| Component | Version |
+|-----------|---------|
+| Node.js | v24.10.0 |
+| Python | 3.14 |
+| tiktoken | 1.0.22 |
+| gpt-tokenizer | 3.4.0 |
+| tsx | 4.21.0 |
+| transformers | 5.8.1 |
+| torch | 2.11.0 |
+| sentencepiece | 0.2.1 |
+
+### Models
+
+| Tokenizer | HuggingFace Model ID | Vocabulary | Revision |
+|-----------|---------------------|-----------|---------|
+| GPT | o200k_base (via gpt-tokenizer) | 200k | - |
+| Claude | cl100k_base (via tiktoken) | 100k | - |
+| LLaMA 3.1 | meta-llama/Llama-3.1-8B | 128k | main |
+| Mistral 7B | mistralai/Mistral-7B-v0.1 | 32k | main |
+| Qwen 2.5 | Qwen/Qwen2.5-7B | 150k | main |
+| Gemma 2 | google/gemma-2-2b | 256k | main |
+| Phi-3 | microsoft/Phi-3-mini-4k-instruct | 32k | main |
+
+### Bootstrap parameters
+
+| Parameter | Value |
+|-----------|-------|
+| N runs | 30 |
+| Sample ratio | 50% |
+| Confidence interval | 95% |
+| Excluded datasets | nested-config (single object, not bootstrappable) |
+
+
 ## Setup
 
 ### TypeScript dependencies
@@ -49,7 +86,7 @@ pnpm install
 cd benchmarks
 python3 -m venv venv
 source venv/bin/activate
-pip install transformers torch sentencepiece
+pip install transformers==5.8.1 torch==2.11.0 sentencepiece==0.2.1
 ```
 
 ### HuggingFace authentication

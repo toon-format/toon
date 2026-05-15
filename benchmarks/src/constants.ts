@@ -91,6 +91,9 @@ export const DATASET_NAMES = [
   'structural-validation-extra-rows',
   'structural-validation-width-mismatch',
   'structural-validation-missing-fields',
+  'huggingface-datasets',
+  'npm-packages',
+  'countries',
 ] as const
 
 /**

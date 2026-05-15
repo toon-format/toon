@@ -6,7 +6,8 @@
     "benchmark:tokens": "node scripts/token-efficiency-benchmark.ts",
     "benchmark:accuracy": "node --env-file=.env scripts/accuracy-benchmark.ts",
     "fetch:github-repos": "node scripts/fetch-github-repos.ts",
-    "benchmark:tokenizers": "node --import tsx/esm tokenizer-comparison/run-benchmark.ts"
+    "benchmark:tokenizers": "node --import tsx/esm tokenizer-comparison/run-benchmark.ts",
+    "fetch:realworld-datasets": "node --import tsx/esm scripts/fetch-realworld-datasets.ts"
   },
   "dependencies": {
     "tiktoken": "^1.0.22"

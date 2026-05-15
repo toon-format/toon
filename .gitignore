@@ -10,3 +10,6 @@ benchmarks/results/tokenizer-comparison/
 benchmarks/tokenizer-comparison/temp/
 benchmarks/venv/
 benchmarks/tokenizer-comparison/tokenizers/__pycache__/
+benchmarks/data/huggingface-datasets.json
+benchmarks/data/npm-packages.json
+benchmarks/data/countries.json

@@ -1,6 +1,9 @@
 import type { Dataset } from './types.ts'
 import { faker } from '@faker-js/faker'
+import countries from '../data/countries.json' with { type: 'json' }
 import githubRepos from '../data/github-repos.json' with { type: 'json' }
+import huggingfaceDatasets from '../data/huggingface-datasets.json' with { type: 'json' }
+import npmPackages from '../data/npm-packages.json' with { type: 'json' }
 
 // Seed for reproducibility
 faker.seed(12345)
@@ -750,4 +753,38 @@ export const TOKEN_EFFICIENCY_DATASETS: Dataset[] = [
   },
   // Nested config: 1 config (same as accuracy)
   nestedConfigDataset,
+
+  // HuggingFace datasets (real-world, nested)
+  {
+    name: 'huggingface-datasets',
+    description: 'Top 100 HuggingFace datasets by likes',
+    data: { datasets: huggingfaceDatasets },
+    metadata: {
+      supportsCSV: false,
+      structureClass: 'nested',
+      tabularEligibility: 33,
+    },
+  },
+  // NPM packages (real-world, nested)
+  {
+    name: 'npm-packages',
+    description: 'Top 100 NPM packages matching react',
+    data: { packages: npmPackages },
+    metadata: {
+      supportsCSV: false,
+      structureClass: 'nested',
+      tabularEligibility: 33,
+    },
+  },
+  // REST Countries (real-world, nested)
+  {
+    name: 'countries',
+    description: 'All world countries from REST Countries API',
+    data: { countries },
+    metadata: {
+      supportsCSV: false,
+      structureClass: 'nested',
+      tabularEligibility: 0,
+    },
+  },
 ]

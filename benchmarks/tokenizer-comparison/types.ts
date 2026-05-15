@@ -23,7 +23,19 @@ export interface TokenizerFormatResult {
   tokenCount: number
 }
 
+export interface BootstrapResult {
+  tokenizer: TokenizerName
+  format: FormatName
+  dataset: string
+  mean: number
+  std: number
+  ci95Low: number
+  ci95High: number
+  runs: number
+}
+
 export interface DatasetComparisonResult {
   dataset: string
   results: TokenizerFormatResult[]
+  bootstrap?: BootstrapResult[]
 }
