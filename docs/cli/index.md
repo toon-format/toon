@@ -1,8 +1,12 @@
+---
+description: Convert JSON to TOON and back from the command line, with token statistics, streaming, and delimiter options.
+---
+
 # Command Line Interface
 
-The `@toon-format/cli` package provides a command-line interface for encoding JSON to TOON and decoding TOON back to JSON. Use it to analyze token savings before integrating TOON into your application, or to process JSON data through TOON in shell pipelines using stdin/stdout with tools like curl and jq. The CLI supports token statistics, streaming for large datasets, and all encoding options available in the library.
+The `@toon-format/cli` package converts JSON to TOON and TOON to JSON. Use it to measure token savings before integrating TOON into your application, or to pipe JSON through TOON in shell workflows alongside tools like `curl` and `jq`. The CLI supports stdin/stdout, token statistics, streaming for large datasets, and every encoding option in the library.
 
-The CLI is built on top of the `@toon-format/toon` TypeScript implementation and adheres to the [latest specification](/reference/spec).
+The CLI is built on the `@toon-format/toon` TypeScript implementation and follows the [latest specification](/reference/spec).
 
 ## Usage
 
@@ -87,6 +91,8 @@ cat data.toon | toon --decode
 
 :::
 
+By convention, TOON files use the `.toon` extension and the provisional media type `text/toon` (see [spec §18.2](https://github.com/toon-format/spec/blob/main/SPEC.md#182-provisional-media-type)).
+
 ### Standard Input
 
 Omit the input argument or use `-` to read from stdin. This enables piping data directly from other commands:
@@ -104,20 +110,40 @@ cat data.toon | toon --decode
 
 ## Performance
 
-### Streaming Encoding
+### Streaming Output
 
-JSON→TOON conversions use line-by-line encoding internally, which avoids holding the entire TOON document in memory. This makes the CLI efficient for large datasets without requiring additional configuration.
+Both encoding and decoding operations use streaming output, writing incrementally without building the full output string in memory. This makes the CLI efficient for large datasets without requiring additional configuration.
+
+**JSON → TOON (Encode)**:
+
+- Streams TOON lines to output.
+- No full TOON string in memory.
+
+**TOON → JSON (Decode)**:
+
+- Uses the same event-based streaming decoder as the `decodeStream` API in `@toon-format/toon`.
+- Streams JSON tokens to output.
+- No full JSON string in memory.
+- When `--expandPaths safe` is enabled, falls back to non-streaming decode internally to apply deep-merge expansion before writing JSON.
+
+Process large files with minimal memory usage:
 
 ```bash
-# Encode large JSON file with minimal memory usage
+# Encode large JSON file
 toon huge-dataset.json -o output.toon
+
+# Decode large TOON file
+toon huge-dataset.toon -o output.json
 
 # Process millions of records efficiently via stdin
 cat million-records.json | toon > output.toon
+cat million-records.toon | toon --decode > output.json
 ```
 
-::: info Token Statistics
-When using the `--stats` flag, the CLI builds the full TOON string once to compute accurate token counts. For maximum memory efficiency on very large files, omit `--stats`.
+Peak memory usage scales with data depth, not total size. This allows processing arbitrarily large files as long as individual nested structures fit in memory.
+
+::: tip Token Statistics
+When using the `--stats` flag with encode, the CLI builds the full TOON string once to compute accurate token counts. For maximum memory efficiency on very large files, omit `--stats`.
 :::
 
 ## Options
@@ -127,13 +153,14 @@ When using the `--stats` flag, the CLI builds the full TOON string once to compu
 | `-o, --output <file>` | Output file path (prints to stdout if omitted) |
 | `-e, --encode` | Force encode mode (overrides auto-detection) |
 | `-d, --decode` | Force decode mode (overrides auto-detection) |
-| `--delimiter <char>` | Array delimiter: `,` (comma), `\t` (tab), `\|` (pipe) |
+| `--delimiter <char>` | Array delimiter: `,` (comma), tab character, `\|` (pipe). Pass tab as `$'\t'` in bash/zsh |
 | `--indent <number>` | Indentation size (default: `2`) |
 | `--stats` | Show token count estimates and savings (encode only) |
 | `--no-strict` | Disable strict validation when decoding |
-| `--key-folding <mode>` | Key folding mode: `off`, `safe` (default: `off`) |
-| `--flatten-depth <number>` | Maximum segments to fold (default: `Infinity`) – requires `--key-folding safe` |
-| `--expand-paths <mode>` | Path expansion mode: `off`, `safe` (default: `off`) |
+| `--keyFolding <mode>` | Key folding mode: `off`, `safe` (default: `off`) |
+| `--flattenDepth <number>` | Maximum segments to fold (default: `Infinity`) – requires `--keyFolding safe` |
+| `--expandPaths <mode>` | Path expansion mode: `off`, `safe` (default: `off`) |
+| `--verbose` | Show full stack traces and cause chains for errors (default: `false`) |
 
 ## Advanced Examples
 
@@ -158,12 +185,12 @@ Example output:
 
 ### Alternative Delimiters
 
-TOON supports three delimiters: comma (default), tab, and pipe. Alternative delimiters can provide additional token savings in specific contexts.
+TOON supports three delimiters: comma (default), tab, and pipe. Alternative delimiters can save additional tokens depending on the data.
 
 ::: code-group
 
-```bash [Tab-separated]
-toon data.json --delimiter "\t" -o output.toon
+```bash [Tab-separated (bash/zsh)]
+toon data.json --delimiter $'\t' -o output.toon
 ```
 
 ```bash [Pipe-separated]
@@ -171,6 +198,8 @@ toon data.json --delimiter "|" -o output.toon
 ```
 
 :::
+
+The `--delimiter` value must be the actual delimiter character. In bash/zsh, use `$'\t'` to pass a real tab; literal `"\t"` is rejected as an invalid delimiter.
 
 **Tab delimiter example:**
 
@@ -190,8 +219,9 @@ items[2]{id,name,qty,price}:
 
 :::
 
-> [!TIP]
-> Tab delimiters often tokenize more efficiently than commas and reduce the need for quote-escaping. Use `--delimiter "\t"` for maximum token savings on large tabular data.
+::: tip
+Tab delimiters often tokenize more efficiently than commas and reduce the need for quote-escaping. Use `--delimiter $'\t'` (bash/zsh) for maximum token savings on large tabular data. See [Delimiter Strategies](/reference/api#delimiter-strategies) for full guidance.
+:::
 
 ### Lenient Decoding
 
@@ -203,6 +233,36 @@ toon data.toon --no-strict -o output.json
 
 Lenient mode (`--no-strict`) disables strict validation checks like array count matching, indentation multiples, and delimiter consistency. Use this when you trust the input and want faster decoding.
 
+### Decode Error Output
+
+When a TOON document fails to parse, the CLI renders the offending line with a caret pointing at the first non-whitespace character. Tabs are shown as `→` so the caret column reflects what the decoder actually saw.
+
+For an input file that uses a tab to indent the second line (rendered here with `→`):
+
+```
+a:
+→b: 1
+```
+
+The CLI prints:
+
+```
+ ERROR  Failed to decode TOON at line 2: Tabs are not allowed in indentation in strict mode
+
+  2 | →b: 1
+      ^
+```
+
+The exit code is `1` on any error. Stack traces are suppressed by default. Pass `--verbose` to include the full stack and the underlying cause chain – useful when filing a bug report or diagnosing an unexpected error path:
+
+```bash
+cat broken.toon | toon --decode --verbose
+```
+
+::: tip Programmatic Access
+Decode errors are thrown as `ToonDecodeError` instances by the library. The CLI's caret rendering is built on the structured `line` and `source` fields exposed on that class. See the [Error Handling](/reference/api#error-handling) section of the API reference if you want the same diagnostic detail in your own code.
+:::
+
 ### Stdin Workflows
 
 The CLI integrates seamlessly with Unix pipes and other command-line tools:
@@ -212,7 +272,7 @@ The CLI integrates seamlessly with Unix pipes and other command-line tools:
 curl https://api.example.com/data | toon --stats
 
 # Process large dataset
-cat large-dataset.json | toon --delimiter "\t" > output.toon
+cat large-dataset.json | toon --delimiter $'\t' > output.toon
 
 # Chain with jq
 jq '.results' data.json | toon > filtered.toon
@@ -225,11 +285,11 @@ Collapse nested wrapper chains to reduce tokens (since spec v1.5):
 ::: code-group
 
 ```bash [Basic key folding]
-toon input.json --key-folding safe -o output.toon
+toon input.json --keyFolding safe -o output.toon
 ```
 
 ```bash [Limit folding depth]
-toon input.json --key-folding safe --flatten-depth 2 -o output.toon
+toon input.json --keyFolding safe --flattenDepth 2 -o output.toon
 ```
 
 :::
@@ -248,7 +308,7 @@ For data like:
 }
 ```
 
-With `--key-folding safe`, output becomes:
+With `--keyFolding safe`, output becomes:
 
 ```yaml
 data.metadata.items[2]: a,b
@@ -267,19 +327,19 @@ data:
 Reconstruct nested structure from folded keys when decoding:
 
 ```bash
-toon data.toon --expand-paths safe -o output.json
+toon data.toon --expandPaths safe -o output.json
 ```
 
-This pairs with `--key-folding safe` for lossless round-trips.
+This pairs with `--keyFolding safe` for lossless round-trips.
 
 ### Round-Trip Workflow
 
 ```bash
 # Encode with folding
-toon input.json --key-folding safe -o compressed.toon
+toon input.json --keyFolding safe -o compressed.toon
 
 # Decode with expansion (restores original structure)
-toon compressed.toon --expand-paths safe -o output.json
+toon compressed.toon --expandPaths safe -o output.json
 
 # Verify round-trip
 diff input.json output.json
@@ -291,5 +351,5 @@ Combine multiple options for maximum efficiency:
 
 ```bash
 # Key folding + tab delimiter + stats
-toon data.json --key-folding safe --delimiter "\t" --stats -o output.toon
+toon data.json --keyFolding safe --delimiter $'\t' --stats -o output.toon
 ```

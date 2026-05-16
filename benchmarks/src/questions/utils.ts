@@ -1,5 +1,5 @@
-import type { AnswerType, NormalizationOptions } from '../normalize'
-import type { Question } from '../types'
+import type { AnswerType, NormalizationOptions } from '../normalize.ts'
+import type { Question } from '../types.ts'
 
 // Constants for sampling strides
 export const SAMPLE_STRIDES = {

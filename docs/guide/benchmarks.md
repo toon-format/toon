@@ -1,3 +1,7 @@
+---
+description: Retrieval accuracy and token efficiency results for TOON across mixed-structure and flat-only tracks.
+---
+
 # Benchmarks
 
 The benchmarks on this page measure TOON's performance across two key dimensions:
@@ -49,17 +53,20 @@ Benchmarks test LLM comprehension across different input formats using 209 data 
 
 #### Efficiency Ranking (Accuracy per 1K Tokens)
 
-Each format's overall performance, balancing accuracy against token cost:
+Each format ranked by efficiency (accuracy percentage per 1,000 tokens):
 
 ```
-TOON           ████████████████████   26.9  │  73.9% acc  │  2,744 tokens
-JSON compact   █████████████████░░░   22.9  │  70.7% acc  │  3,081 tokens
-YAML           ██████████████░░░░░░   18.6  │  69.0% acc  │  3,719 tokens
-JSON           ███████████░░░░░░░░░   15.3  │  69.7% acc  │  4,545 tokens
-XML            ██████████░░░░░░░░░░   13.0  │  67.1% acc  │  5,167 tokens
+TOON           ████████████████████   27.7 acc%/1K tok  │  76.4% acc  │  2,759 tokens
+JSON compact   █████████████████░░░   23.7 acc%/1K tok  │  73.7% acc  │  3,104 tokens
+YAML           ██████████████░░░░░░   19.9 acc%/1K tok  │  74.5% acc  │  3,749 tokens
+JSON           ████████████░░░░░░░░   16.4 acc%/1K tok  │  75.0% acc  │  4,587 tokens
+XML            ██████████░░░░░░░░░░   13.8 acc%/1K tok  │  72.1% acc  │  5,221 tokens
 ```
 
-TOON achieves **73.9%** accuracy (vs JSON's 69.7%) while using **39.6% fewer tokens**.
+*Efficiency score = (Accuracy % ÷ Tokens) × 1,000. Higher is better.*
+
+> [!TIP]
+> TOON achieves **76.4%** accuracy (vs JSON's 75.0%) while using **39.9% fewer tokens**.
 
 **Note on CSV:** Excluded from ranking as it only supports 109 of 209 questions (flat tabular data only). While CSV is highly token-efficient for simple tabular data, it cannot represent nested structures that other formats handle.
 
@@ -76,13 +83,13 @@ claude-haiku-4-5-20251001
   JSON compact   ███████████░░░░░░░░░    55.0% (115/209)
   CSV            ██████████░░░░░░░░░░    50.5% (55/109)
 
-gemini-2.5-flash
-→ TOON           ██████████████████░░    87.6% (183/209)
-  CSV            █████████████████░░░    86.2% (94/109)
-  JSON compact   ████████████████░░░░    82.3% (172/209)
-  YAML           ████████████████░░░░    79.4% (166/209)
-  XML            ████████████████░░░░    79.4% (166/209)
-  JSON           ███████████████░░░░░    77.0% (161/209)
+gemini-3-flash-preview
+  XML            ████████████████████    98.1% (205/209)
+  JSON           ███████████████████░    97.1% (203/209)
+  YAML           ███████████████████░    97.1% (203/209)
+→ TOON           ███████████████████░    96.7% (202/209)
+  JSON compact   ███████████████████░    96.7% (202/209)
+  CSV            ███████████████████░    96.3% (105/109)
 
 gpt-5-nano
 → TOON           ██████████████████░░    90.9% (190/209)
@@ -92,30 +99,30 @@ gpt-5-nano
   YAML           █████████████████░░░    87.1% (182/209)
   XML            ████████████████░░░░    80.9% (169/209)
 
-grok-4-fast-non-reasoning
-→ TOON           ███████████░░░░░░░░░    57.4% (120/209)
-  JSON           ███████████░░░░░░░░░    55.5% (116/209)
-  JSON compact   ███████████░░░░░░░░░    54.5% (114/209)
-  YAML           ███████████░░░░░░░░░    53.6% (112/209)
-  XML            ███████████░░░░░░░░░    52.6% (110/209)
-  CSV            ██████████░░░░░░░░░░    52.3% (57/109)
+grok-4-1-fast-non-reasoning
+→ TOON           ████████████░░░░░░░░    58.4% (122/209)
+  YAML           ████████████░░░░░░░░    57.9% (121/209)
+  JSON           ███████████░░░░░░░░░    56.5% (118/209)
+  XML            ███████████░░░░░░░░░    54.1% (113/209)
+  JSON compact   ██████████░░░░░░░░░░    52.2% (109/209)
+  CSV            ██████████░░░░░░░░░░    51.4% (56/109)
 ```
 
-> [!TIP] Results Summary
-> TOON achieves **73.9% accuracy** (vs JSON's 69.7%) while using **39.6% fewer tokens** on these datasets.
+> [!TIP]
+> TOON achieves **76.4% accuracy** (vs JSON's 75.0%) while using **39.9% fewer tokens** on these datasets.
 
 <details>
 <summary><strong>Performance by dataset, model, and question type</strong></summary>
 
 #### Performance by Question Type
 
-| Question Type | TOON | JSON compact | JSON | CSV | YAML | XML |
+| Question Type | TOON | JSON | YAML | JSON compact | XML | CSV |
 | ------------- | ---- | ---- | ---- | ---- | ---- | ---- |
-| Field Retrieval | 99.6% | 99.3% | 99.3% | 100.0% | 98.2% | 98.9% |
-| Aggregation | 54.4% | 47.2% | 48.8% | 44.0% | 47.6% | 41.3% |
-| Filtering | 56.3% | 57.3% | 50.5% | 49.1% | 51.0% | 47.9% |
-| Structure Awareness | 88.0% | 83.0% | 83.0% | 85.9% | 80.0% | 80.0% |
-| Structural Validation | 70.0% | 45.0% | 50.0% | 80.0% | 60.0% | 80.0% |
+| Field Retrieval | 99.6% | 99.3% | 98.5% | 98.5% | 98.9% | 100.0% |
+| Aggregation | 61.9% | 61.9% | 59.9% | 58.3% | 54.4% | 50.9% |
+| Filtering | 56.8% | 53.1% | 56.3% | 55.2% | 51.6% | 50.9% |
+| Structure Awareness | 89.0% | 87.0% | 84.0% | 84.0% | 81.0% | 85.9% |
+| Structural Validation | 70.0% | 60.0% | 60.0% | 55.0% | 85.0% | 80.0% |
 
 #### Performance by Dataset
 
@@ -123,119 +130,119 @@ grok-4-fast-non-reasoning
 
 | Format | Accuracy | Tokens | Correct/Total |
 | ------ | -------- | ------ | ------------- |
-| `csv` | 72.0% | 2,352 | 118/164 |
-| `toon` | 73.8% | 2,518 | 121/164 |
-| `json-compact` | 69.5% | 3,953 | 114/164 |
-| `yaml` | 68.3% | 4,982 | 112/164 |
-| `json-pretty` | 68.3% | 6,360 | 112/164 |
-| `xml` | 69.5% | 7,324 | 114/164 |
+| `csv` | 73.2% | 2,334 | 120/164 |
+| `toon` | 73.2% | 2,498 | 120/164 |
+| `json-compact` | 73.8% | 3,924 | 121/164 |
+| `yaml` | 73.8% | 4,959 | 121/164 |
+| `json-pretty` | 73.8% | 6,331 | 121/164 |
+| `xml` | 74.4% | 7,296 | 122/164 |
 
 ##### E-commerce orders with nested structures
 
 | Format | Accuracy | Tokens | Correct/Total |
 | ------ | -------- | ------ | ------------- |
-| `toon` | 81.1% | 7,232 | 133/164 |
-| `json-compact` | 76.8% | 6,794 | 126/164 |
-| `yaml` | 75.6% | 8,347 | 124/164 |
-| `json-pretty` | 76.2% | 10,713 | 125/164 |
-| `xml` | 74.4% | 12,023 | 122/164 |
+| `toon` | 82.3% | 7,458 | 135/164 |
+| `json-compact` | 78.7% | 7,110 | 129/164 |
+| `yaml` | 79.9% | 8,755 | 131/164 |
+| `json-pretty` | 79.3% | 11,234 | 130/164 |
+| `xml` | 77.4% | 12,649 | 127/164 |
 
 ##### Time-series analytics data
 
 | Format | Accuracy | Tokens | Correct/Total |
 | ------ | -------- | ------ | ------------- |
-| `csv` | 73.3% | 1,406 | 88/120 |
-| `toon` | 72.5% | 1,548 | 87/120 |
-| `json-compact` | 71.7% | 2,349 | 86/120 |
-| `yaml` | 71.7% | 2,949 | 86/120 |
-| `json-pretty` | 68.3% | 3,676 | 82/120 |
-| `xml` | 68.3% | 4,384 | 82/120 |
+| `csv` | 75.0% | 1,411 | 90/120 |
+| `toon` | 78.3% | 1,553 | 94/120 |
+| `json-compact` | 74.2% | 2,354 | 89/120 |
+| `yaml` | 75.8% | 2,954 | 91/120 |
+| `json-pretty` | 75.0% | 3,681 | 90/120 |
+| `xml` | 72.5% | 4,389 | 87/120 |
 
 ##### Top 100 GitHub repositories
 
 | Format | Accuracy | Tokens | Correct/Total |
 | ------ | -------- | ------ | ------------- |
-| `toon` | 62.9% | 8,779 | 83/132 |
-| `csv` | 61.4% | 8,527 | 81/132 |
-| `yaml` | 59.8% | 13,141 | 79/132 |
-| `json-compact` | 55.3% | 11,464 | 73/132 |
-| `json-pretty` | 56.1% | 15,157 | 74/132 |
-| `xml` | 48.5% | 17,105 | 64/132 |
+| `csv` | 65.9% | 8,527 | 87/132 |
+| `toon` | 66.7% | 8,779 | 88/132 |
+| `yaml` | 65.2% | 13,141 | 86/132 |
+| `json-compact` | 59.8% | 11,464 | 79/132 |
+| `json-pretty` | 63.6% | 15,157 | 84/132 |
+| `xml` | 56.1% | 17,105 | 74/132 |
 
 ##### Semi-uniform event logs
 
 | Format | Accuracy | Tokens | Correct/Total |
 | ------ | -------- | ------ | ------------- |
-| `json-compact` | 63.3% | 4,819 | 76/120 |
-| `toon` | 57.5% | 5,799 | 69/120 |
-| `json-pretty` | 59.2% | 6,797 | 71/120 |
-| `yaml` | 48.3% | 5,827 | 58/120 |
-| `xml` | 46.7% | 7,709 | 56/120 |
+| `json-compact` | 68.3% | 4,839 | 82/120 |
+| `toon` | 65.0% | 5,819 | 78/120 |
+| `json-pretty` | 69.2% | 6,817 | 83/120 |
+| `yaml` | 61.7% | 5,847 | 74/120 |
+| `xml` | 58.3% | 7,729 | 70/120 |
 
 ##### Deeply nested configuration
 
 | Format | Accuracy | Tokens | Correct/Total |
 | ------ | -------- | ------ | ------------- |
-| `json-compact` | 92.2% | 574 | 107/116 |
-| `toon` | 95.7% | 666 | 111/116 |
-| `yaml` | 91.4% | 686 | 106/116 |
-| `json-pretty` | 94.0% | 932 | 109/116 |
-| `xml` | 92.2% | 1,018 | 107/116 |
+| `json-compact` | 90.5% | 568 | 105/116 |
+| `toon` | 94.8% | 655 | 110/116 |
+| `yaml` | 93.1% | 675 | 108/116 |
+| `json-pretty` | 92.2% | 924 | 107/116 |
+| `xml` | 91.4% | 1,013 | 106/116 |
 
 ##### Valid complete dataset (control)
 
 | Format | Accuracy | Tokens | Correct/Total |
 | ------ | -------- | ------ | ------------- |
-| `toon` | 100.0% | 544 | 4/4 |
-| `json-compact` | 100.0% | 795 | 4/4 |
-| `yaml` | 100.0% | 1,003 | 4/4 |
-| `json-pretty` | 100.0% | 1,282 | 4/4 |
-| `csv` | 25.0% | 492 | 1/4 |
-| `xml` | 0.0% | 1,467 | 0/4 |
+| `toon` | 100.0% | 535 | 4/4 |
+| `json-compact` | 100.0% | 787 | 4/4 |
+| `yaml` | 100.0% | 992 | 4/4 |
+| `json-pretty` | 100.0% | 1,274 | 4/4 |
+| `xml` | 25.0% | 1,462 | 1/4 |
+| `csv` | 0.0% | 483 | 0/4 |
 
 ##### Array truncated: 3 rows removed from end
 
 | Format | Accuracy | Tokens | Correct/Total |
 | ------ | -------- | ------ | ------------- |
-| `csv` | 100.0% | 425 | 4/4 |
-| `xml` | 100.0% | 1,251 | 4/4 |
-| `toon` | 0.0% | 474 | 0/4 |
-| `json-compact` | 0.0% | 681 | 0/4 |
-| `json-pretty` | 0.0% | 1,096 | 0/4 |
-| `yaml` | 0.0% | 859 | 0/4 |
+| `csv` | 100.0% | 413 | 4/4 |
+| `xml` | 100.0% | 1,243 | 4/4 |
+| `toon` | 0.0% | 462 | 0/4 |
+| `json-pretty` | 0.0% | 1,085 | 0/4 |
+| `yaml` | 0.0% | 843 | 0/4 |
+| `json-compact` | 0.0% | 670 | 0/4 |
 
 ##### Extra rows added beyond declared length
 
 | Format | Accuracy | Tokens | Correct/Total |
 | ------ | -------- | ------ | ------------- |
-| `csv` | 100.0% | 566 | 4/4 |
-| `toon` | 75.0% | 621 | 3/4 |
-| `xml` | 100.0% | 1,692 | 4/4 |
-| `yaml` | 75.0% | 1,157 | 3/4 |
-| `json-compact` | 50.0% | 917 | 2/4 |
-| `json-pretty` | 50.0% | 1,476 | 2/4 |
+| `csv` | 100.0% | 550 | 4/4 |
+| `toon` | 75.0% | 605 | 3/4 |
+| `json-compact` | 75.0% | 901 | 3/4 |
+| `xml` | 100.0% | 1,678 | 4/4 |
+| `yaml` | 75.0% | 1,138 | 3/4 |
+| `json-pretty` | 50.0% | 1,460 | 2/4 |
 
 ##### Inconsistent field count (missing salary in row 10)
 
 | Format | Accuracy | Tokens | Correct/Total |
 | ------ | -------- | ------ | ------------- |
-| `csv` | 75.0% | 489 | 3/4 |
-| `yaml` | 100.0% | 996 | 4/4 |
-| `toon` | 100.0% | 1,019 | 4/4 |
-| `json-compact` | 75.0% | 790 | 3/4 |
-| `xml` | 100.0% | 1,458 | 4/4 |
-| `json-pretty` | 75.0% | 1,274 | 3/4 |
+| `csv` | 100.0% | 480 | 4/4 |
+| `json-compact` | 100.0% | 782 | 4/4 |
+| `yaml` | 100.0% | 985 | 4/4 |
+| `toon` | 100.0% | 1,008 | 4/4 |
+| `json-pretty` | 100.0% | 1,266 | 4/4 |
+| `xml` | 100.0% | 1,453 | 4/4 |
 
 ##### Missing required fields (no email in multiple rows)
 
 | Format | Accuracy | Tokens | Correct/Total |
 | ------ | -------- | ------ | ------------- |
-| `csv` | 100.0% | 329 | 4/4 |
-| `xml` | 100.0% | 1,411 | 4/4 |
-| `toon` | 75.0% | 983 | 3/4 |
-| `yaml` | 25.0% | 960 | 1/4 |
-| `json-pretty` | 25.0% | 1,230 | 1/4 |
-| `json-compact` | 0.0% | 755 | 0/4 |
+| `csv` | 100.0% | 340 | 4/4 |
+| `xml` | 100.0% | 1,409 | 4/4 |
+| `toon` | 75.0% | 974 | 3/4 |
+| `json-pretty` | 50.0% | 1,225 | 2/4 |
+| `yaml` | 25.0% | 951 | 1/4 |
+| `json-compact` | 0.0% | 750 | 0/4 |
 
 #### Performance by Model
 
@@ -250,16 +257,16 @@ grok-4-fast-non-reasoning
 | `json-compact` | 55.0% | 115/209 |
 | `csv` | 50.5% | 55/109 |
 
-##### gemini-2.5-flash
+##### gemini-3-flash-preview
 
 | Format | Accuracy | Correct/Total |
 | ------ | -------- | ------------- |
-| `toon` | 87.6% | 183/209 |
-| `csv` | 86.2% | 94/109 |
-| `json-compact` | 82.3% | 172/209 |
-| `yaml` | 79.4% | 166/209 |
-| `xml` | 79.4% | 166/209 |
-| `json-pretty` | 77.0% | 161/209 |
+| `xml` | 98.1% | 205/209 |
+| `json-pretty` | 97.1% | 203/209 |
+| `yaml` | 97.1% | 203/209 |
+| `toon` | 96.7% | 202/209 |
+| `json-compact` | 96.7% | 202/209 |
+| `csv` | 96.3% | 105/109 |
 
 ##### gpt-5-nano
 
@@ -272,16 +279,16 @@ grok-4-fast-non-reasoning
 | `yaml` | 87.1% | 182/209 |
 | `xml` | 80.9% | 169/209 |
 
-##### grok-4-fast-non-reasoning
+##### grok-4-1-fast-non-reasoning
 
 | Format | Accuracy | Correct/Total |
 | ------ | -------- | ------------- |
-| `toon` | 57.4% | 120/209 |
-| `json-pretty` | 55.5% | 116/209 |
-| `json-compact` | 54.5% | 114/209 |
-| `yaml` | 53.6% | 112/209 |
-| `xml` | 52.6% | 110/209 |
-| `csv` | 52.3% | 57/109 |
+| `toon` | 58.4% | 122/209 |
+| `yaml` | 57.9% | 121/209 |
+| `json-pretty` | 56.5% | 118/209 |
+| `xml` | 54.1% | 113/209 |
+| `json-compact` | 52.2% | 109/209 |
+| `csv` | 51.4% | 56/109 |
 
 </details>
 
@@ -340,13 +347,13 @@ Eleven datasets designed to test different structural patterns and validation ca
 
 #### Evaluation Process
 
-1. **Format conversion**: Each dataset is converted to all 6 formats (TOON, JSON compact, JSON, CSV, YAML, XML).
+1. **Format conversion**: Each dataset is converted to all 6 formats (TOON, JSON, YAML, JSON compact, XML, CSV).
 2. **Query LLM**: Each model receives formatted data + question in a prompt and extracts the answer.
 3. **Validate deterministically**: Answers are validated using type-aware comparison (e.g., `50000` = `$50,000`, `Engineering` = `engineering`, `2025-01-01` = `January 1, 2025`) without requiring an LLM judge.
 
 #### Models & Configuration
 
-- **Models tested**: `claude-haiku-4-5-20251001`, `gemini-2.5-flash`, `gpt-5-nano`, `grok-4-fast-non-reasoning`
+- **Models tested**: `claude-haiku-4-5-20251001`, `gemini-3-flash-preview`, `gpt-5-nano`, `grok-4-1-fast-non-reasoning`
 - **Token counting**: Using `gpt-tokenizer` with `o200k_base` encoding (GPT-5 tokenizer)
 - **Temperature**: Not set (models use their defaults)
 - **Total evaluations**: 209 questions × 6 formats × 4 models = 5,016 LLM calls
@@ -368,34 +375,34 @@ Datasets with nested or semi-uniform structures. CSV excluded as it cannot prope
 ```
 🛒 E-commerce orders with nested structures  ┊  Tabular: 33%
    │
-   TOON                █████████████░░░░░░░    72,771 tokens
-   ├─ vs JSON          (−33.1%)               108,806 tokens
-   ├─ vs JSON compact  (+5.5%)                 68,975 tokens
-   ├─ vs YAML          (−14.2%)                84,780 tokens
-   └─ vs XML           (−40.5%)               122,406 tokens
+   TOON                █████████████░░░░░░░    73,126 tokens
+   ├─ vs JSON          (−33.3%)               109,599 tokens
+   ├─ vs JSON compact  (+5.3%)                 69,459 tokens
+   ├─ vs YAML          (−14.4%)                85,415 tokens
+   └─ vs XML           (−40.7%)               123,344 tokens
 
 🧾 Semi-uniform event logs  ┊  Tabular: 50%
    │
-   TOON                █████████████████░░░   153,211 tokens
-   ├─ vs JSON          (−15.0%)               180,176 tokens
-   ├─ vs JSON compact  (+19.9%)               127,731 tokens
-   ├─ vs YAML          (−0.8%)                154,505 tokens
-   └─ vs XML           (−25.2%)               204,777 tokens
+   TOON                █████████████████░░░   154,084 tokens
+   ├─ vs JSON          (−15.0%)               181,201 tokens
+   ├─ vs JSON compact  (+19.9%)               128,529 tokens
+   ├─ vs YAML          (−0.8%)                155,397 tokens
+   └─ vs XML           (−25.2%)               205,859 tokens
 
 🧩 Deeply nested configuration  ┊  Tabular: 0%
    │
-   TOON                ██████████████░░░░░░       631 tokens
-   ├─ vs JSON          (−31.3%)                   919 tokens
-   ├─ vs JSON compact  (+11.9%)                   564 tokens
-   ├─ vs YAML          (−6.2%)                    673 tokens
-   └─ vs XML           (−37.4%)                 1,008 tokens
+   TOON                ██████████████░░░░░░       620 tokens
+   ├─ vs JSON          (−31.9%)                   911 tokens
+   ├─ vs JSON compact  (+11.1%)                   558 tokens
+   ├─ vs YAML          (−6.3%)                    662 tokens
+   └─ vs XML           (−38.2%)                 1,003 tokens
 
 ──────────────────────────────────── Total ────────────────────────────────────
-   TOON                ████████████████░░░░   226,613 tokens
-   ├─ vs JSON          (−21.8%)               289,901 tokens
-   ├─ vs JSON compact  (+14.9%)               197,270 tokens
-   ├─ vs YAML          (−5.6%)                239,958 tokens
-   └─ vs XML           (−31.0%)               328,191 tokens
+   TOON                ████████████████░░░░   227,830 tokens
+   ├─ vs JSON          (−21.9%)               291,711 tokens
+   ├─ vs JSON compact  (+14.7%)               198,546 tokens
+   ├─ vs YAML          (−5.7%)                241,474 tokens
+   └─ vs XML           (−31.0%)               330,206 tokens
 ```
 
 #### Flat-Only Track
@@ -405,38 +412,38 @@ Datasets with flat tabular structures where CSV is applicable.
 ```
 👥 Uniform employee records  ┊  Tabular: 100%
    │
-   CSV                 ███████████████████░    46,954 tokens
-   TOON                ████████████████████    49,831 tokens   (+6.1% vs CSV)
-   ├─ vs JSON          (−60.7%)               126,860 tokens
-   ├─ vs JSON compact  (−36.8%)                78,856 tokens
-   ├─ vs YAML          (−50.0%)                99,706 tokens
-   └─ vs XML           (−66.0%)               146,444 tokens
+   CSV                 ███████████████████░    47,102 tokens
+   TOON                ████████████████████    49,919 tokens   (+6.0% vs CSV)
+   ├─ vs JSON          (−60.7%)               127,063 tokens
+   ├─ vs JSON compact  (−36.9%)                79,059 tokens
+   ├─ vs YAML          (−50.1%)               100,011 tokens
+   └─ vs XML           (−65.9%)               146,579 tokens
 
 📈 Time-series analytics data  ┊  Tabular: 100%
    │
-   CSV                 ██████████████████░░     8,388 tokens
-   TOON                ████████████████████     9,120 tokens   (+8.7% vs CSV)
-   ├─ vs JSON          (−59.0%)                22,250 tokens
-   ├─ vs JSON compact  (−35.8%)                14,216 tokens
-   ├─ vs YAML          (−48.9%)                17,863 tokens
-   └─ vs XML           (−65.7%)                26,621 tokens
+   CSV                 ██████████████████░░     8,383 tokens
+   TOON                ████████████████████     9,115 tokens   (+8.7% vs CSV)
+   ├─ vs JSON          (−59.0%)                22,245 tokens
+   ├─ vs JSON compact  (−35.9%)                14,211 tokens
+   ├─ vs YAML          (−49.0%)                17,858 tokens
+   └─ vs XML           (−65.8%)                26,616 tokens
 
 ⭐ Top 100 GitHub repositories  ┊  Tabular: 100%
    │
-   CSV                 ███████████████████░     8,513 tokens
-   TOON                ████████████████████     8,745 tokens   (+2.7% vs CSV)
-   ├─ vs JSON          (−42.3%)                15,145 tokens
-   ├─ vs JSON compact  (−23.7%)                11,455 tokens
-   ├─ vs YAML          (−33.4%)                13,129 tokens
-   └─ vs XML           (−48.8%)                17,095 tokens
+   CSV                 ███████████████████░     8,512 tokens
+   TOON                ████████████████████     8,744 tokens   (+2.7% vs CSV)
+   ├─ vs JSON          (−42.3%)                15,144 tokens
+   ├─ vs JSON compact  (−23.7%)                11,454 tokens
+   ├─ vs YAML          (−33.4%)                13,128 tokens
+   └─ vs XML           (−48.9%)                17,095 tokens
 
 ──────────────────────────────────── Total ────────────────────────────────────
-   CSV                 ███████████████████░    63,855 tokens
-   TOON                ████████████████████    67,696 tokens   (+6.0% vs CSV)
-   ├─ vs JSON          (−58.8%)               164,255 tokens
-   ├─ vs JSON compact  (−35.2%)               104,527 tokens
-   ├─ vs YAML          (−48.2%)               130,698 tokens
-   └─ vs XML           (−64.4%)               190,160 tokens
+   CSV                 ███████████████████░    63,997 tokens
+   TOON                ████████████████████    67,778 tokens   (+5.9% vs CSV)
+   ├─ vs JSON          (−58.8%)               164,452 tokens
+   ├─ vs JSON compact  (−35.3%)               104,724 tokens
+   ├─ vs YAML          (−48.3%)               130,997 tokens
+   └─ vs XML           (−64.4%)               190,290 tokens
 ```
 
 <details>
@@ -446,64 +453,64 @@ Datasets with flat tabular structures where CSV is applicable.
 
 **Savings:** 13,130 tokens (59.0% reduction vs JSON)
 
-**JSON** (22,250 tokens):
+**JSON** (22,245 tokens):
 
 ```json
 {
   "metrics": [
     {
       "date": "2025-01-01",
-      "views": 5715,
-      "clicks": 211,
-      "conversions": 28,
-      "revenue": 7976.46,
-      "bounceRate": 0.47
+      "views": 6138,
+      "clicks": 174,
+      "conversions": 12,
+      "revenue": 2712.49,
+      "bounceRate": 0.35
     },
     {
       "date": "2025-01-02",
-      "views": 7103,
-      "clicks": 393,
-      "conversions": 28,
-      "revenue": 8360.53,
-      "bounceRate": 0.32
+      "views": 4616,
+      "clicks": 274,
+      "conversions": 34,
+      "revenue": 9156.29,
+      "bounceRate": 0.56
     },
     {
       "date": "2025-01-03",
-      "views": 7248,
-      "clicks": 378,
-      "conversions": 24,
-      "revenue": 3212.57,
-      "bounceRate": 0.5
+      "views": 4460,
+      "clicks": 143,
+      "conversions": 8,
+      "revenue": 1317.98,
+      "bounceRate": 0.59
     },
     {
       "date": "2025-01-04",
-      "views": 2927,
-      "clicks": 77,
-      "conversions": 11,
-      "revenue": 1211.69,
-      "bounceRate": 0.62
+      "views": 4740,
+      "clicks": 125,
+      "conversions": 13,
+      "revenue": 2934.77,
+      "bounceRate": 0.37
     },
     {
       "date": "2025-01-05",
-      "views": 3530,
-      "clicks": 82,
-      "conversions": 8,
-      "revenue": 462.77,
-      "bounceRate": 0.56
+      "views": 6428,
+      "clicks": 369,
+      "conversions": 19,
+      "revenue": 1317.24,
+      "bounceRate": 0.3
     }
   ]
 }
 ```
 
-**TOON** (9,120 tokens):
+**TOON** (9,115 tokens):
 
 ```
 metrics[5]{date,views,clicks,conversions,revenue,bounceRate}:
-  2025-01-01,5715,211,28,7976.46,0.47
-  2025-01-02,7103,393,28,8360.53,0.32
-  2025-01-03,7248,378,24,3212.57,0.5
-  2025-01-04,2927,77,11,1211.69,0.62
-  2025-01-05,3530,82,8,462.77,0.56
+  2025-01-01,6138,174,12,2712.49,0.35
+  2025-01-02,4616,274,34,9156.29,0.56
+  2025-01-03,4460,143,8,1317.98,0.59
+  2025-01-04,4740,125,13,2934.77,0.37
+  2025-01-05,6428,369,19,1317.24,0.3
 ```
 
 ---
@@ -512,7 +519,7 @@ metrics[5]{date,views,clicks,conversions,revenue,bounceRate}:
 
 **Savings:** 6,400 tokens (42.3% reduction vs JSON)
 
-**JSON** (15,145 tokens):
+**JSON** (15,144 tokens):
 
 ```json
 {
@@ -560,7 +567,7 @@ metrics[5]{date,views,clicks,conversions,revenue,bounceRate}:
 }
 ```
 
-**TOON** (8,745 tokens):
+**TOON** (8,744 tokens):
 
 ```
 repositories[3]{id,name,repo,description,createdAt,updatedAt,pushedAt,stars,watchers,forks,defaultBranch}:
@@ -572,3 +579,8 @@ repositories[3]{id,name,repo,description,createdAt,updatedAt,pushedAt,stars,watc
 </details>
 
 <!-- /automd -->
+
+## Related Resources
+
+- [Formal Byte-Level Model](/reference/efficiency-formalization) – Mathematical analysis of byte efficiency compared to JSON
+- [Specification](/reference/spec) – Formal TOON specification

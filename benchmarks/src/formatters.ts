@@ -1,8 +1,8 @@
-import type { Dataset } from './types'
+import type { Dataset } from './types.ts'
 import { stringify as stringifyCSV } from 'csv-stringify/sync'
 import { XMLBuilder } from 'fast-xml-parser'
 import { stringify as stringifyYAML } from 'yaml'
-import { encode as encodeToon } from '../../packages/toon/src'
+import { encode as encodeToon } from '../../packages/toon/src/index.ts'
 
 /**
  * Format converters registry

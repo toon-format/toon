@@ -1,6 +1,10 @@
+---
+description: JSON-to-TOON mappings at a glance for objects, arrays, quoting, key folding, and type conversions.
+---
+
 # Syntax Cheatsheet
 
-Quick reference for mapping JSON to TOON format. For rigorous, normative syntax rules and edge cases, see the [specification](/reference/spec).
+Quick reference for mapping JSON to TOON format. For rigorous, normative syntax rules and edge cases, see the [Specification](/reference/spec).
 
 ## Objects
 
@@ -78,7 +82,7 @@ items[2]{id,qty}:
 
 :::
 
-## Mixed / Non-Uniform Arrays
+## Mixed and Non-Uniform Arrays
 
 ::: code-group
 
@@ -93,6 +97,28 @@ items[3]:
   - 1
   - a: 1
   - x
+```
+
+:::
+
+> [!NOTE]
+> When a list-item object has a tabular array as its first field, the tabular header appears on the hyphen line. Rows are indented two levels deeper than the hyphen, and other fields are indented one level deeper. This is the canonical encoding for this pattern.
+
+::: code-group
+
+```yaml [Multi-field object]
+items[1]:
+  - users[2]{id,name}:
+      1,Ada
+      2,Bob
+    status: active
+```
+
+```yaml [Single-field object]
+items[1]:
+  - users[2]{id,name}:
+      1,Ada
+      2,Bob
 ```
 
 :::
@@ -330,4 +356,6 @@ See [Format Overview – Key Folding](/guide/format-overview#key-folding-optiona
 | `BigInt` (safe range) | Number |
 | `BigInt` (out of range) | Quoted decimal string |
 | `Date` | ISO string (quoted) |
+| `Set` | Array of normalized values |
+| `Map` | Object with `String(key)` keys |
 | `undefined`, `function`, `symbol` | `null` |

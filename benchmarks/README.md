@@ -3,7 +3,7 @@
 Benchmarks measuring TOON's **token efficiency** and **retrieval accuracy** compared to JSON, XML, YAML, and CSV.
 
 > [!NOTE]
-> Results are automatically embedded in the [main README](../README.md#benchmarks). This guide focuses on running the benchmarks locally.
+> Results are automatically embedded in the [main README](https://github.com/toon-format/toon/#benchmarks). This guide focuses on running the benchmarks locally.
 
 ## Quick Start
 
@@ -44,11 +44,11 @@ Tests how well LLMs can answer questions about data in different formats (TOON, 
 
 1. Edit [`src/evaluate.ts`](./src/evaluate.ts) and add models to the exported `models` array:
    ```ts
-   export const models: LanguageModelV2[] = [
+   export const models: LanguageModelV3[] = [
      openai('gpt-5-nano'),
      anthropic('claude-haiku-4-5-20251001'),
-     google('gemini-2.5-flash'),
-     xai('grok-4-fast-non-reasoning'),
+     google('gemini-3-flash-preview'),
+     xai('grok-4-1-fast-non-reasoning'),
      // Add your models here
    ]
    ```

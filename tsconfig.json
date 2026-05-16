@@ -1,17 +1,15 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "rootDir": ".",
+    "moduleDetection": "force",
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "resolveJsonModule": true,
-    "strict": true,
+    "types": ["node"],
+    "allowImportingTsExtensions": true,
     "noUncheckedIndexedAccess": true,
     "declaration": true,
     "noEmit": true,
-    "esModuleInterop": true,
     "isolatedDeclarations": true,
-    "isolatedModules": true,
     "verbatimModuleSyntax": true,
     "erasableSyntaxOnly": true,
     "skipLibCheck": true

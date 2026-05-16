@@ -11,22 +11,22 @@ hero:
     alt: TOON Logo
   actions:
     - theme: brand
-      text: Get Started
+      text: What is TOON?
       link: /guide/getting-started
     - theme: alt
       text: Benchmarks
       link: /guide/benchmarks
     - theme: alt
+      text: Playground
+      link: /playground
+    - theme: alt
       text: CLI
       link: /cli/
-    - theme: alt
-      text: Spec v2.0
-      link: /reference/spec
 
 features:
   - title: Token-Efficient & Accurate
     icon: 📊
-    details: TOON reaches 74% accuracy (vs JSON's 70%) while using ~40% fewer tokens in mixed-structure benchmarks across 4 models.
+    details: TOON reaches 76.4% accuracy (vs JSON's 75.0%) while using ~40% fewer tokens in mixed-structure benchmarks across 4 models.
     link: /guide/benchmarks
   - title: JSON Data Model
     icon: 🔁

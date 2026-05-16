@@ -1,7 +1,7 @@
-import type { JsonValue, ResolvedEncodeOptions } from '../types'
-import { DOT } from '../constants'
-import { isIdentifierSegment } from '../shared/validation'
-import { isEmptyObject, isJsonObject } from './normalize'
+import type { JsonValue, ResolvedEncodeOptions } from '../types.ts'
+import { DOT } from '../constants.ts'
+import { isIdentifierSegment } from '../shared/validation.ts'
+import { isEmptyObject, isJsonObject } from './normalize.ts'
 
 // #region Key folding helpers
 

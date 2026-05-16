@@ -1,4 +1,4 @@
-import { BACKSLASH, CARRIAGE_RETURN, DOUBLE_QUOTE, NEWLINE, TAB } from '../constants'
+import { BACKSLASH, CARRIAGE_RETURN, DOUBLE_QUOTE, NEWLINE, TAB } from '../constants.ts'
 
 /**
  * Escapes special characters in a string for encoding.

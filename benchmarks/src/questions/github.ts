@@ -1,7 +1,7 @@
-import type { Repository } from '../datasets'
-import type { Question } from '../types'
-import { QUESTION_LIMITS, QUESTION_THRESHOLDS } from '../constants'
-import { QuestionBuilder, rotateQuestions, SAMPLE_STRIDES } from './utils'
+import type { Repository } from '../datasets.ts'
+import type { Question } from '../types.ts'
+import { QUESTION_LIMITS, QUESTION_THRESHOLDS } from '../constants.ts'
+import { QuestionBuilder, rotateQuestions, SAMPLE_STRIDES } from './utils.ts'
 
 /**
  * Generate GitHub repository questions

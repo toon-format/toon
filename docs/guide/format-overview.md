@@ -1,6 +1,10 @@
+---
+description: TOON syntax with concrete examples – objects, arrays, headers, key folding, and quoting rules.
+---
+
 # Format Overview
 
-TOON syntax reference with concrete examples. See [Getting Started](/guide/getting-started) for introduction.
+TOON syntax reference with concrete examples. See [Getting Started](/guide/getting-started) for an introduction.
 
 ## Data Model
 
@@ -107,6 +111,40 @@ items[3]:
 
 Each element starts with `- ` at one indentation level deeper than the parent array header.
 
+### Objects as List Items
+
+When an array element is an object, it appears as a list item:
+
+```yaml
+items[2]:
+  - id: 1
+    name: First
+  - id: 2
+    name: Second
+    extra: true
+```
+
+When a tabular array is the first field of a list-item object, the tabular header appears on the hyphen line, with rows indented two levels deeper and other fields indented one level deeper:
+
+```yaml
+items[1]:
+  - users[2]{id,name}:
+      1,Ada
+      2,Bob
+    status: active
+```
+
+When the object has only a single tabular field, the same pattern applies:
+
+```yaml
+items[1]:
+  - users[2]{id,name}:
+      1,Ada
+      2,Bob
+```
+
+This is the canonical encoding for list-item objects whose first field is a tabular array.
+
 ### Arrays of Arrays
 
 When you have arrays containing primitive inner arrays:
@@ -147,7 +185,7 @@ Where:
   - `|` → pipe delimiter
 - **fields** (optional) for tabular arrays: `{field1,field2,field3}`
 
-> [!TIP]
+> [!NOTE]
 > The array length `[N]` helps LLMs validate structure. If you ask a model to generate TOON output, explicit lengths let you detect truncation or malformed data.
 
 ### Delimiter Options
@@ -292,8 +330,34 @@ Numbers are emitted in canonical decimal form (no exponent notation, no trailing
 | `BigInt` (within safe range) | Number |
 | `BigInt` (out of range) | Quoted decimal string (e.g., `"9007199254740993"`) |
 | `Date` | ISO string in quotes (e.g., `"2025-01-01T00:00:00.000Z"`) |
+| `Set` | Array of normalized values |
+| `Map` | Object with `String(key)` keys |
 | `undefined`, `function`, `symbol` | `null` |
 
 Decoders accept both decimal and exponent forms on input (e.g., `42`, `-3.14`, `1e-6`), and treat tokens with forbidden leading zeros (e.g., `"05"`) as strings, not numbers.
+
+### Custom Serialization with toJSON
+
+Objects with a `toJSON()` method are serialized by calling the method and normalizing its result before encoding, similar to `JSON.stringify`:
+
+```ts
+const obj = {
+  data: 'example',
+  toJSON() {
+    return { info: this.data }
+  }
+}
+
+encode(obj)
+// info: example
+```
+
+The `toJSON()` method:
+
+- Takes precedence over built-in normalization (Date, Array, Set, Map)
+- Results are recursively normalized
+- Is called for objects with `toJSON` in their prototype chain
+
+---
 
 For complete rules on quoting, escaping, type conversions, and strict-mode decoding, see [spec §2–4 (data model), §7 (strings and keys), and §14 (strict mode)](https://github.com/toon-format/spec/blob/main/SPEC.md).

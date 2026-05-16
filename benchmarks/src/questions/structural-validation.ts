@@ -1,5 +1,5 @@
-import type { Question } from '../types'
-import { QuestionBuilder } from './utils'
+import type { Question } from '../types.ts'
+import { QuestionBuilder } from './utils.ts'
 
 /**
  * Generate structural validation questions for all incompleteness fixtures

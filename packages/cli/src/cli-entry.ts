@@ -1,4 +1,4 @@
 import { runMain } from 'citty'
-import { mainCommand } from '.'
+import { mainCommand } from './index.ts'
 
 runMain(mainCommand)

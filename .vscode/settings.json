@@ -1,7 +1,4 @@
 {
-  // Enable the ESLint flat config support
-  "eslint.useFlatConfig": true,
-
   // Disable the default formatter, use ESLint instead
   "prettier.enable": false,
   "editor.formatOnSave": false,
@@ -37,6 +34,17 @@
     "markdown",
     "json",
     "jsonc",
-    "yaml"
+    "yaml",
+    "toml",
+    "xml",
+    "gql",
+    "graphql",
+    "astro",
+    "svelte",
+    "css",
+    "less",
+    "scss",
+    "pcss",
+    "postcss"
   ]
 }

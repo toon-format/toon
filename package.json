@@ -1,9 +1,9 @@
 {
   "name": "@toon-format/monorepo",
   "type": "module",
-  "version": "1.2.0",
+  "version": "2.2.0",
   "private": true,
-  "packageManager": "pnpm@10.21.0",
+  "packageManager": "pnpm@10.33.4",
   "scripts": {
     "build": "pnpm -r --filter=./packages/** run build",
     "automd": "automd",
@@ -17,14 +17,16 @@
     "release": "bumpp -r"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^6.2.0",
-    "@types/node": "^24.10.0",
-    "automd": "^0.4.2",
-    "bumpp": "^10.3.1",
-    "eslint": "^9.39.1",
-    "tsdown": "^0.16.2",
-    "tsx": "^4.20.6",
-    "typescript": "^5.9.3",
-    "vitest": "^4.0.8"
+    "@antfu/eslint-config": "^8.2.0",
+    "@commitlint/types": "^21.0.0",
+    "@types/node": "^25.6.2",
+    "automd": "^0.4.3",
+    "bumpp": "^11.1.0",
+    "eslint": "^10.3.0",
+    "eslint-flat-config-utils": "^3.2.0",
+    "tsdown": "^0.22.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.11",
+    "vitest": "^4.1.5"
   }
 }

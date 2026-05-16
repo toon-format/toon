@@ -1,4 +1,4 @@
-import type { Dataset } from './types'
+import type { Dataset } from './types.ts'
 import { faker } from '@faker-js/faker'
 import githubRepos from '../data/github-repos.json' with { type: 'json' }
 

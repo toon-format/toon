@@ -1,7 +1,7 @@
-import type { EventLog } from '../datasets'
-import type { Question } from '../types'
-import { QUESTION_LIMITS } from '../constants'
-import { QuestionBuilder, rotateQuestions, SAMPLE_STRIDES } from './utils'
+import type { EventLog } from '../datasets.ts'
+import type { Question } from '../types.ts'
+import { QUESTION_LIMITS } from '../constants.ts'
+import { QuestionBuilder, rotateQuestions, SAMPLE_STRIDES } from './utils.ts'
 
 /**
  * Generate event log questions

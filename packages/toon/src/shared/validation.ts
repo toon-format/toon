@@ -1,5 +1,8 @@
-import { DEFAULT_DELIMITER, LIST_ITEM_MARKER } from '../constants'
-import { isBooleanOrNullLiteral } from './literal-utils'
+import { DEFAULT_DELIMITER, LIST_ITEM_MARKER } from '../constants.ts'
+import { isBooleanOrNullLiteral } from './literal-utils.ts'
+
+const NUMERIC_LIKE_PATTERN = /^-?\d+(?:\.\d+)?(?:e[+-]?\d+)?$/i
+const LEADING_ZERO_PATTERN = /^0\d+$/
 
 /**
  * Checks if a key can be used without quotes.
@@ -93,5 +96,5 @@ export function isSafeUnquoted(value: string, delimiter: string = DEFAULT_DELIMI
  * Match numbers like `42`, `-3.14`, `1e-6`, `05`, etc.
  */
 function isNumericLike(value: string): boolean {
-  return /^-?\d+(?:\.\d+)?(?:e[+-]?\d+)?$/i.test(value) || /^0\d+$/.test(value)
+  return NUMERIC_LIKE_PATTERN.test(value) || LEADING_ZERO_PATTERN.test(value)
 }

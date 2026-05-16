@@ -4,8 +4,8 @@ import process from 'node:process'
 import * as prompts from '@clack/prompts'
 import { ofetch } from 'ofetch'
 import pMap from 'p-map'
-import { BENCHMARKS_DIR } from '../src/constants'
-import { ensureDir } from '../src/utils'
+import { BENCHMARKS_DIR } from '../src/constants.ts'
+import { ensureDir } from '../src/utils.ts'
 
 prompts.intro('GitHub Repositories Fetcher')
 

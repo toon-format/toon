@@ -1,4 +1,4 @@
-import type { JsonArray, JsonObject, JsonPrimitive, JsonValue } from '../types'
+import type { JsonArray, JsonObject, JsonPrimitive, JsonValue } from '../types.ts'
 
 // #region Normalization (unknown → JsonValue)
 
@@ -6,6 +6,20 @@ export function normalizeValue(value: unknown): JsonValue {
   // null
   if (value === null) {
     return null
+  }
+
+  // Objects with toJSON: delegate to its result before host-type normalization
+  if (
+    typeof value === 'object'
+    && value !== null
+    && 'toJSON' in value
+    && typeof value.toJSON === 'function'
+  ) {
+    const next = value.toJSON()
+    // Avoid infinite recursion when toJSON returns the same object
+    if (next !== value) {
+      return normalizeValue(next)
+    }
   }
 
   // Primitives
@@ -30,7 +44,7 @@ export function normalizeValue(value: unknown): JsonValue {
     if (value >= Number.MIN_SAFE_INTEGER && value <= Number.MAX_SAFE_INTEGER) {
       return Number(value)
     }
-    // Otherwise convert to string (will be unquoted as it looks numeric)
+    // Otherwise convert to string (will be quoted in output)
     return value.toString()
   }
 
@@ -58,15 +72,15 @@ export function normalizeValue(value: unknown): JsonValue {
 
   // Plain object
   if (isPlainObject(value)) {
-    const normalized: Record<string, JsonValue> = {}
+    const encodedValues: Record<string, JsonValue> = {}
 
     for (const key in value) {
-      if (Object.prototype.hasOwnProperty.call(value, key)) {
-        normalized[key] = normalizeValue(value[key])
+      if (Object.hasOwn(value, key)) {
+        encodedValues[key] = normalizeValue(value[key])
       }
     }
 
-    return normalized
+    return encodedValues
   }
 
   // Fallback: function, symbol, undefined, or other → null

@@ -1,5 +1,5 @@
-import type { DATASET_NAMES, QUESTION_TYPES, STRUCTURE_CLASSES } from './constants'
-import type { AnswerType, NormalizationOptions } from './normalize'
+import type { DATASET_NAMES, QUESTION_TYPES, STRUCTURE_CLASSES } from './constants.ts'
+import type { AnswerType, NormalizationOptions } from './normalize.ts'
 
 export type QuestionType = typeof QUESTION_TYPES[number]
 export type DatasetName = typeof DATASET_NAMES[number]

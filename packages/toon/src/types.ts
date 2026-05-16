@@ -1,6 +1,6 @@
 // #region JSON types
 
-import type { Delimiter, DelimiterKey } from './constants'
+import type { Delimiter, DelimiterKey } from './constants.ts'
 
 export type JsonPrimitive = string | number | boolean | null
 export type JsonObject = { [Key in string]: JsonValue } & { [Key in string]?: JsonValue | undefined }
@@ -12,6 +12,42 @@ export type JsonValue = JsonPrimitive | JsonObject | JsonArray
 // #region Encoder options
 
 export type { Delimiter, DelimiterKey }
+
+/**
+ * A function that transforms or filters values during encoding.
+ *
+ * Called for every value (root, object properties, array elements) during the encoding process.
+ * Similar to `JSON.stringify`'s replacer, but with path tracking.
+ *
+ * @param key - The property key or array index (as string). Empty string (`''`) for root value.
+ * @param value - The normalized `JsonValue` at this location.
+ * @param path - Array representing the path from root to this value.
+ *
+ * @returns The replacement value (will be normalized again), or `undefined` to omit.
+ *          For root value, returning `undefined` means "no change" (don't omit root).
+ *
+ * @example
+ * ```ts
+ * // Remove password fields
+ * const replacer = (key, value) => {
+ *   if (key === 'password') return undefined
+ *   return value
+ * }
+ *
+ * // Add timestamps
+ * const replacer = (key, value, path) => {
+ *   if (path.length === 0 && typeof value === 'object' && value !== null) {
+ *     return { ...value, _timestamp: Date.now() }
+ *   }
+ *   return value
+ * }
+ * ```
+ */
+export type EncodeReplacer = (
+  key: string,
+  value: JsonValue,
+  path: readonly (string | number)[],
+) => unknown
 
 export interface EncodeOptions {
   /**
@@ -38,9 +74,16 @@ export interface EncodeOptions {
    * @default Infinity
    */
   flattenDepth?: number
+  /**
+   * A function to transform or filter values during encoding.
+   * Called for the root value and every nested property/element.
+   * Return `undefined` to omit properties/elements (root cannot be omitted).
+   * @default undefined
+   */
+  replacer?: EncodeReplacer
 }
 
-export type ResolvedEncodeOptions = Readonly<Required<EncodeOptions>>
+export type ResolvedEncodeOptions = Readonly<Required<Omit<EncodeOptions, 'replacer'>>> & Pick<EncodeOptions, 'replacer'>
 
 // #endregion
 
@@ -68,6 +111,32 @@ export interface DecodeOptions {
 }
 
 export type ResolvedDecodeOptions = Readonly<Required<DecodeOptions>>
+
+/**
+ * Options for streaming decode operations.
+ *
+ * @remarks
+ * Path expansion is not supported in streaming mode.
+ */
+export interface DecodeStreamOptions extends Omit<DecodeOptions, 'expandPaths'> {
+  /**
+   * Path expansion is not supported in streaming decode.
+   * This option is explicitly omitted.
+   */
+  expandPaths?: never
+}
+
+// #endregion
+
+// #region Streaming decoder types
+
+export type JsonStreamEvent
+  = | { type: 'startObject' }
+    | { type: 'endObject' }
+    | { type: 'startArray', length: number }
+    | { type: 'endArray' }
+    | { type: 'key', key: string, wasQuoted?: boolean }
+    | { type: 'primitive', value: JsonPrimitive }
 
 // #endregion
 

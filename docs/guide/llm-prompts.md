@@ -1,3 +1,7 @@
+---
+description: Prompting strategies for sending TOON to LLMs and validating TOON they generate, with examples.
+---
+
 # Using TOON with LLMs
 
 TOON is designed for passing structured data to Large Language Models with reduced token costs and improved reliability. This guide shows how to use TOON effectively in prompts, both for input (sending data to models) and output (getting models to generate TOON).
@@ -6,7 +10,7 @@ This guide is about the TOON format itself. Code examples use the TypeScript lib
 
 ## Why TOON for LLMs
 
-LLM tokens cost money, and JSON is verbose – repeating every field name for every record in an array. TOON minimizes tokens especially for uniform arrays by declaring fields once and streaming data as rows, typically saving 30-60% compared to formatted JSON.
+LLM tokens cost money, and JSON is verbose – repeating every field name for every record in an array. TOON minimizes tokens especially for uniform arrays by declaring fields once and streaming data as rows, typically saving 30–60% compared to formatted JSON.
 
 TOON adds structure guardrails: explicit `[N]` lengths and `{fields}` headers make it easier for models to track rows and for you to validate output. Strict mode helps detect truncation and malformed TOON when decoding model responses.
 
@@ -83,7 +87,7 @@ catch (error) {
 }
 ```
 
-Strict mode checks counts, indentation, and escaping so you can detect truncation or malformed TOON. For complete details, see the [API reference](/reference/api#decode).
+Strict mode checks counts, indentation, and escaping so you can detect truncation or malformed TOON. For complete details, see the [API Reference](/reference/api#decode).
 
 ## Delimiter Choices for Token Efficiency
 
@@ -116,13 +120,38 @@ The CLI also supports streaming for memory-efficient JSON-to-TOON conversion:
 toon large-dataset.json --output output.toon
 ```
 
-This streaming approach prevents out-of-memory errors when preparing large context windows for LLMs. For complete details on `encodeLines()`, see the [API reference](/reference/api#encodelines).
+This streaming approach prevents out-of-memory errors when preparing large context windows for LLMs. For complete details on `encodeLines()`, see the [API Reference](/reference/api#encodelines).
+
+**Consuming streaming LLM outputs:** If your LLM client exposes streaming text and you buffer by lines, you can decode TOON incrementally:
+
+```ts
+import { decodeFromLines } from '@toon-format/toon'
+
+// Buffer streaming response into lines
+const lines: string[] = []
+let buffer = ''
+
+for await (const chunk of modelStream) {
+  buffer += chunk
+  let index: number
+
+  while ((index = buffer.indexOf('\n')) !== -1) {
+    lines.push(buffer.slice(0, index))
+    buffer = buffer.slice(index + 1)
+  }
+}
+
+// Decode buffered lines
+const data = decodeFromLines(lines)
+```
+
+For streaming decode APIs, see [`decodeFromLines()`](/reference/api#decodefromlines-lines-options) and [`decodeStream()`](/reference/api#decodestream-source-options).
 
 ## Tips and Pitfalls
 
-**Show, don't describe.** Don't explain TOON syntax in detail – just show an example. Models learn the pattern from context. A simple code block with 2-5 rows is more effective than paragraphs of explanation.
+**Show, don't describe.** Don't explain TOON syntax in detail – just show an example. Models learn the pattern from context. A simple code block with 2–5 rows is more effective than paragraphs of explanation.
 
-**Keep examples small.** Use 2-5 rows in your examples, not hundreds. The model generalizes from the pattern. Large examples waste tokens without improving accuracy.
+**Keep examples small.** Use 2–5 rows in your examples, not hundreds. The model generalizes from the pattern. Large examples waste tokens without improving accuracy.
 
 **Always validate output.** Decode generated TOON with `strict: true` (default) to catch errors early. Don't assume model output is valid TOON without checking.
 

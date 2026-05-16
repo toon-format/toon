@@ -1,20 +1,20 @@
-import type { LanguageModelV2 } from '@ai-sdk/provider'
-import type { EvaluationResult, Question } from './types'
+import type { LanguageModelV3 } from '@ai-sdk/provider'
+import type { EvaluationResult, Question } from './types.ts'
 import { anthropic } from '@ai-sdk/anthropic'
 import { google } from '@ai-sdk/google'
 import { openai } from '@ai-sdk/openai'
 import { xai } from '@ai-sdk/xai'
 import { generateText } from 'ai'
-import { compareAnswers } from './normalize'
+import { compareAnswers } from './normalize.ts'
 
 /**
  * Models used for evaluation
  */
-export const models: LanguageModelV2[] = [
+export const models: LanguageModelV3[] = [
   anthropic('claude-haiku-4-5-20251001'),
-  google('gemini-2.5-flash'),
+  google('gemini-3-flash-preview'),
   openai('gpt-5-nano'),
-  xai('grok-4-fast-non-reasoning'),
+  xai('grok-4-1-fast-non-reasoning'),
 ]
 
 /**
@@ -58,7 +58,7 @@ export async function evaluateQuestion(
     question: Question
     formatName: string
     formattedData: string
-    model: LanguageModelV2
+    model: LanguageModelV3
   },
 ): Promise<EvaluationResult> {
   const primer = PRIMERS[formatName] ?? ''

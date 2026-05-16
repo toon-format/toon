@@ -1,6 +1,9 @@
 name = "toon-docs"
 compatibility_date = "2025-10-01"
-routes = [ { pattern = "toonformat.dev", custom_domain = true } ]
+
+[[routes]]
+pattern = "toonformat.dev"
+custom_domain = true
 
 [assets]
 directory = "./.vitepress/dist/"

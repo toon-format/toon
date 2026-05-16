@@ -1,13 +1,15 @@
 import type { FileHandle } from 'node:fs/promises'
-import type { DecodeOptions, EncodeOptions } from '../../toon/src'
-import type { InputSource } from './types'
+import type { DecodeOptions, DecodeStreamOptions, EncodeOptions } from '../../toon/src/index.ts'
+import type { InputSource } from './types.ts'
 import * as fsp from 'node:fs/promises'
 import * as path from 'node:path'
 import process from 'node:process'
 import { consola } from 'consola'
 import { estimateTokenCount } from 'tokenx'
-import { decode, encode, encodeLines } from '../../toon/src'
-import { formatInputLabel, readInput } from './utils'
+import { decode, decodeStream, encode, encodeLines } from '../../toon/src/index.ts'
+import { jsonStreamFromEvents } from './json-from-events.ts'
+import { jsonStringifyLines } from './json-stringify-stream.ts'
+import { formatInputLabel, readInput, readLinesFromSource } from './utils.ts'
 
 export async function encodeToToon(config: {
   input: InputSource
@@ -62,7 +64,6 @@ export async function encodeToToon(config: {
     consola.success(`Saved ~${diff} tokens (-${percent}%)`)
   }
   else {
-    // Use streaming encoder for memory-efficient output
     await writeStreamingToon(encodeLines(data, encodeOptions), config.output)
 
     if (config.output) {
@@ -80,40 +81,77 @@ export async function decodeToJson(config: {
   strict: NonNullable<DecodeOptions['strict']>
   expandPaths?: NonNullable<DecodeOptions['expandPaths']>
 }): Promise<void> {
-  const toonContent = await readInput(config.input)
+  // Path expansion requires full value in memory, so use non-streaming path
+  if (config.expandPaths === 'safe') {
+    const toonContent = await readInput(config.input)
 
-  let data: unknown
-  try {
     const decodeOptions: DecodeOptions = {
       indent: config.indent,
       strict: config.strict,
       expandPaths: config.expandPaths,
     }
-    data = decode(toonContent, decodeOptions)
-  }
-  catch (error) {
-    throw new Error(`Failed to decode TOON: ${error instanceof Error ? error.message : String(error)}`)
-  }
+    const data = decode(toonContent, decodeOptions)
 
-  const jsonOutput = JSON.stringify(data, undefined, config.indent)
+    await writeStreamingJson(jsonStringifyLines(data, config.indent), config.output)
+  }
+  else {
+    const lineSource = readLinesFromSource(config.input)
+
+    const decodeStreamOptions: DecodeStreamOptions = {
+      indent: config.indent,
+      strict: config.strict,
+    }
+
+    const events = decodeStream(lineSource, decodeStreamOptions)
+    const jsonChunks = jsonStreamFromEvents(events, config.indent)
+
+    await writeStreamingJson(jsonChunks, config.output)
+  }
 
   if (config.output) {
-    await fsp.writeFile(config.output, jsonOutput, 'utf-8')
     const relativeInputPath = formatInputLabel(config.input)
     const relativeOutputPath = path.relative(process.cwd(), config.output)
     consola.success(`Decoded \`${relativeInputPath}\` → \`${relativeOutputPath}\``)
   }
+}
+
+/**
+ * Writes JSON chunks to a file or stdout using streaming approach.
+ * Chunks are written one at a time without building the full string in memory.
+ */
+async function writeStreamingJson(
+  chunks: AsyncIterable<string> | Iterable<string>,
+  outputPath?: string,
+): Promise<void> {
+  // Stream to file using fs/promises API
+  if (outputPath) {
+    let fileHandle: FileHandle | undefined
+
+    try {
+      fileHandle = await fsp.open(outputPath, 'w')
+
+      for await (const chunk of chunks) {
+        await fileHandle.write(chunk)
+      }
+    }
+    finally {
+      await fileHandle?.close()
+    }
+  }
+  // Stream to stdout
   else {
-    console.log(jsonOutput)
+    for await (const chunk of chunks) {
+      process.stdout.write(chunk)
+    }
+
+    // Add final newline for stdout
+    process.stdout.write('\n')
   }
 }
 
 /**
  * Writes TOON lines to a file or stdout using streaming approach.
  * Lines are written one at a time without building the full string in memory.
- *
- * @param lines - Iterable of TOON lines (without trailing newlines)
- * @param outputPath - File path to write to, or undefined for stdout
  */
 async function writeStreamingToon(
   lines: Iterable<string>,

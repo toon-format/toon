@@ -1,0 +1,36 @@
+name: Check PR Title
+
+on:
+  pull_request:
+    types: [opened, edited]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-pr-title:
+    name: Lint PR title
+    runs-on: ubuntu-slim
+
+    if: ${{ (github.event.action == 'opened' || github.event.changes.title != null) && github.actor != 'renovate[bot]' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+          # Only fetch the config file from the repository
+          sparse-checkout-cone-mode: false
+          sparse-checkout: commitlint.config.ts
+
+      - name: Install dependencies
+        run: npm install -D @commitlint/cli @commitlint/config-conventional
+
+      - name: Validate PR title with commitlint
+        run: echo "$PR_TITLE" | npx commitlint
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}

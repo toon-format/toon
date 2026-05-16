@@ -33,6 +33,10 @@ export default defineConfig({
 
     nav: [
       {
+        text: 'Playground',
+        link: '/playground',
+      },
+      {
         text: 'Guide',
         activeMatch: '^/guide/',
         items: [
@@ -53,6 +57,7 @@ export default defineConfig({
           { text: 'API', link: '/reference/api' },
           { text: 'Syntax Cheatsheet', link: '/reference/syntax-cheatsheet' },
           { text: 'Specification', link: '/reference/spec' },
+          { text: 'Efficiency Formalization', link: '/reference/efficiency-formalization' },
         ],
       },
       {
@@ -87,7 +92,7 @@ export default defineConfig({
 
     footer: {
       message: 'Released under the <a href="https://opensource.org/licenses/MIT" target="_blank">MIT License</a>.',
-      copyright: 'Copyright © 2025-PRESENT <a href="https://github.com/johannschopplich" target="_blank">Johann Schopplich</a>',
+      copyright: 'Copyright © 2025-PRESENT <a href="https://johannschopplich.com" target="_blank">Johann Schopplich</a>',
     },
 
     search: {
@@ -98,6 +103,7 @@ export default defineConfig({
     config(md) {
       md.use(copyOrDownloadAsMarkdownButtons)
     },
+    math: true,
   },
 })
 
@@ -115,13 +121,14 @@ function sidebarPrimary(): DefaultTheme.SidebarItem[] {
     {
       text: 'Tooling',
       items: [
+        { text: 'Playground', link: '/playground' },
         { text: 'CLI Reference', link: '/cli/' },
-        { text: 'Tools & Playgrounds', link: '/ecosystem/tools-and-playgrounds' },
       ],
     },
     {
       text: 'Ecosystem',
       items: [
+        { text: 'Tools & Playgrounds', link: '/ecosystem/tools-and-playgrounds' },
         { text: 'Implementations', link: '/ecosystem/implementations' },
       ],
     },
@@ -131,6 +138,7 @@ function sidebarPrimary(): DefaultTheme.SidebarItem[] {
         { text: 'API (TypeScript)', link: '/reference/api' },
         { text: 'Syntax Cheatsheet', link: '/reference/syntax-cheatsheet' },
         { text: 'Specification', link: '/reference/spec' },
+        { text: 'Efficiency Formalization', link: '/reference/efficiency-formalization' },
       ],
     },
   ]

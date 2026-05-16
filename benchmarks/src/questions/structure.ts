@@ -1,6 +1,6 @@
-import type { AnalyticsMetric, Employee, EventLog, Order, Repository } from '../datasets'
-import type { Question } from '../types'
-import { QuestionBuilder } from './utils'
+import type { AnalyticsMetric, Employee, EventLog, Order, Repository } from '../datasets.ts'
+import type { Question } from '../types.ts'
+import { QuestionBuilder } from './utils.ts'
 
 /**
  * Generate structure-awareness questions across all datasets

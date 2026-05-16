@@ -1,14 +1,18 @@
+---
+description: What TOON is, when to use it, and a first encode/decode example with the TypeScript library.
+---
+
 # Getting Started
 
-## What is TOON?
+## What Is TOON?
 
-**Token-Oriented Object Notation** is a compact, human-readable encoding of the JSON data model that minimizes tokens and makes structure easy for models to follow. It's intended for *LLM input* as a drop-in, lossless representation of your existing JSON.
+**Token-Oriented Object Notation** is a compact, human-readable encoding of the JSON data model that minimizes tokens and makes structure easy for models to follow. It is intended for *LLM input* as a drop-in, lossless representation of your existing JSON.
 
 TOON combines YAML's indentation-based structure for nested objects with a CSV-style tabular layout for uniform arrays. TOON's sweet spot is uniform arrays of objects (multiple fields per row, same structure across items), achieving CSV-like compactness while adding explicit structure that helps LLMs parse and validate data reliably.
 
 Think of it as a translation layer: use JSON programmatically, and encode it as TOON for LLM input.
 
-###  Why TOON?
+### Why TOON?
 
 Standard JSON is verbose and token-expensive. For uniform arrays of objects, JSON repeats every field name for every record:
 
@@ -41,7 +45,7 @@ users[2]{id,name,role}:
   2,Bob,user
 ```
 
-The `[2]` declares the array length, enabling LLMs to answer dataset size questions and detect truncation. The `{id,name,role}` declares the field names. Each row is then a compact, comma-separated list of values. This is the core pattern: declare structure once, stream data compactly. The format approaches CSV's efficiency while adding explicit structure.
+The `[2]` declares the array length, letting LLMs answer dataset-size questions and detect truncation. The `{id,name,role}` declares the field names. Each row is a compact, comma-separated list of values. The pattern is the same throughout TOON: declare structure once, stream data compactly. The result lands close to CSV density with explicit structure preserved.
 
 For a more realistic example, here's how TOON handles a dataset with both nested objects and tabular arrays:
 
@@ -123,11 +127,12 @@ TOON is not always the best choice. Consider alternatives when:
 
 - **Deeply nested or non-uniform structures** (tabular eligibility ≈ 0%): JSON-compact often uses fewer tokens. Example: complex configuration objects with many nested levels.
 - **Semi-uniform arrays** (~40–60% tabular eligibility): Token savings diminish. Prefer JSON if your pipelines already rely on it.
-- **Pure tabular data**: CSV is smaller than TOON for flat tables. TOON adds minimal overhead (~5-10%) to provide structure (array length declarations, field headers, delimiter scoping) that improves LLM reliability.
+- **Pure tabular data**: CSV is smaller than TOON for flat tables. TOON adds minimal overhead (~5–10%) to provide structure (array length declarations, field headers, delimiter scoping) that improves LLM reliability.
 - **Latency-critical applications**: Benchmark on your exact setup. Some deployments (especially local/quantized models) may process compact JSON faster despite TOON's lower token count.
 
-> [!NOTE]
-> For data-driven comparisons across different structures, see [benchmarks](/guide/benchmarks). When optimizing for latency, measure TTFT, tokens/sec, and total time for both TOON and JSON-compact and use whichever performs better in your specific environment.
+::: info
+For data-driven comparisons across different structures, see [Benchmarks](/guide/benchmarks). When optimizing for latency, measure TTFT, tokens/sec, and total time for both TOON and JSON-compact, and use whichever is faster in your specific environment.
+:::
 
 ## Installation
 
@@ -176,6 +181,10 @@ yarn global add @toon-format/cli
 :::
 
 For full CLI documentation, see the [CLI reference](/cli/).
+
+## Media Type & File Extension
+
+TOON files conventionally use the `.toon` extension. For HTTP transmission, the provisional media type is `text/toon`, always with UTF-8 encoding. While you may specify `charset=utf-8` explicitly, it's optional – UTF-8 is the default assumption. This follows the registration process outlined in [spec §18.2](https://github.com/toon-format/spec/blob/main/SPEC.md#182-provisional-media-type).
 
 ## Your First Example
 
@@ -236,4 +245,4 @@ Round-tripping is lossless: `decode(encode(x))` always equals `x` (after normali
 
 ## Where to Go Next
 
-Now that you've seen your first TOON document, read the [Format Overview](/guide/format-overview) for complete syntax details (objects, arrays, quoting rules, key folding), then explore [Using TOON with LLMs](/guide/llm-prompts) to see how to use it effectively in prompts. For implementation details, check the [API reference](/reference/api) (TypeScript) or the [specification](/reference/spec) (language-agnostic normative rules).
+Now that you've seen your first TOON document, read the [Format Overview](/guide/format-overview) for complete syntax details (objects, arrays, quoting rules, key folding), then explore [Using TOON with LLMs](/guide/llm-prompts) to see how to use it effectively in prompts. For implementation details, check the [API Reference](/reference/api) (TypeScript) or the [Specification](/reference/spec) (language-agnostic normative rules).

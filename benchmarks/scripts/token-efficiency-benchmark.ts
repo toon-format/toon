@@ -1,12 +1,12 @@
-import type { Dataset } from '../src/types'
+import type { Dataset } from '../src/types.ts'
 import * as fsp from 'node:fs/promises'
 import * as path from 'node:path'
 import * as prompts from '@clack/prompts'
-import { encode } from '../../packages/toon/src'
-import { BENCHMARKS_DIR, FORMATTER_DISPLAY_NAMES, ROOT_DIR } from '../src/constants'
-import { TOKEN_EFFICIENCY_DATASETS } from '../src/datasets'
-import { formatters, supportsCSV } from '../src/formatters'
-import { createProgressBar, ensureDir, tokenize } from '../src/utils'
+import { encode } from '../../packages/toon/src/index.ts'
+import { BENCHMARKS_DIR, FORMATTER_DISPLAY_NAMES, ROOT_DIR } from '../src/constants.ts'
+import { TOKEN_EFFICIENCY_DATASETS } from '../src/datasets.ts'
+import { formatters, supportsCSV } from '../src/formatters.ts'
+import { createProgressBar, ensureDir, tokenize } from '../src/utils.ts'
 
 interface FormatMetrics {
   name: string

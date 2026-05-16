@@ -1,4 +1,6 @@
-import { FALSE_LITERAL, NULL_LITERAL, TRUE_LITERAL } from '../constants'
+import { FALSE_LITERAL, NULL_LITERAL, TRUE_LITERAL } from '../constants.ts'
+
+const NUMERIC_LITERAL_PATTERN = /^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:e[+-]?\d+)?$/i
 
 export function isBooleanOrNullLiteral(token: string): boolean {
   return token === TRUE_LITERAL || token === FALSE_LITERAL || token === NULL_LITERAL
@@ -14,12 +16,10 @@ export function isNumericLiteral(token: string): boolean {
   if (!token)
     return false
 
-  // Must not have leading zeros (except for `"0"` itself or decimals like `"0.5"`)
-  if (token.length > 1 && token[0] === '0' && token[1] !== '.') {
+  // Enforce JSON-like grammar with no forbidden leading zeros
+  if (!NUMERIC_LITERAL_PATTERN.test(token))
     return false
-  }
 
-  // Check if it's a valid number
   const numericValue = Number(token)
   return !Number.isNaN(numericValue) && Number.isFinite(numericValue)
 }

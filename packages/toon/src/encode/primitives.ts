@@ -1,7 +1,7 @@
-import type { JsonPrimitive } from '../types'
-import { COMMA, DEFAULT_DELIMITER, DOUBLE_QUOTE, NULL_LITERAL } from '../constants'
-import { escapeString } from '../shared/string-utils'
-import { isSafeUnquoted, isValidUnquotedKey } from '../shared/validation'
+import type { JsonPrimitive } from '../types.ts'
+import { COMMA, DEFAULT_DELIMITER, DOUBLE_QUOTE, NULL_LITERAL } from '../constants.ts'
+import { escapeString } from '../shared/string-utils.ts'
+import { isSafeUnquoted, isValidUnquotedKey } from '../shared/validation.ts'
 
 // #region Primitive encoding
 
@@ -67,7 +67,7 @@ export function formatHeader(
 
   let header = ''
 
-  if (key) {
+  if (key != null) {
     header += encodeKey(key)
   }
 
