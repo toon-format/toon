@@ -1,4 +1,4 @@
-import type { DecodeOptions, DecodeStreamOptions, EncodeOptions, JsonStreamEvent, JsonValue, ResolvedDecodeOptions, ResolvedEncodeOptions } from './types.ts'
+import type { DecodeOptions, DecodeStreamOptions, EncodeOptions, JsonStreamEvent, JsonValue, ResolvedDecodeOptions, ResolvedEncodeOptions, TruncatedArray, TruncationReport } from './types.ts'
 import { DEFAULT_DELIMITER } from './constants.ts'
 import { decodeStream as decodeStreamCore, decodeStreamSync as decodeStreamSyncCore } from './decode/decoders.ts'
 import { buildValueFromEvents } from './decode/event-builder.ts'
@@ -23,6 +23,8 @@ export type {
   JsonValue,
   ResolvedDecodeOptions,
   ResolvedEncodeOptions,
+  TruncatedArray,
+  TruncationReport,
 } from './types.ts'
 
 /**
@@ -228,5 +230,115 @@ function resolveDecodeOptions(options?: DecodeOptions): ResolvedDecodeOptions {
     indent: options?.indent ?? 2,
     strict: options?.strict ?? true,
     expandPaths: options?.expandPaths ?? 'off',
+  }
+}
+
+/**
+ * Detects truncation in a TOON string by comparing declared array lengths
+ * with actual parsed counts.
+ *
+ * Unlike `decode()`, this function never throws. It always returns a report,
+ * even if the input is malformed or truncated.
+ *
+ * @param input - TOON formatted string (possibly truncated)
+ * @param options - Optional decoding configuration
+ * @returns TruncationReport with details about missing items
+ *
+ * @example
+ * ```ts
+ * const report = detectTruncation('employees[100]{id,name}:\n  1,Alice\n  2,Bob')
+ * // {
+ * //   isTruncated: true,
+ * //   arrays: [{
+ * //     key: 'employees',
+ * //     declaredCount: 100,
+ * //     actualCount: 2,
+ * //     missingItems: 98,
+ * //     completionRate: 0.02
+ * //   }]
+ * // }
+ * ```
+ */
+export function detectTruncation(input: string, options?: DecodeOptions): TruncationReport {
+  const lines = input.split('\n')
+  const streamOptions: DecodeStreamOptions = {
+    indent: options?.indent ?? 2,
+    strict: false,
+  }
+
+  const arrays: TruncatedArray[] = []
+  const stack: { key: string | undefined, declaredCount: number, actualCount: number, depth: number }[] = []
+
+  try {
+    const events = decodeStreamSyncCore(lines, streamOptions)
+    let lastKey: string | undefined
+    let objectDepth = 0
+
+    for (const event of events) {
+      if (event.type === 'key') {
+        lastKey = event.key
+      }
+      else if (event.type === 'startArray') {
+        stack.push({
+          key: lastKey,
+          declaredCount: event.length,
+          actualCount: 0,
+          depth: objectDepth,
+        })
+        lastKey = undefined
+      }
+      else if (event.type === 'startObject') {
+        // Only count direct children of the array
+        const current = stack[stack.length - 1]
+        if (current && objectDepth === current.depth) {
+          current.actualCount++
+        }
+        objectDepth++
+      }
+      else if (event.type === 'endObject') {
+        objectDepth--
+      }
+      else if (event.type === 'primitive') {
+        // Count primitives only at array root level (inline arrays)
+        const current = stack[stack.length - 1]
+        if (current && objectDepth === current.depth) {
+          current.actualCount++
+        }
+      }
+      else if (event.type === 'endArray') {
+        const completed = stack.pop()
+        if (completed && completed.declaredCount > 0) {
+          const missingItems = completed.declaredCount - completed.actualCount
+          arrays.push({
+            key: completed.key,
+            declaredCount: completed.declaredCount,
+            actualCount: completed.actualCount,
+            missingItems: Math.max(0, missingItems),
+            completionRate: Number((completed.actualCount / completed.declaredCount).toFixed(2)),
+          })
+        }
+      }
+    }
+
+    // Arrays never closed (truncated mid-stream)
+    for (const incomplete of stack) {
+      if (incomplete.declaredCount > 0) {
+        arrays.push({
+          key: incomplete.key,
+          declaredCount: incomplete.declaredCount,
+          actualCount: incomplete.actualCount,
+          missingItems: Math.max(0, incomplete.declaredCount - incomplete.actualCount),
+          completionRate: Number((incomplete.actualCount / incomplete.declaredCount).toFixed(2)),
+        })
+      }
+    }
+  }
+  catch {
+    // Return partial results even on error
+  }
+
+  return {
+    isTruncated: arrays.some(a => a.missingItems > 0),
+    arrays,
   }
 }
