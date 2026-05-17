@@ -74,3 +74,9 @@ const data = decode(toon)
 ```
 
 See the [API Reference](/reference/api) for details.
+
+## MCP
+
+### Tooner
+
+[Tooner](https://github.com/chaindead/tooner) – MCP proxy that converts JSON tool responses to TOON.
