@@ -213,7 +213,7 @@ onMounted(() => {
 
   const state = decodeState(hash)
   if (state) {
-    inputText.value = state.input ?? state.json ?? ''
+    inputText.value = state.input ?? state.json
     delimiter.value = state.delimiter
     indent.value = state.indent
     keyFolding.value = state.keyFolding ?? 'safe'
@@ -278,7 +278,7 @@ async function loadTokenizer() {
       <!-- Header -->
       <header class="playground-header">
         <h1>Playground</h1>
-        <p>Experiment with JSON or YAML to TOON encoding in real-time.</p>
+        <p>Convert JSON or YAML to TOON in real time.</p>
       </header>
 
       <!-- Options Bar -->
@@ -394,10 +394,7 @@ async function loadTokenizer() {
           <div class="pane-header">
             <span class="pane-title">{{ inputFormat === 'yaml' ? 'YAML Input' : 'JSON Input' }}</span>
             <span class="pane-stats">
-              <span
-                class="stat-primary"
-                :title="inputFormat === 'yaml' ? 'Token count of formatted YAML input' : 'Token count using selected JSON baseline format'"
-              >{{ inputTokens ?? '…' }} tokens</span>
+              <span class="stat-primary" title="Token count of the formatted input">{{ inputTokens ?? '…' }} tokens</span>
               <span class="stat-secondary">{{ formattedInput.length }} chars</span>
             </span>
           </div>
