@@ -194,9 +194,10 @@ function* decodeKeyValueSync(
   }
 
   // Regular key-value pair
-  const { key, isQuoted } = withLine(line, () => parseKeyToken(content, 0))
-  const colonIndex = content.indexOf(COLON, key.length)
-  const rest = colonIndex >= 0 ? content.slice(colonIndex + 1).trim() : ''
+  // Use `end` from parseKeyToken directly — it already points to the character
+  // after the colon separator, avoiding a fragile secondary indexOf search.
+  const { key, end, isQuoted } = withLine(line, () => parseKeyToken(content, 0))
+  const rest = content.slice(end).trim()
 
   yield isQuoted ? { type: 'key', key, wasQuoted: true } : { type: 'key', key }
 
@@ -616,9 +617,10 @@ async function* decodeKeyValueAsync(
   }
 
   // Regular key-value pair
-  const { key, isQuoted } = withLine(line, () => parseKeyToken(content, 0))
-  const colonIndex = content.indexOf(COLON, key.length)
-  const rest = colonIndex >= 0 ? content.slice(colonIndex + 1).trim() : ''
+  // Use `end` from parseKeyToken directly — it already points to the character
+  // after the colon separator, avoiding a fragile secondary indexOf search.
+  const { key, end, isQuoted } = withLine(line, () => parseKeyToken(content, 0))
+  const rest = content.slice(end).trim()
 
   yield isQuoted ? { type: 'key', key, wasQuoted: true } : { type: 'key', key }
 
