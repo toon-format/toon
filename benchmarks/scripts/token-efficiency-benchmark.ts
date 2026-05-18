@@ -30,7 +30,7 @@ const DATASET_ICONS: Record<string, string> = {
   'nested-config': '🧩',
 }
 
-const COMPARISON_FORMAT_ORDER = ['json-pretty', 'json-compact', 'yaml', 'xml'] as const
+const COMPARISON_FORMAT_ORDER = ['json-pretty', 'json-compact', 'yaml', 'xml', 'kdl'] as const
 
 const PROGRESS_BAR_WIDTH = 20
 const TOKEN_PADDING = 7

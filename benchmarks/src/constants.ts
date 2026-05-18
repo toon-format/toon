@@ -49,6 +49,7 @@ export const FORMATTER_DISPLAY_NAMES: Record<string, string> = {
   'csv': 'CSV',
   'xml': 'XML',
   'yaml': 'YAML',
+  'kdl': 'KDL',
 } as const
 
 /**

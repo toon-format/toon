@@ -1,4 +1,5 @@
 import type { Dataset } from './types.ts'
+import { stringify as stringifyKDL } from '@bgotink/kdl/json'
 import { stringify as stringifyCSV } from 'csv-stringify/sync'
 import { XMLBuilder } from 'fast-xml-parser'
 import { stringify as stringifyYAML } from 'yaml'
@@ -19,6 +20,7 @@ export const formatters: Record<string, (data: unknown) => string> = {
   'csv': data => toCSV(data),
   'xml': data => toXML(data),
   'yaml': data => stringifyYAML(data),
+  'kdl': data => toKDL(data),
 }
 
 /**
@@ -75,6 +77,19 @@ function toXML(data: unknown): string {
   })
 
   return builder.build(data)
+}
+
+/**
+ * Convert data to KDL format
+ *
+ * @remarks
+ * Uses `@bgotink/kdl/json` (JSON-in-KDL / JiK) for lossless JSON ↔ KDL conversion.
+ * KDL is a node-oriented document language designed for configuration files and
+ * human-maintained documents. It includes native comments, type annotations,
+ * and child nodes — features absent from TOON's JSON-centric model.
+ */
+function toKDL(data: unknown): string {
+  return stringifyKDL(data, {}, 2)
 }
 
 /**
