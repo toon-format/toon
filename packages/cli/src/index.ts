@@ -46,7 +46,7 @@ const args: ArgsDef = {
   },
   strict: {
     type: 'boolean',
-    description: 'Enable strict mode for decoding',
+    description: 'Strict decode validation (disable with --no-strict)',
     default: true,
   },
   keyFolding: {

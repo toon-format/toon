@@ -63,7 +63,7 @@ cat data.toon | toon --decode
 | `--delimiter <char>` | Array delimiter: `,` (comma), tab character, `\|` (pipe). Pass tab as `$'\t'` in bash/zsh |
 | `--indent <number>` | Indentation size (default: `2`) |
 | `--stats` | Show token count estimates and savings (encode only) |
-| `--no-strict` | Disable strict validation when decoding |
+| `--no-strict` | Skip decode validation; last-write-wins on duplicate keys |
 | `--keyFolding <mode>` | Enable key folding: `off`, `safe` (default: `off`) |
 | `--flattenDepth <number>` | Maximum folded segment count when key folding is enabled (default: `Infinity`) |
 | `--expandPaths <mode>` | Enable path expansion: `off`, `safe` (default: `off`) |
@@ -100,11 +100,13 @@ The `--delimiter` value must be the actual delimiter character. In bash/zsh, use
 
 ### Lenient Decoding
 
-Skip validation for faster processing:
+Skip validation for faster, more forgiving decoding:
 
 ```bash
 toon data.toon --no-strict -o output.json
 ```
+
+With `--no-strict`, the decoder stops enforcing array count matches, indentation multiples, and delimiter consistency. Duplicate sibling keys no longer throw – the last value wins. Malformed array headers fall back to plain `key: value` lines instead of erroring.
 
 ### Decode Error Output
 

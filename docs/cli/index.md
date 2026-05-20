@@ -91,7 +91,7 @@ cat data.toon | toon --decode
 
 :::
 
-By convention, TOON files use the `.toon` extension and the provisional media type `text/toon` (see [spec §18.2](https://github.com/toon-format/spec/blob/main/SPEC.md#182-provisional-media-type)).
+By convention, TOON files use the `.toon` extension and the provisional media type `text/toon` (see [spec §17](https://github.com/toon-format/spec/blob/main/SPEC.md#17-iana-considerations)).
 
 ### Standard Input
 
@@ -156,7 +156,7 @@ When using the `--stats` flag with encode, the CLI builds the full TOON string o
 | `--delimiter <char>` | Array delimiter: `,` (comma), tab character, `\|` (pipe). Pass tab as `$'\t'` in bash/zsh |
 | `--indent <number>` | Indentation size (default: `2`) |
 | `--stats` | Show token count estimates and savings (encode only) |
-| `--no-strict` | Disable strict validation when decoding |
+| `--no-strict` | Skip decode validation; last-write-wins on duplicate keys |
 | `--keyFolding <mode>` | Key folding mode: `off`, `safe` (default: `off`) |
 | `--flattenDepth <number>` | Maximum segments to fold (default: `Infinity`) – requires `--keyFolding safe` |
 | `--expandPaths <mode>` | Path expansion mode: `off`, `safe` (default: `off`) |
@@ -225,13 +225,13 @@ Tab delimiters often tokenize more efficiently than commas and reduce the need f
 
 ### Lenient Decoding
 
-Skip validation for faster processing:
+Skip validation for faster, more forgiving decoding:
 
 ```bash
 toon data.toon --no-strict -o output.json
 ```
 
-Lenient mode (`--no-strict`) disables strict validation checks like array count matching, indentation multiples, and delimiter consistency. Use this when you trust the input and want faster decoding.
+With `--no-strict`, the decoder stops enforcing array count matches, indentation multiples, and delimiter consistency. Duplicate sibling keys no longer throw – the last value wins. Malformed array headers fall back to plain `key: value` lines instead of erroring.
 
 ### Decode Error Output
 
