@@ -41,6 +41,12 @@ export function parseArrayHeaderLine(
     return
   }
 
+  // A header key can't contain an unquoted colon, so this is a key-value line
+  const firstColonIndex = findUnquotedChar(content, COLON)
+  if (firstColonIndex !== -1 && firstColonIndex < bracketStart) {
+    return
+  }
+
   const bracketEnd = findUnquotedChar(content, CLOSE_BRACKET, bracketStart)
   if (bracketEnd === -1) {
     return
