@@ -16,6 +16,7 @@ export interface TestCase {
     strict?: boolean
     keyFolding?: 'off' | 'safe'
     flattenDepth?: number
+    maxDepth?: number
     expandPaths?: 'off' | 'safe'
   }
   specSection?: string

@@ -18,6 +18,7 @@ export async function encodeToToon(config: {
   delimiter: NonNullable<EncodeOptions['delimiter']>
   keyFolding?: NonNullable<EncodeOptions['keyFolding']>
   flattenDepth?: number
+  maxDepth?: number
   printStats: boolean
 }): Promise<void> {
   const jsonContent = await readInput(config.input)
@@ -35,6 +36,7 @@ export async function encodeToToon(config: {
     indent: config.indent,
     keyFolding: config.keyFolding,
     flattenDepth: config.flattenDepth,
+    maxDepth: config.maxDepth,
   }
 
   // When printing stats, we need the full string for token counting
@@ -80,6 +82,7 @@ export async function decodeToJson(config: {
   indent: NonNullable<DecodeOptions['indent']>
   strict: NonNullable<DecodeOptions['strict']>
   expandPaths?: NonNullable<DecodeOptions['expandPaths']>
+  maxDepth?: number
 }): Promise<void> {
   // Path expansion requires full value in memory, so use non-streaming path
   if (config.expandPaths === 'safe') {
@@ -89,6 +92,7 @@ export async function decodeToJson(config: {
       indent: config.indent,
       strict: config.strict,
       expandPaths: config.expandPaths,
+      maxDepth: config.maxDepth,
     }
     const data = decode(toonContent, decodeOptions)
 
@@ -100,6 +104,7 @@ export async function decodeToJson(config: {
     const decodeStreamOptions: DecodeStreamOptions = {
       indent: config.indent,
       strict: config.strict,
+      maxDepth: config.maxDepth,
     }
 
     const events = decodeStream(lineSource, decodeStreamOptions)

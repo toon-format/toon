@@ -1,6 +1,7 @@
 import type { JsonObject, JsonValue } from '../types.ts'
 import { DOT } from '../constants.ts'
 import { isJsonObject } from '../encode/normalize.ts'
+import { assertMaxDepth } from '../shared/depth.ts'
 import { isIdentifierSegment } from '../shared/validation.ts'
 
 // #region Path expansion (safe)
@@ -37,16 +38,25 @@ export interface ObjectWithQuotedKeys extends JsonObject {
  *
  * @param value - The decoded value to expand
  * @param strict - Whether to throw errors on conflicts
+ * @param maxDepth - Maximum structural nesting depth to produce
+ * @param depth - Current structural nesting depth
  * @returns The expanded value with dotted keys reconstructed as nested objects
  * @throws TypeError if conflicts occur in strict mode
  */
-export function expandPathsSafe(value: JsonValue, strict: boolean): JsonValue {
+export function expandPathsSafe(
+  value: JsonValue,
+  strict: boolean,
+  maxDepth: number = Number.POSITIVE_INFINITY,
+  depth = 0,
+): JsonValue {
   if (Array.isArray(value)) {
+    assertDecodeExpansionDepth(depth, maxDepth)
     // Recursively expand array elements
-    return value.map(item => expandPathsSafe(item, strict))
+    return value.map(item => expandPathsSafe(item, strict, maxDepth, depth + 1))
   }
 
   if (isJsonObject(value)) {
+    assertDecodeExpansionDepth(depth, maxDepth)
     const expandedObject: JsonObject = {}
 
     // Check if this object has quoted key metadata
@@ -62,15 +72,16 @@ export function expandPathsSafe(value: JsonValue, strict: boolean): JsonValue {
 
         // Validate all segments are identifiers
         if (segments.every(seg => isIdentifierSegment(seg))) {
+          assertDecodeExpansionDepth(depth + segments.length - 1, maxDepth)
           // Expand this dotted key
-          const expandedValue = expandPathsSafe(keyValue, strict)
+          const expandedValue = expandPathsSafe(keyValue, strict, maxDepth, depth + segments.length)
           insertPathSafe(expandedObject, segments, expandedValue, strict)
           continue
         }
       }
 
       // Not expandable - keep as literal key, but still recursively expand the value
-      const expandedValue = expandPathsSafe(keyValue, strict)
+      const expandedValue = expandPathsSafe(keyValue, strict, maxDepth, depth + 1)
 
       // Check for conflicts with already-expanded keys
       if (key in expandedObject) {
@@ -230,6 +241,10 @@ function mergeObjects(
 
 function canMerge(a: JsonValue, b: JsonValue): a is JsonObject {
   return isJsonObject(a) && isJsonObject(b)
+}
+
+function assertDecodeExpansionDepth(depth: number, maxDepth: number): void {
+  assertMaxDepth(depth, maxDepth, 'Decoded value nesting')
 }
 
 // #endregion

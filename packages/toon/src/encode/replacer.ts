@@ -1,4 +1,5 @@
 import type { EncodeReplacer, JsonArray, JsonObject, JsonValue } from '../types.ts'
+import { assertMaxDepth } from '../shared/depth.ts'
 import { isJsonArray, isJsonObject, normalizeValue } from './normalize.ts'
 
 /**
@@ -13,20 +14,24 @@ import { isJsonArray, isJsonObject, normalizeValue } from './normalize.ts'
  * @param replacer - The replacer function to apply
  * @returns The transformed `JsonValue`
  */
-export function applyReplacer(root: JsonValue, replacer: EncodeReplacer): JsonValue {
+export function applyReplacer(
+  root: JsonValue,
+  replacer: EncodeReplacer,
+  maxDepth: number = Number.POSITIVE_INFINITY,
+): JsonValue {
   // Call replacer on root with empty string key and empty path
   const replacedRoot = replacer('', root, [])
 
   // For root, undefined means "no change" (don't omit the root)
   if (replacedRoot === undefined) {
-    return transformChildren(root, replacer, [])
+    return transformChildren(root, replacer, [], maxDepth)
   }
 
   // Normalize the replaced value (in case user returned non-JsonValue)
-  const normalizedRoot = normalizeValue(replacedRoot)
+  const normalizedRoot = normalizeValue(replacedRoot, maxDepth)
 
   // Recursively transform children
-  return transformChildren(normalizedRoot, replacer, [])
+  return transformChildren(normalizedRoot, replacer, [], maxDepth)
 }
 
 /**
@@ -41,13 +46,16 @@ function transformChildren(
   value: JsonValue,
   replacer: EncodeReplacer,
   path: readonly (string | number)[],
+  maxDepth: number,
 ): JsonValue {
   if (isJsonObject(value)) {
-    return transformObject(value, replacer, path)
+    assertMaxDepth(path.length, maxDepth, 'Encoded value nesting')
+    return transformObject(value, replacer, path, maxDepth)
   }
 
   if (isJsonArray(value)) {
-    return transformArray(value, replacer, path)
+    assertMaxDepth(path.length, maxDepth, 'Encoded value nesting')
+    return transformArray(value, replacer, path, maxDepth)
   }
 
   // Primitives have no children
@@ -66,6 +74,7 @@ function transformObject(
   obj: JsonObject,
   replacer: EncodeReplacer,
   path: readonly (string | number)[],
+  maxDepth: number,
 ): JsonObject {
   const result: Record<string, JsonValue> = {}
 
@@ -80,10 +89,10 @@ function transformObject(
     }
 
     // Normalize the replaced value
-    const normalizedValue = normalizeValue(replacedValue)
+    const normalizedValue = normalizeValue(replacedValue, maxDepth, childPath.length)
 
     // Recursively transform children of the replaced value
-    result[key] = transformChildren(normalizedValue, replacer, childPath)
+    result[key] = transformChildren(normalizedValue, replacer, childPath, maxDepth)
   }
 
   return result
@@ -101,6 +110,7 @@ function transformArray(
   arr: JsonArray,
   replacer: EncodeReplacer,
   path: readonly (string | number)[],
+  maxDepth: number,
 ): JsonArray {
   const result: JsonValue[] = []
 
@@ -116,10 +126,10 @@ function transformArray(
     }
 
     // Normalize the replaced value
-    const normalizedValue = normalizeValue(replacedValue)
+    const normalizedValue = normalizeValue(replacedValue, maxDepth, childPath.length)
 
     // Recursively transform children of the replaced value
-    result.push(transformChildren(normalizedValue, replacer, childPath))
+    result.push(transformChildren(normalizedValue, replacer, childPath, maxDepth))
   }
 
   return result

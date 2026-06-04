@@ -1,8 +1,13 @@
 import type { JsonArray, JsonObject, JsonPrimitive, JsonValue } from '../types.ts'
+import { assertMaxDepth } from '../shared/depth.ts'
 
 // #region Normalization (unknown → JsonValue)
 
-export function normalizeValue(value: unknown): JsonValue {
+export function normalizeValue(
+  value: unknown,
+  maxDepth: number = Number.POSITIVE_INFINITY,
+  depth = 0,
+): JsonValue {
   // null
   if (value === null) {
     return null
@@ -18,7 +23,7 @@ export function normalizeValue(value: unknown): JsonValue {
     const next = value.toJSON()
     // Avoid infinite recursion when toJSON returns the same object
     if (next !== value) {
-      return normalizeValue(next)
+      return normalizeValue(next, maxDepth, depth)
     }
   }
 
@@ -55,28 +60,32 @@ export function normalizeValue(value: unknown): JsonValue {
 
   // Array
   if (Array.isArray(value)) {
-    return value.map(normalizeValue)
+    assertMaxDepth(depth, maxDepth, 'Encoded value nesting')
+    return value.map(item => normalizeValue(item, maxDepth, depth + 1))
   }
 
   // Set → array
   if (value instanceof Set) {
-    return Array.from(value).map(normalizeValue)
+    assertMaxDepth(depth, maxDepth, 'Encoded value nesting')
+    return Array.from(value).map(item => normalizeValue(item, maxDepth, depth + 1))
   }
 
   // Map → object
   if (value instanceof Map) {
+    assertMaxDepth(depth, maxDepth, 'Encoded value nesting')
     return Object.fromEntries(
-      Array.from(value, ([k, v]) => [String(k), normalizeValue(v)]),
+      Array.from(value, ([k, v]) => [String(k), normalizeValue(v, maxDepth, depth + 1)]),
     )
   }
 
   // Plain object
   if (isPlainObject(value)) {
+    assertMaxDepth(depth, maxDepth, 'Encoded value nesting')
     const encodedValues: Record<string, JsonValue> = {}
 
     for (const key in value) {
       if (Object.hasOwn(value, key)) {
-        encodedValues[key] = normalizeValue(value[key])
+        encodedValues[key] = normalizeValue(value[key], maxDepth, depth + 1)
       }
     }
 

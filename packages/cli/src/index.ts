@@ -58,6 +58,10 @@ const args: ArgsDef = {
     type: 'string',
     description: 'Maximum folded segment count when key folding is enabled (default: Infinity)',
   },
+  maxDepth: {
+    type: 'string',
+    description: 'Maximum structural nesting depth for encode/decode (default: 1000, use Infinity to disable)',
+  },
   expandPaths: {
     type: 'string',
     description: 'Enable path expansion: off, safe (default: off)',
@@ -117,6 +121,8 @@ export const mainCommand: CommandDef<ArgsDef> = defineCommand({
       }
     }
 
+    const maxDepth = parseDepthLimit(args.maxDepth, 'maxDepth')
+
     // Validate `expandPaths`
     const expandPaths = args.expandPaths || 'off'
     if (expandPaths !== 'off' && expandPaths !== 'safe') {
@@ -134,6 +140,7 @@ export const mainCommand: CommandDef<ArgsDef> = defineCommand({
           indent,
           keyFolding: keyFolding as NonNullable<EncodeOptions['keyFolding']>,
           flattenDepth,
+          maxDepth,
           printStats: args.stats === true,
         })
       }
@@ -144,6 +151,7 @@ export const mainCommand: CommandDef<ArgsDef> = defineCommand({
           indent,
           strict: args.strict !== false,
           expandPaths: expandPaths as NonNullable<DecodeOptions['expandPaths']>,
+          maxDepth,
         })
       }
     }
@@ -153,3 +161,20 @@ export const mainCommand: CommandDef<ArgsDef> = defineCommand({
     }
   },
 })
+
+function parseDepthLimit(value: string | undefined, optionName: string): number | undefined {
+  if (value === undefined) {
+    return undefined
+  }
+
+  if (value === 'Infinity') {
+    return Number.POSITIVE_INFINITY
+  }
+
+  const parsed = Number(value)
+  if (!Number.isInteger(parsed) || parsed < 0) {
+    throw new Error(`Invalid ${optionName} value: ${value}`)
+  }
+
+  return parsed
+}

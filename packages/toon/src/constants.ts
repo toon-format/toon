@@ -56,3 +56,9 @@ export type Delimiter = typeof DELIMITERS[DelimiterKey]
 export const DEFAULT_DELIMITER: Delimiter = DELIMITERS.comma
 
 // #endregion
+
+// #region Limits
+
+export const DEFAULT_MAX_DEPTH = 1000
+
+// #endregion

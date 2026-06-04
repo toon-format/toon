@@ -345,6 +345,38 @@ describe('toon CLI', () => {
         cleanup()
       }
     })
+
+    it('rejects encode input deeper than --maxDepth', async () => {
+      const cleanup = mockStdin(JSON.stringify({ a: { b: { c: true } } }))
+      const consolaError = vi.spyOn(consola, 'error').mockImplementation(() => undefined)
+      const exitSpy = vi.mocked(process.exit)
+
+      try {
+        await runCli({ rawArgs: ['--maxDepth', '1'] })
+
+        expect(exitSpy).toHaveBeenCalledWith(1)
+        expect(consolaError).toHaveBeenCalledWith(expect.stringContaining('maxDepth'))
+      }
+      finally {
+        cleanup()
+      }
+    })
+
+    it('rejects decode input deeper than --maxDepth', async () => {
+      const cleanup = mockStdin('a:\n  b:\n    c: true\n')
+      const consolaError = vi.spyOn(consola, 'error').mockImplementation(() => undefined)
+      const exitSpy = vi.mocked(process.exit)
+
+      try {
+        await runCli({ rawArgs: ['--decode', '--maxDepth', '1'] })
+
+        expect(exitSpy).toHaveBeenCalledWith(1)
+        expect(consolaError).toHaveBeenCalledWith(expect.stringContaining('Maximum nesting depth'))
+      }
+      finally {
+        cleanup()
+      }
+    })
   })
 
   describe('encode options', () => {

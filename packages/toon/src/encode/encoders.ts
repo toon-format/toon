@@ -1,5 +1,6 @@
 import type { Depth, JsonArray, JsonObject, JsonPrimitive, JsonValue, ResolvedEncodeOptions } from '../types.ts'
 import { DOT, LIST_ITEM_MARKER, LIST_ITEM_PREFIX } from '../constants.ts'
+import { assertMaxDepth } from '../shared/depth.ts'
 import { tryFoldKeyChain } from './folding.ts'
 import { isArrayOfArrays, isArrayOfObjects, isArrayOfPrimitives, isEmptyObject, isJsonArray, isJsonObject, isJsonPrimitive } from './normalize.ts'
 import { encodeAndJoinPrimitives, encodeKey, encodePrimitive, formatHeader } from './primitives.ts'
@@ -7,6 +8,8 @@ import { encodeAndJoinPrimitives, encodeKey, encodePrimitive, formatHeader } fro
 // #region Encode normalized JsonValue
 
 export function* encodeJsonValue(value: JsonValue, options: ResolvedEncodeOptions, depth: Depth): Generator<string> {
+  assertEncodeDepth(depth, options)
+
   if (isJsonPrimitive(value)) {
     // Primitives at root level are returned as a single line
     const encodedPrimitive = encodePrimitive(value, options.delimiter)
@@ -37,6 +40,8 @@ export function* encodeObjectLines(
   pathPrefix?: string,
   remainingDepth?: number,
 ): Generator<string> {
+  assertEncodeDepth(depth, options)
+
   const keys = Object.keys(value)
 
   // At root level (depth 0), collect all literal dotted keys for collision checking
@@ -61,6 +66,8 @@ export function* encodeKeyValuePairLines(
   pathPrefix?: string,
   flattenDepth?: number,
 ): Generator<string> {
+  assertEncodeDepth(depth, options)
+
   const currentPath = pathPrefix ? `${pathPrefix}${DOT}${key}` : key
   const effectiveFlattenDepth = flattenDepth ?? options.flattenDepth
 
@@ -70,6 +77,7 @@ export function* encodeKeyValuePairLines(
 
     if (foldResult) {
       const { foldedKey, remainder, leafValue, segmentCount } = foldResult
+      assertEncodeDepth(depth + segmentCount - 1, options)
       const encodedFoldedKey = encodeKey(foldedKey)
 
       // Case 1: Fully folded to a leaf value
@@ -127,6 +135,8 @@ export function* encodeArrayLines(
   depth: Depth,
   options: ResolvedEncodeOptions,
 ): Generator<string> {
+  assertEncodeDepth(depth, options)
+
   if (value.length === 0) {
     const line = key != null ? `${encodeKey(key)}: []` : '[]'
     yield indentedLine(depth, line, options.indent)
@@ -175,6 +185,8 @@ export function* encodeArrayOfArraysAsListItemsLines(
   depth: Depth,
   options: ResolvedEncodeOptions,
 ): Generator<string> {
+  assertEncodeDepth(depth, options)
+
   const header = formatHeader(values.length, { key: prefix, delimiter: options.delimiter })
   yield indentedLine(depth, header, options.indent)
 
@@ -207,6 +219,8 @@ export function* encodeArrayOfObjectsAsTabularLines(
   depth: Depth,
   options: ResolvedEncodeOptions,
 ): Generator<string> {
+  assertEncodeDepth(depth, options)
+
   const formattedHeader = formatHeader(rows.length, { key: prefix, fields: header, delimiter: options.delimiter })
   yield indentedLine(depth, formattedHeader, options.indent)
 
@@ -259,6 +273,8 @@ function* writeTabularRowsLines(
   depth: Depth,
   options: ResolvedEncodeOptions,
 ): Generator<string> {
+  assertEncodeDepth(depth, options)
+
   for (const row of rows) {
     const values = header.map(key => row[key])
     const joinedValue = encodeAndJoinPrimitives(values as JsonPrimitive[], options.delimiter)
@@ -276,6 +292,8 @@ export function* encodeMixedArrayAsListItemsLines(
   depth: Depth,
   options: ResolvedEncodeOptions,
 ): Generator<string> {
+  assertEncodeDepth(depth, options)
+
   const header = formatHeader(items.length, { key: prefix, delimiter: options.delimiter })
   yield indentedLine(depth, header, options.indent)
 
@@ -289,6 +307,8 @@ export function* encodeObjectAsListItemLines(
   depth: Depth,
   options: ResolvedEncodeOptions,
 ): Generator<string> {
+  assertEncodeDepth(depth, options)
+
   if (isEmptyObject(obj)) {
     yield indentedLine(depth, LIST_ITEM_MARKER, options.indent)
     return
@@ -365,6 +385,8 @@ function* encodeListItemValueLines(
   depth: Depth,
   options: ResolvedEncodeOptions,
 ): Generator<string> {
+  assertEncodeDepth(depth, options)
+
   if (isJsonPrimitive(value)) {
     yield indentedListItem(depth, encodePrimitive(value, options.delimiter), options.indent)
   }
@@ -397,6 +419,10 @@ function indentedLine(depth: Depth, content: string, indentSize: number): string
 
 function indentedListItem(depth: Depth, content: string, indentSize: number): string {
   return indentedLine(depth, LIST_ITEM_PREFIX + content, indentSize)
+}
+
+function assertEncodeDepth(depth: Depth, options: ResolvedEncodeOptions): void {
+  assertMaxDepth(depth, options.maxDepth, 'Encoded value nesting')
 }
 
 // #endregion

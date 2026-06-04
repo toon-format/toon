@@ -159,6 +159,7 @@ When using the `--stats` flag with encode, the CLI builds the full TOON string o
 | `--no-strict` | Skip decode validation (array counts, indentation, header delimiter); last-write-wins on duplicate keys |
 | `--keyFolding <mode>` | Key folding mode: `off`, `safe` (default: `off`) |
 | `--flattenDepth <number>` | Maximum segments to fold (default: `Infinity`) – requires `--keyFolding safe` |
+| `--maxDepth <number>` | Maximum structural nesting depth for encode/decode (default: `1000`; use `Infinity` to disable) |
 | `--expandPaths <mode>` | Path expansion mode: `off`, `safe` (default: `off`) |
 | `--verbose` | Show full stack traces and cause chains for errors (default: `false`) |
 
@@ -232,6 +233,17 @@ toon data.toon --no-strict -o output.json
 ```
 
 With `--no-strict`, the decoder stops enforcing array count matches, indentation multiples, and header delimiter mismatches. Duplicate sibling keys no longer throw – the last value wins. Malformed array headers fall back to plain `key: value` lines instead of erroring.
+
+### Depth Limits
+
+Encode and decode reject documents deeper than `--maxDepth` (default: `1000`) to avoid stack exhaustion on hostile or accidental deeply nested inputs:
+
+```bash
+toon data.json --maxDepth 200 -o output.toon
+toon data.toon --decode --maxDepth 200 -o output.json
+```
+
+Pass `--maxDepth Infinity` only for trusted inputs that intentionally exceed the default nesting limit.
 
 ### Decode Error Output
 

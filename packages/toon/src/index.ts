@@ -6,8 +6,9 @@ import { expandPathsSafe } from './decode/expand.ts'
 import { encodeJsonValue } from './encode/encoders.ts'
 import { normalizeValue } from './encode/normalize.ts'
 import { applyReplacer } from './encode/replacer.ts'
+import { resolveMaxDepth } from './shared/depth.ts'
 
-export { DEFAULT_DELIMITER, DELIMITERS } from './constants.ts'
+export { DEFAULT_DELIMITER, DEFAULT_MAX_DEPTH, DELIMITERS } from './constants.ts'
 export { ToonDecodeError } from './decode/errors.ts'
 export type {
   DecodeOptions,
@@ -104,12 +105,12 @@ export function decode(input: string, options?: DecodeOptions): JsonValue {
  * ```
  */
 export function encodeLines(input: unknown, options?: EncodeOptions): Iterable<string> {
-  const normalizedValue = normalizeValue(input)
   const resolvedOptions = resolveOptions(options)
+  const normalizedValue = normalizeValue(input, resolvedOptions.maxDepth)
 
   // Apply replacer if provided
   const maybeReplacedValue = resolvedOptions.replacer
-    ? applyReplacer(normalizedValue, resolvedOptions.replacer)
+    ? applyReplacer(normalizedValue, resolvedOptions.replacer, resolvedOptions.maxDepth)
     : normalizedValue
 
   return encodeJsonValue(maybeReplacedValue, resolvedOptions, 0)
@@ -140,6 +141,7 @@ export function decodeFromLines(lines: Iterable<string>, options?: DecodeOptions
   const streamOptions: DecodeStreamOptions = {
     indent: resolvedOptions.indent,
     strict: resolvedOptions.strict,
+    maxDepth: resolvedOptions.maxDepth,
   }
 
   const events = decodeStreamSyncCore(lines, streamOptions)
@@ -147,7 +149,7 @@ export function decodeFromLines(lines: Iterable<string>, options?: DecodeOptions
 
   // Apply path expansion if enabled
   if (resolvedOptions.expandPaths === 'safe') {
-    return expandPathsSafe(decodedValue, resolvedOptions.strict)
+    return expandPathsSafe(decodedValue, resolvedOptions.strict, resolvedOptions.maxDepth)
   }
 
   return decodedValue
@@ -225,6 +227,7 @@ function resolveOptions(options?: EncodeOptions): ResolvedEncodeOptions {
     delimiter: options?.delimiter ?? DEFAULT_DELIMITER,
     keyFolding: options?.keyFolding ?? 'off',
     flattenDepth: options?.flattenDepth ?? Number.POSITIVE_INFINITY,
+    maxDepth: resolveMaxDepth(options?.maxDepth),
     replacer: options?.replacer,
   }
 }
@@ -234,5 +237,6 @@ function resolveDecodeOptions(options?: DecodeOptions): ResolvedDecodeOptions {
     indent: options?.indent ?? 2,
     strict: options?.strict ?? true,
     expandPaths: options?.expandPaths ?? 'off',
+    maxDepth: resolveMaxDepth(options?.maxDepth),
   }
 }

@@ -75,6 +75,11 @@ export interface EncodeOptions {
    */
   flattenDepth?: number
   /**
+   * Maximum structural nesting depth to encode. Use Infinity to disable the limit.
+   * @default 1000
+   */
+  maxDepth?: number
+  /**
    * A function to transform or filter values during encoding.
    * Called for the root value and every nested property/element.
    * Return `undefined` to omit properties/elements (root cannot be omitted).
@@ -108,6 +113,11 @@ export interface DecodeOptions {
    * @default 'off'
    */
   expandPaths?: 'off' | 'safe'
+  /**
+   * Maximum structural nesting depth to decode. Use Infinity to disable the limit.
+   * @default 1000
+   */
+  maxDepth?: number
 }
 
 export type ResolvedDecodeOptions = Readonly<Required<DecodeOptions>>

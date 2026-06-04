@@ -37,7 +37,8 @@ const toon = encode(data, {
   indent: 2,
   delimiter: ',',
   keyFolding: 'off',
-  flattenDepth: Infinity
+  flattenDepth: Infinity,
+  maxDepth: 1000
 })
 ```
 
@@ -286,7 +287,8 @@ import { decode } from '@toon-format/toon'
 const data = decode(toon, {
   indent: 2,
   strict: true,
-  expandPaths: 'off'
+  expandPaths: 'off',
+  maxDepth: 1000
 })
 ```
 
@@ -552,6 +554,7 @@ Configuration for [`encode()`](#encode-input-options) and [`encodeLines()`](#enc
 | `delimiter` | `','` \| `'\t'` \| `'\|'` | `','` | Delimiter for array values and tabular rows |
 | `keyFolding` | `'off'` \| `'safe'` | `'off'` | Enable key folding to collapse single-key wrapper chains into dotted paths |
 | `flattenDepth` | `number` | `Infinity` | Maximum number of segments to fold when `keyFolding` is enabled (values 0-1 have no practical effect) |
+| `maxDepth` | `number` | `1000` | Maximum structural nesting depth to encode; use `Infinity` to disable |
 | `replacer` | `EncodeReplacer` | `undefined` | Optional hook to transform or omit values before encoding (see [Replacer Function](#replacer-function)) |
 
 **Delimiter options:**
@@ -583,6 +586,7 @@ Configuration for [`decode()`](#decode-input-options) and [`decodeFromLines()`](
 | `indent` | `number` | `2` | Expected number of spaces per indentation level |
 | `strict` | `boolean` | `true` | Enable strict validation (array counts, indentation, delimiter consistency) |
 | `expandPaths` | `'off'` \| `'safe'` | `'off'` | Enable path expansion to reconstruct dotted keys into nested objects (pairs with `keyFolding: 'safe'`) |
+| `maxDepth` | `number` | `1000` | Maximum structural nesting depth to decode; use `Infinity` to disable |
 
 By default (`strict: true`), the decoder validates input strictly:
 
@@ -592,6 +596,7 @@ By default (`strict: true`), the decoder validates input strictly:
 - **Header delimiter mismatch**: Throws when the bracket-declared delimiter differs from the field-list delimiter (§14.2)
 - **Indentation errors**: Throws when leading spaces aren't exact multiples of `indent`
 - **Header structure**: Throws on leading-zero or non-integer array lengths and on intervening content between bracket/fields/colon
+- **Maximum nesting depth**: Throws when indentation or safe path expansion exceeds `maxDepth` (default `1000`)
 - **Duplicate sibling keys**: Throws when an object has two children with the same key (§14.4)
 - **Path-expansion conflicts**: When `expandPaths: 'safe'` is set, throws on overlapping dotted paths that would collide
 
@@ -609,6 +614,7 @@ Configuration for [`decodeStreamSync()`](#decodestreamsync-lines-options) and [`
 |--------|------|---------|-------------|
 | `indent` | `number` | `2` | Expected number of spaces per indentation level |
 | `strict` | `boolean` | `true` | Enable strict validation (array counts, indentation, delimiter consistency) |
+| `maxDepth` | `number` | `1000` | Maximum structural nesting depth to decode; use `Infinity` to disable |
 
 ::: warning Path Expansion Not Supported
 Path expansion requires building the full value tree, which is incompatible with event streaming. Use [`decodeFromLines()`](#decodefromlines-lines-options) if you need path expansion.
@@ -642,6 +648,7 @@ DELIMITERS // { comma: ',', tab: '\t', pipe: '|' }
 | Export | Description |
 |--------|-------------|
 | `DEFAULT_DELIMITER` | The default delimiter character (`,`) used when none is specified |
+| `DEFAULT_MAX_DEPTH` | The default maximum structural nesting depth (`1000`) |
 | `DELIMITERS` | Frozen record mapping delimiter names to their characters |
 | `Delimiter` | Type union of valid delimiter characters: `',' \| '\t' \| '\|'` |
 | `DelimiterKey` | Type union of delimiter names: `'comma' \| 'tab' \| 'pipe'` |
