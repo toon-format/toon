@@ -63,7 +63,7 @@ function applyEvent(state: BuildState, event: JsonStreamEvent): void {
             throw new Error('Object startObject event without preceding key')
           }
 
-          parent.obj[parent.currentKey] = obj
+          setObjectProperty(parent.obj, parent.currentKey, obj)
           parent.currentKey = undefined
         }
         else if (parent.type === 'array') {
@@ -116,7 +116,7 @@ function applyEvent(state: BuildState, event: JsonStreamEvent): void {
           if (parent.currentKey === undefined) {
             throw new Error('Array startArray event without preceding key')
           }
-          parent.obj[parent.currentKey] = arr
+          setObjectProperty(parent.obj, parent.currentKey, arr)
           parent.currentKey = undefined
         }
         else if (parent.type === 'array') {
@@ -177,7 +177,7 @@ function applyEvent(state: BuildState, event: JsonStreamEvent): void {
           if (parent.currentKey === undefined) {
             throw new Error('Primitive event without preceding key in object')
           }
-          parent.obj[parent.currentKey] = event.value
+          setObjectProperty(parent.obj, parent.currentKey, event.value)
           parent.currentKey = undefined
         }
         else if (parent.type === 'array') {
@@ -200,6 +200,16 @@ function finalizeState(state: BuildState): JsonValue {
   }
 
   return state.root
+}
+
+function setObjectProperty(target: JsonObject, key: string, value: JsonValue): void {
+  // Avoid invoking Object.prototype accessors such as __proto__ while decoding.
+  Object.defineProperty(target, key, {
+    value,
+    enumerable: true,
+    writable: true,
+    configurable: true,
+  })
 }
 
 // #endregion
