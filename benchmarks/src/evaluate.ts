@@ -30,6 +30,7 @@ export const PRIMERS: Record<string, string> = {
   'yaml': 'YAML: Indentation-based key/value and lists (- items).',
   'xml': 'XML: Tag-based tree structure with nested elements.',
   'csv': 'CSV: Header row, comma-separated values. First row contains field names.',
+  'gcf': 'GCF: Positional format. Arrays declare fields in header (## name [count]{field1,field2}). Rows are pipe-separated values in field order. Sections marked with ##.',
 }
 
 /**
@@ -42,6 +43,7 @@ export const FENCE: Record<string, string> = {
   'yaml': 'yaml',
   'xml': 'xml',
   'csv': 'csv',
+  'gcf': 'gcf',
 }
 
 /**

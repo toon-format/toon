@@ -3,6 +3,7 @@ import { stringify as stringifyCSV } from 'csv-stringify/sync'
 import { XMLBuilder } from 'fast-xml-parser'
 import { stringify as stringifyYAML } from 'yaml'
 import { encode as encodeToon } from '../../packages/toon/src/index.ts'
+import { encodeGeneric as encodeGCF } from '@blackwell-systems/gcf'
 
 /**
  * Format converters registry
@@ -16,6 +17,7 @@ export const formatters: Record<string, (data: unknown) => string> = {
   'json-pretty': data => JSON.stringify(data, undefined, 2),
   'json-compact': data => JSON.stringify(data),
   'toon': data => encodeToon(data),
+  'gcf': data => encodeGCF(data),
   'csv': data => toCSV(data),
   'xml': data => toXML(data),
   'yaml': data => stringifyYAML(data),
