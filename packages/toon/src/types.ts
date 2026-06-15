@@ -166,3 +166,20 @@ export interface BlankLineInfo {
 // #endregion
 
 export type Depth = number
+
+// #region Truncation detection
+
+export interface TruncationReport {
+  isTruncated: boolean
+  arrays: TruncatedArray[]
+}
+
+export interface TruncatedArray {
+  key: string | undefined
+  declaredCount: number
+  actualCount: number
+  missingItems: number
+  completionRate: number
+}
+
+// #endregion
