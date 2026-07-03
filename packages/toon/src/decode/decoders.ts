@@ -223,8 +223,8 @@ function* decodeKeyValueSync(
   }
 
   // Regular key-value pair
-  const { key, isQuoted } = withLine(line, () => parseKeyToken(content, 0))
-  const colonIndex = content.indexOf(COLON, key.length)
+  const { key, end: keyEnd, isQuoted } = withLine(line, () => parseKeyToken(content, 0))
+  const colonIndex = content.indexOf(COLON, keyEnd)
   const rest = colonIndex >= 0 ? content.slice(colonIndex + 1).trim() : ''
 
   assertNoDuplicateKey(key, line, seenKeys)
@@ -678,8 +678,8 @@ async function* decodeKeyValueAsync(
   }
 
   // Regular key-value pair
-  const { key, isQuoted } = withLine(line, () => parseKeyToken(content, 0))
-  const colonIndex = content.indexOf(COLON, key.length)
+  const { key, end: keyEnd, isQuoted } = withLine(line, () => parseKeyToken(content, 0))
+  const colonIndex = content.indexOf(COLON, keyEnd)
   const rest = colonIndex >= 0 ? content.slice(colonIndex + 1).trim() : ''
 
   assertNoDuplicateKey(key, line, seenKeys)
