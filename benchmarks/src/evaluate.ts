@@ -6,6 +6,7 @@ import { openai } from '@ai-sdk/openai'
 import { xai } from '@ai-sdk/xai'
 import { generateText } from 'ai'
 import { compareAnswers } from './normalize.ts'
+import { createMiniMaxModels } from './providers/minimax.ts'
 
 /**
  * Models used for evaluation
@@ -15,6 +16,7 @@ export const models: LanguageModelV3[] = [
   google('gemini-3-flash-preview'),
   openai('gpt-5-nano'),
   xai('grok-4-1-fast-non-reasoning'),
+  ...createMiniMaxModels(),
 ]
 
 /**

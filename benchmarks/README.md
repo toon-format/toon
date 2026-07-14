@@ -57,6 +57,27 @@ Tests how well LLMs can answer questions about data in different formats (TOON, 
    cp .env.example .env
    ```
 
+To add `MiniMax-M3` and `MiniMax-M2.7` to the model selection, set `MINIMAX_API_KEY` and choose a region and API protocol:
+
+```bash
+MINIMAX_API_KEY=your-key
+MINIMAX_API_REGION=global_en
+MINIMAX_API_PROTOCOL=anthropic
+```
+
+The benchmark supports these public base URLs:
+
+| Region | Protocol | Base URL |
+| --- | --- | --- |
+| `global_en` | `openai` | `https://api.minimax.io/v1` |
+| `global_en` | `anthropic` | `https://api.minimax.io/anthropic` |
+| `cn_zh` | `openai` | `https://api.minimaxi.com/v1` |
+| `cn_zh` | `anthropic` | `https://api.minimaxi.com/anthropic` |
+
+Regional documentation is available for [global endpoints](https://platform.minimax.io/docs) and [mainland China endpoints](https://platform.minimaxi.com/docs).
+
+Set `MINIMAX_API_BASE_URL` only to override the default selected by `MINIMAX_API_REGION` and `MINIMAX_API_PROTOCOL`. Anthropic-compatible public base URLs must end in `/anthropic`; the adapter derives the internal request path without changing the configured public URL.
+
 ### Usage
 
 ```bash
