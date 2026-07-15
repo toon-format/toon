@@ -241,7 +241,7 @@ export function isTabularArray(
 
     // Check that all header keys exist in the row and all values are primitives
     for (const key of header) {
-      if (!(key in row)) {
+      if (!Object.hasOwn(row, key)) {
         return false
       }
       if (!isJsonPrimitive(row[key])) {
