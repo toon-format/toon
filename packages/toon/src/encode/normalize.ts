@@ -76,7 +76,7 @@ export function normalizeValue(value: unknown): JsonValue {
 
     for (const key in value) {
       if (Object.hasOwn(value, key)) {
-        encodedValues[key] = normalizeValue(value[key])
+        setOwnProperty(encodedValues, key, normalizeValue(value[key]))
       }
     }
 
@@ -85,6 +85,16 @@ export function normalizeValue(value: unknown): JsonValue {
 
   // Fallback: function, symbol, undefined, or other → null
   return null
+}
+
+export function setOwnProperty(target: JsonObject, key: string, value: JsonValue): void {
+  // Avoid invoking Object.prototype accessors such as __proto__ while normalizing.
+  Object.defineProperty(target, key, {
+    value,
+    enumerable: true,
+    writable: true,
+    configurable: true,
+  })
 }
 
 // #endregion

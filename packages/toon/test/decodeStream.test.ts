@@ -38,6 +38,21 @@ describe('streaming decode', () => {
       ])
     })
 
+    it('preserves __proto__ keys in events', () => {
+      const lines = ['__proto__:', '  safe: true']
+      const events = Array.from(decodeStreamSync(lines))
+
+      expect(events).toEqual([
+        { type: 'startObject' },
+        { type: 'key', key: '__proto__' },
+        { type: 'startObject' },
+        { type: 'key', key: 'safe' },
+        { type: 'primitive', value: true },
+        { type: 'endObject' },
+        { type: 'endObject' },
+      ])
+    })
+
     it('decodes inline primitive array', () => {
       const input = 'scores[3]: 95, 87, 92'
       const lines = input.split('\n')
@@ -224,6 +239,21 @@ describe('streaming decode', () => {
         { type: 'endObject' },
       ])
       expect(events).toEqual(Array.from(decodeStreamSync(lines)))
+    })
+
+    it('preserves __proto__ keys in events', async () => {
+      const lines = ['__proto__:', '  safe: true']
+      const events = await collect(decodeStream(asyncLines(lines)))
+
+      expect(events).toEqual([
+        { type: 'startObject' },
+        { type: 'key', key: '__proto__' },
+        { type: 'startObject' },
+        { type: 'key', key: 'safe' },
+        { type: 'primitive', value: true },
+        { type: 'endObject' },
+        { type: 'endObject' },
+      ])
     })
 
     it('rejects expandPaths option', async () => {
