@@ -53,7 +53,7 @@ describe('encode security hardening', () => {
     const inheritedKey = '__toonInheritedTabularField'
     const input = [{ [inheritedKey]: 'user' }, { other: 'kept' }]
 
-    // eslint-disable-next-line no-extend-native -- Simulate a pre-polluted environment.
+    // eslint-disable-next-line no-extend-native -- Simulate a pre-polluted environment
     Object.defineProperty(Object.prototype, inheritedKey, {
       value: 'admin',
       enumerable: true,
