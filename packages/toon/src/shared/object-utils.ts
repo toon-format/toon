@@ -16,14 +16,20 @@ export function getOwnProperty(target: JsonObject, key: string): JsonValue | und
  *
  * @remarks
  * A plain `target[key] = value` would trigger the `Object.prototype` setter for
- * keys such as `__proto__`, corrupting the prototype chain instead of storing an
- * own entry. Defining the property pins it as an ordinary own value.
+ * `__proto__`, corrupting the prototype chain instead of storing an own entry.
+ * Defining the property pins it as an ordinary own value; every other key takes
+ * the plain-assignment fast path since `defineProperty` is markedly slower.
  */
 export function setOwnProperty(target: JsonObject, key: string, value: JsonValue): void {
-  Object.defineProperty(target, key, {
-    value,
-    enumerable: true,
-    writable: true,
-    configurable: true,
-  })
+  if (key === '__proto__') {
+    Object.defineProperty(target, key, {
+      value,
+      enumerable: true,
+      writable: true,
+      configurable: true,
+    })
+    return
+  }
+
+  target[key] = value
 }
