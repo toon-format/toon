@@ -4,8 +4,7 @@ import type { JsonObject, JsonValue } from '../types.ts'
  * Reads an own data property, treating inherited and absent keys alike.
  *
  * @remarks
- * Uses {@link Object.hasOwn} so prototype keys such as `__proto__` never
- * resolve through `Object.prototype`.
+ * Keys such as `__proto__` must not resolve through the prototype chain.
  */
 export function getOwnProperty(target: JsonObject, key: string): JsonValue | undefined {
   return Object.hasOwn(target, key) ? target[key] : undefined
@@ -15,10 +14,9 @@ export function getOwnProperty(target: JsonObject, key: string): JsonValue | und
  * Assigns an own data property without invoking inherited accessors.
  *
  * @remarks
- * A plain `target[key] = value` would trigger the `Object.prototype` setter for
- * `__proto__`, corrupting the prototype chain instead of storing an own entry.
- * Defining the property pins it as an ordinary own value; every other key takes
- * the plain-assignment fast path since `defineProperty` is markedly slower.
+ * Plain assignment of `__proto__` would hit the `Object.prototype` setter and
+ * corrupt the prototype chain; `defineProperty` avoids that but is markedly
+ * slower, so every other key takes plain assignment.
  */
 export function setOwnProperty(target: JsonObject, key: string, value: JsonValue): void {
   if (key === '__proto__') {
