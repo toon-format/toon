@@ -1,4 +1,5 @@
 import type { JsonArray, JsonObject, JsonPrimitive, JsonValue } from '../types.ts'
+import { setOwnProperty } from '../shared/object-utils.ts'
 
 // #region Normalization (unknown → JsonValue)
 
@@ -85,16 +86,6 @@ export function normalizeValue(value: unknown): JsonValue {
 
   // Fallback: function, symbol, undefined, or other → null
   return null
-}
-
-export function setOwnProperty(target: JsonObject, key: string, value: JsonValue): void {
-  // Avoid invoking Object.prototype accessors such as __proto__ while normalizing.
-  Object.defineProperty(target, key, {
-    value,
-    enumerable: true,
-    writable: true,
-    configurable: true,
-  })
 }
 
 // #endregion

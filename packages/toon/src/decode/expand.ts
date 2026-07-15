@@ -1,6 +1,7 @@
 import type { JsonObject, JsonValue } from '../types.ts'
 import { DOT } from '../constants.ts'
 import { isJsonObject } from '../encode/normalize.ts'
+import { getOwnProperty, setOwnProperty } from '../shared/object-utils.ts'
 import { isIdentifierSegment } from '../shared/validation.ts'
 
 // #region Path expansion (safe)
@@ -223,20 +224,6 @@ function mergeObjects(
       setOwnProperty(target, key, sourceValue)
     }
   }
-}
-
-function getOwnProperty(target: JsonObject, key: string): JsonValue | undefined {
-  return Object.hasOwn(target, key) ? target[key] : undefined
-}
-
-function setOwnProperty(target: JsonObject, key: string, value: JsonValue): void {
-  // Avoid invoking Object.prototype accessors such as __proto__ while expanding paths.
-  Object.defineProperty(target, key, {
-    value,
-    enumerable: true,
-    writable: true,
-    configurable: true,
-  })
 }
 
 // #endregion

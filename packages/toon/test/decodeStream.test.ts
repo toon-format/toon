@@ -38,19 +38,14 @@ describe('streaming decode', () => {
       ])
     })
 
-    it('preserves __proto__ keys in events', () => {
+    it('materializes __proto__ as an own property', () => {
+      const prototypeKey = '__proto__'
       const lines = ['__proto__:', '  safe: true']
-      const events = Array.from(decodeStreamSync(lines))
+      const result = buildValueFromEvents(decodeStreamSync(lines)) as Record<string, unknown>
 
-      expect(events).toEqual([
-        { type: 'startObject' },
-        { type: 'key', key: '__proto__' },
-        { type: 'startObject' },
-        { type: 'key', key: 'safe' },
-        { type: 'primitive', value: true },
-        { type: 'endObject' },
-        { type: 'endObject' },
-      ])
+      expect(Object.hasOwn(result, prototypeKey)).toBe(true)
+      expect(result[prototypeKey]).toEqual({ safe: true })
+      expect(Object.getPrototypeOf(result)).toBe(Object.prototype)
     })
 
     it('decodes inline primitive array', () => {
@@ -241,19 +236,15 @@ describe('streaming decode', () => {
       expect(events).toEqual(Array.from(decodeStreamSync(lines)))
     })
 
-    it('preserves __proto__ keys in events', async () => {
+    it('materializes __proto__ as an own property', async () => {
+      const prototypeKey = '__proto__'
       const lines = ['__proto__:', '  safe: true']
       const events = await collect(decodeStream(asyncLines(lines)))
+      const result = await buildValueFromEventsAsync(asyncEvents(events)) as Record<string, unknown>
 
-      expect(events).toEqual([
-        { type: 'startObject' },
-        { type: 'key', key: '__proto__' },
-        { type: 'startObject' },
-        { type: 'key', key: 'safe' },
-        { type: 'primitive', value: true },
-        { type: 'endObject' },
-        { type: 'endObject' },
-      ])
+      expect(Object.hasOwn(result, prototypeKey)).toBe(true)
+      expect(result[prototypeKey]).toEqual({ safe: true })
+      expect(Object.getPrototypeOf(result)).toBe(Object.prototype)
     })
 
     it('rejects expandPaths option', async () => {

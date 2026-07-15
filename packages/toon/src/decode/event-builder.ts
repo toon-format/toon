@@ -1,4 +1,5 @@
 import type { JsonObject, JsonStreamEvent, JsonValue } from '../types.ts'
+import { setOwnProperty } from '../shared/object-utils.ts'
 import { QUOTED_KEY_MARKER } from './expand.ts'
 
 // #region Build context types
@@ -63,7 +64,7 @@ function applyEvent(state: BuildState, event: JsonStreamEvent): void {
             throw new Error('Object startObject event without preceding key')
           }
 
-          setObjectProperty(parent.obj, parent.currentKey, obj)
+          setOwnProperty(parent.obj, parent.currentKey, obj)
           parent.currentKey = undefined
         }
         else if (parent.type === 'array') {
@@ -116,7 +117,7 @@ function applyEvent(state: BuildState, event: JsonStreamEvent): void {
           if (parent.currentKey === undefined) {
             throw new Error('Array startArray event without preceding key')
           }
-          setObjectProperty(parent.obj, parent.currentKey, arr)
+          setOwnProperty(parent.obj, parent.currentKey, arr)
           parent.currentKey = undefined
         }
         else if (parent.type === 'array') {
@@ -177,7 +178,7 @@ function applyEvent(state: BuildState, event: JsonStreamEvent): void {
           if (parent.currentKey === undefined) {
             throw new Error('Primitive event without preceding key in object')
           }
-          setObjectProperty(parent.obj, parent.currentKey, event.value)
+          setOwnProperty(parent.obj, parent.currentKey, event.value)
           parent.currentKey = undefined
         }
         else if (parent.type === 'array') {
@@ -200,16 +201,6 @@ function finalizeState(state: BuildState): JsonValue {
   }
 
   return state.root
-}
-
-function setObjectProperty(target: JsonObject, key: string, value: JsonValue): void {
-  // Avoid invoking Object.prototype accessors such as __proto__ while decoding.
-  Object.defineProperty(target, key, {
-    value,
-    enumerable: true,
-    writable: true,
-    configurable: true,
-  })
 }
 
 // #endregion
