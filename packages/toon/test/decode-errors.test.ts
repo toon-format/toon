@@ -36,6 +36,16 @@ describe('toonDecodeError line context', () => {
     expect(error.message).toMatch(/tabular|rows?/i)
   })
 
+  it('reports a malformed array length marker with line and source', () => {
+    const error = captureDecodeError('rules[-1]:\n  - a\n')
+
+    expect(error).toBeInstanceOf(SyntaxError)
+    expect(error.line).toBe(1)
+    expect(error.source).toBe('rules[-1]:')
+    expect(error.message).toMatch(/^Line 1: /)
+    expect(error.message).toMatch(/invalid array length/i)
+  })
+
   it('reports indentation errors with line and source', () => {
     const error = captureDecodeError('a:\n   b: 1\n')
 
