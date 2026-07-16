@@ -236,6 +236,19 @@ describe('streaming decode', () => {
       expect(events).toEqual(Array.from(decodeStreamSync(lines)))
     })
 
+    it('keeps an unquoted bracket-colon scalar whole, matching decodeStreamSync', async () => {
+      const lines = ['key: foo [2]: bar']
+      const events = await collect(decodeStream(asyncLines(lines)))
+
+      expect(events).toEqual([
+        { type: 'startObject' },
+        { type: 'key', key: 'key' },
+        { type: 'primitive', value: 'foo [2]: bar' },
+        { type: 'endObject' },
+      ])
+      expect(events).toEqual(Array.from(decodeStreamSync(lines)))
+    })
+
     it('keeps a colon-bearing value such as a URL intact', async () => {
       const lines = ['a: http://x']
       const events = await collect(decodeStream(asyncLines(lines)))
