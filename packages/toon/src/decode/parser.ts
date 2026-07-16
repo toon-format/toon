@@ -33,8 +33,10 @@ export function parseArrayHeaderLine(
     bracketStart = content.indexOf(OPEN_BRACKET, keyEndIndex)
   }
   else {
-    // Unquoted key - find first bracket
-    bracketStart = content.indexOf(OPEN_BRACKET)
+    // Unquoted key - find first bracket, skipping any that live inside a
+    // quoted value (e.g. `a: "[2]: x"`), which must stay opaque to header
+    // scanning so the line is treated as a plain key-value pair.
+    bracketStart = findUnquotedChar(content, OPEN_BRACKET)
   }
 
   if (bracketStart === -1) {
