@@ -5,6 +5,7 @@ minimumReleaseAgeExclude:
   - '@ai-sdk/xai@3.0.108'
   - ai@6.0.228
   - tsdown@0.22.8
+  - '@toon-format/spec@3.3.2'
 
 shellEmulator: true
 trustPolicy: no-downgrade
