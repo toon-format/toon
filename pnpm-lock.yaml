@@ -53,6 +53,9 @@ importers:
       '@ai-sdk/openai':
         specifier: ^3.0.85
         version: 3.0.85(zod@4.4.3)
+      '@ai-sdk/openai-compatible':
+        specifier: ^2.0.61
+        version: 2.0.61(zod@4.4.3)
       '@ai-sdk/provider':
         specifier: ^3.0.14
         version: 3.0.14

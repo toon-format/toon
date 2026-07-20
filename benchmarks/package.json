@@ -5,12 +5,16 @@
   "scripts": {
     "benchmark:tokens": "node scripts/token-efficiency-benchmark.ts",
     "benchmark:accuracy": "node --env-file=.env scripts/accuracy-benchmark.ts",
-    "fetch:github-repos": "node scripts/fetch-github-repos.ts"
+    "benchmark:generation": "node --env-file=.env scripts/generation-benchmark.ts",
+    "fetch:github-repos": "node scripts/fetch-github-repos.ts",
+    "generate:generation-fixtures": "node scripts/generate-generation-fixtures.ts",
+    "test": "vitest run"
   },
   "devDependencies": {
     "@ai-sdk/anthropic": "^3.0.97",
     "@ai-sdk/google": "^3.0.94",
     "@ai-sdk/openai": "^3.0.85",
+    "@ai-sdk/openai-compatible": "^2.0.61",
     "@ai-sdk/provider": "^3.0.14",
     "@ai-sdk/xai": "^3.0.108",
     "@clack/prompts": "^1.7.0",

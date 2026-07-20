@@ -1,0 +1,4 @@
+users[3]{id,name,role}:
+  1,Alice,admin
+  2,Bob,staff
+  3,Eve,guest
