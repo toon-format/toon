@@ -12,7 +12,7 @@ export interface TestCase {
   shouldError?: boolean
   options?: {
     delimiter?: ',' | '\t' | '|'
-    indent?: number
+    indentSize?: number
     strict?: boolean
   }
   specSection?: string
