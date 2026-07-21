@@ -109,13 +109,29 @@ export type JsonStreamEvent
 
 // #endregion
 
+// #region Header field types
+
+/**
+ * One entry of a tabular header's fields segment.
+ *
+ * @remarks
+ * A leaf field (no children) maps to one row cell; a nested field group
+ * carries its subfields and materializes a nested object per row.
+ */
+export interface FieldNode {
+  name: string
+  children?: FieldNode[]
+}
+
+// #endregion
+
 // #region Decoder parsing types
 
 export interface ArrayHeaderInfo {
   key?: string
   length: number
   delimiter: Delimiter
-  fields?: string[]
+  fields?: FieldNode[]
 }
 
 export interface ParsedLine {

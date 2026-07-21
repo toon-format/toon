@@ -1,9 +1,9 @@
-import type { ArrayHeaderInfo, DecodeStreamOptions, Depth, JsonPrimitive, JsonStreamEvent, ParsedLine } from '../types.ts'
+import type { ArrayHeaderInfo, DecodeStreamOptions, Depth, FieldNode, JsonPrimitive, JsonStreamEvent, ParsedLine } from '../types.ts'
 import type { StreamingScanState } from './scanner.ts'
 import { COLON, DEFAULT_DELIMITER, LIST_ITEM_MARKER, LIST_ITEM_PREFIX } from '../constants.ts'
 import { findClosingQuote, trimSpaces } from '../shared/string-utils.ts'
 import { ToonDecodeError, withLine } from './errors.ts'
-import { isArrayHeaderContent, isKeyValueContent, mapRowValuesToPrimitives, parseArrayHeaderLine, parseDelimitedValues, parseKeyToken, parsePrimitiveToken } from './parser.ts'
+import { countLeafFields, isArrayHeaderContent, isKeyValueContent, mapRowValuesToPrimitives, parseArrayHeaderLine, parseDelimitedValues, parseKeyToken, parsePrimitiveToken } from './parser.ts'
 import { createScanState, parseLinesAsync, parseLinesSync } from './scanner.ts'
 import { assertExpectedCount, isDataRow, validateNoBlankLinesInRange, validateNoExtraListItems, validateNoExtraTabularRows } from './validation.ts'
 
@@ -370,7 +370,7 @@ function* decodeTabularArraySync(
 
       cursor.advanceSync()
       const values = withLine(line, () => parseDelimitedValues(line.content, header.delimiter))
-      assertExpectedCount(values.length, header.fields!.length, 'tabular row values', options, line)
+      assertExpectedCount(values.length, countLeafFields(header.fields!), 'tabular row values', options, line)
 
       const primitives = withLine(line, () => mapRowValuesToPrimitives(values))
       yield* yieldObjectFromFields(header.fields!, primitives)
@@ -803,7 +803,7 @@ async function* decodeTabularArrayAsync(
 
       await cursor.advance()
       const values = withLine(line, () => parseDelimitedValues(line.content, header.delimiter))
-      assertExpectedCount(values.length, header.fields!.length, 'tabular row values', options, line)
+      assertExpectedCount(values.length, countLeafFields(header.fields!), 'tabular row values', options, line)
 
       const primitives = withLine(line, () => mapRowValuesToPrimitives(values))
       yield* yieldObjectFromFields(header.fields!, primitives)
@@ -1002,15 +1002,26 @@ async function* decodeListItemAsync(
 // #region Shared decoder helpers
 
 function* yieldObjectFromFields(
-  fields: string[],
-  primitives: JsonPrimitive[],
+  fields: readonly FieldNode[],
+  primitives: readonly JsonPrimitive[],
 ): Generator<JsonStreamEvent> {
-  yield { type: 'startObject' }
-  for (let i = 0; i < fields.length; i++) {
-    yield { type: 'key', key: fields[i]! }
-    yield { type: 'primitive', value: primitives[i]! }
+  let cellIndex = 0
+
+  function* walkFieldGroup(nodes: readonly FieldNode[]): Generator<JsonStreamEvent> {
+    yield { type: 'startObject' }
+    for (const node of nodes) {
+      yield { type: 'key', key: node.name }
+      if (node.children) {
+        yield* walkFieldGroup(node.children)
+      }
+      else {
+        yield { type: 'primitive', value: primitives[cellIndex++]! }
+      }
+    }
+    yield { type: 'endObject' }
   }
-  yield { type: 'endObject' }
+
+  yield* walkFieldGroup(fields)
 }
 
 // #endregion

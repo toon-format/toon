@@ -1,4 +1,4 @@
-import type { JsonPrimitive } from '../types.ts'
+import type { FieldNode, JsonPrimitive } from '../types.ts'
 import { COMMA, DEFAULT_DELIMITER, DOUBLE_QUOTE, NULL_LITERAL } from '../constants.ts'
 import { escapeString } from '../shared/string-utils.ts'
 import { isSafeUnquoted, isValidUnquotedKey } from '../shared/validation.ts'
@@ -57,7 +57,7 @@ export function formatHeader(
   length: number,
   options?: {
     key?: string
-    fields?: readonly string[]
+    fields?: readonly FieldNode[]
     delimiter?: string
   },
 ): string {
@@ -75,13 +75,18 @@ export function formatHeader(
   header += `[${length}${delimiter !== DEFAULT_DELIMITER ? delimiter : ''}]`
 
   if (fields) {
-    const quotedFields = fields.map(f => encodeKey(f))
-    header += `{${quotedFields.join(delimiter)}}`
+    header += `{${formatFieldSegment(fields, delimiter)}}`
   }
 
   header += ':'
 
   return header
+}
+
+function formatFieldSegment(fields: readonly FieldNode[], delimiter: string): string {
+  return fields
+    .map(field => encodeKey(field.name) + (field.children ? `{${formatFieldSegment(field.children, delimiter)}}` : ''))
+    .join(delimiter)
 }
 
 // #endregion

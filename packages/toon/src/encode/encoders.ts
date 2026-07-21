@@ -1,4 +1,4 @@
-import type { Depth, JsonArray, JsonObject, JsonPrimitive, JsonValue, ResolvedEncodeOptions } from '../types.ts'
+import type { Depth, FieldNode, JsonArray, JsonObject, JsonPrimitive, JsonValue, ResolvedEncodeOptions } from '../types.ts'
 import { LIST_ITEM_MARKER, LIST_ITEM_PREFIX } from '../constants.ts'
 import { isArrayOfArrays, isArrayOfObjects, isArrayOfPrimitives, isEmptyObject, isJsonArray, isJsonObject, isJsonPrimitive } from './normalize.ts'
 import { encodeAndJoinPrimitives, encodeKey, encodePrimitive, formatHeader } from './primitives.ts'
@@ -146,7 +146,7 @@ export function encodeInlineArrayLine(values: readonly JsonPrimitive[], delimite
 export function* encodeArrayOfObjectsAsTabularLines(
   prefix: string | undefined,
   rows: readonly JsonObject[],
-  header: readonly string[],
+  header: readonly FieldNode[],
   depth: Depth,
   options: ResolvedEncodeOptions,
 ): Generator<string> {
@@ -156,56 +156,80 @@ export function* encodeArrayOfObjectsAsTabularLines(
   yield* writeTabularRowsLines(rows, header, depth + 1, options)
 }
 
-export function extractTabularHeader(rows: readonly JsonObject[]): string[] | undefined {
+export function extractTabularHeader(rows: readonly JsonObject[]): FieldNode[] | undefined {
   if (rows.length === 0)
     return
 
-  const firstRow = rows[0]!
-  const firstKeys = Object.keys(firstRow)
+  const firstKeys = Object.keys(rows[0]!)
   if (firstKeys.length === 0)
     return
 
-  if (isTabularArray(rows, firstKeys)) {
-    return firstKeys
+  // All objects must have the same set of keys (order per object may vary)
+  for (const row of rows) {
+    if (Object.keys(row).length !== firstKeys.length) {
+      return
+    }
+    for (const key of firstKeys) {
+      if (!Object.hasOwn(row, key)) {
+        return
+      }
+    }
   }
+
+  const fieldNodes: FieldNode[] = []
+  for (const key of firstKeys) {
+    const fieldNode = classifyColumn(key, rows.map(row => row[key]!))
+    if (!fieldNode) {
+      return
+    }
+    fieldNodes.push(fieldNode)
+  }
+
+  return fieldNodes
 }
 
-export function isTabularArray(
-  rows: readonly JsonObject[],
-  header: readonly string[],
-): boolean {
-  for (const row of rows) {
-    const keys = Object.keys(row)
-
-    // All objects must have the same keys (but order can differ)
-    if (keys.length !== header.length) {
-      return false
-    }
-
-    // Check that all header keys exist in the row and all values are primitives
-    for (const key of header) {
-      if (!Object.hasOwn(row, key)) {
-        return false
-      }
-      if (!isJsonPrimitive(row[key])) {
-        return false
-      }
-    }
+function classifyColumn(name: string, values: readonly JsonValue[]): FieldNode | undefined {
+  // Uniform-primitive column: a bare leaf field
+  if (values.every(value => isJsonPrimitive(value))) {
+    return { name }
   }
 
-  return true
+  // Nested-uniform column: every value a non-empty object sharing one key
+  // set whose sub-columns classify recursively
+  if (!values.every(value => isJsonObject(value) && !isEmptyObject(value))) {
+    return
+  }
+
+  const children = extractTabularHeader(values as JsonObject[])
+  if (!children) {
+    return
+  }
+
+  return { name, children }
+}
+
+function collectLeafValues(row: JsonObject, fields: readonly FieldNode[], leaves: JsonPrimitive[]): void {
+  for (const field of fields) {
+    const value = row[field.name]
+    if (field.children) {
+      collectLeafValues(value as JsonObject, field.children, leaves)
+    }
+    else {
+      leaves.push(value as JsonPrimitive)
+    }
+  }
 }
 
 function* writeTabularRowsLines(
   rows: readonly JsonObject[],
-  header: readonly string[],
+  header: readonly FieldNode[],
   depth: Depth,
   options: ResolvedEncodeOptions,
 ): Generator<string> {
   for (const row of rows) {
-    const values = header.map(key => row[key])
-    const joinedValue = encodeAndJoinPrimitives(values as JsonPrimitive[], options.delimiter)
-    yield indentedLine(depth, joinedValue, options.indent)
+    const leaves: JsonPrimitive[] = []
+    collectLeafValues(row, header, leaves)
+    yield indentedLine(depth, encodeAndJoinPrimitives(leaves, options.delimiter), options.indent)
   }
 }
 
