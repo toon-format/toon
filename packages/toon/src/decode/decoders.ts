@@ -213,6 +213,13 @@ function overIndentedLineError(line: ParsedLine, expectedDepth: Depth): ToonDeco
   )
 }
 
+function keylessKeyedError(line: ParsedLine): ToonDecodeError {
+  return new ToonDecodeError(
+    'Keyless keyed header is only valid at the document root',
+    { line: line.lineNumber, source: line.raw },
+  )
+}
+
 // Strict decoding never silently discards input: once the root form is
 // complete, any remaining line is an error rather than dropped data
 function assertFullyConsumedSync(cursor: StreamingLineCursor, strict: boolean): void {
@@ -274,10 +281,7 @@ function* decodeKeyValueSync(
   // The keyless keyed form is only valid as the document's root header;
   // non-strict decoders fall through to key-value parsing
   if (arrayHeader?.header.keyed && arrayHeader.header.key === undefined && options.strict) {
-    throw new ToonDecodeError(
-      'Keyless keyed header is only valid at the document root',
-      { line: line.lineNumber, source: line.raw },
-    )
+    throw keylessKeyedError(line)
   }
 
   // Regular key-value pair
@@ -646,10 +650,7 @@ function* decodeListItemSync(
       // There is no keyless keyed list-item form (`- [N:]{fields}:`)
       if (arrayHeader.header.keyed) {
         if (options.strict) {
-          throw new ToonDecodeError(
-            'Keyless keyed header is only valid at the document root',
-            { line: line.lineNumber, source: line.raw },
-          )
+          throw keylessKeyedError(itemLine)
         }
       }
       else {
@@ -853,10 +854,7 @@ async function* decodeKeyValueAsync(
   // The keyless keyed form is only valid as the document's root header;
   // non-strict decoders fall through to key-value parsing
   if (arrayHeader?.header.keyed && arrayHeader.header.key === undefined && options.strict) {
-    throw new ToonDecodeError(
-      'Keyless keyed header is only valid at the document root',
-      { line: line.lineNumber, source: line.raw },
-    )
+    throw keylessKeyedError(line)
   }
 
   // Regular key-value pair
@@ -1204,10 +1202,7 @@ async function* decodeListItemAsync(
       // There is no keyless keyed list-item form (`- [N:]{fields}:`)
       if (arrayHeader.header.keyed) {
         if (options.strict) {
-          throw new ToonDecodeError(
-            'Keyless keyed header is only valid at the document root',
-            { line: line.lineNumber, source: line.raw },
-          )
+          throw keylessKeyedError(itemLine)
         }
       }
       else {
