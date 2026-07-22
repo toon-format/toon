@@ -139,6 +139,7 @@ export function* decodeStreamSync(
     cursor.advanceSync()
     yield { type: 'startArray', length: 0 }
     yield { type: 'endArray' }
+    assertFullyConsumedSync(cursor, resolvedOptions.strict)
     return
   }
 
@@ -148,6 +149,7 @@ export function* decodeStreamSync(
     if (headerInfo) {
       cursor.advanceSync()
       yield* decodeArrayFromHeaderSync(headerInfo.header, headerInfo.inlineValues, cursor, 0, resolvedOptions, first)
+      assertFullyConsumedSync(cursor, resolvedOptions.strict)
       return
     }
   }
@@ -176,8 +178,16 @@ export function* decodeStreamSync(
   // Process remaining object fields
   while (!cursor.atEndSync()) {
     const line = cursor.peekSync()
-    if (!line || line.depth !== 0) {
+    if (!line) {
       break
+    }
+
+    if (line.depth !== 0) {
+      if (resolvedOptions.strict) {
+        throw overIndentedLineError(line, 0)
+      }
+      cursor.advanceSync()
+      continue
     }
 
     cursor.advanceSync()
@@ -192,6 +202,41 @@ function assertNoDepthJump(firstNestedLine: ParsedLine, parentDepth: Depth, stri
     throw new ToonDecodeError(
       `Indentation depth jump: expected depth ${parentDepth + 1}, but found ${firstNestedLine.depth}`,
       { line: firstNestedLine.lineNumber, source: firstNestedLine.raw },
+    )
+  }
+}
+
+function overIndentedLineError(line: ParsedLine, expectedDepth: Depth): ToonDecodeError {
+  return new ToonDecodeError(
+    `Over-indented line: expected depth ${expectedDepth}, but found ${line.depth}`,
+    { line: line.lineNumber, source: line.raw },
+  )
+}
+
+// Strict decoding never silently discards input: once the root form is
+// complete, any remaining line is an error rather than dropped data
+function assertFullyConsumedSync(cursor: StreamingLineCursor, strict: boolean): void {
+  if (!strict) {
+    return
+  }
+  const line = cursor.peekSync()
+  if (line) {
+    throw new ToonDecodeError(
+      'Unexpected content after the document root',
+      { line: line.lineNumber, source: line.raw },
+    )
+  }
+}
+
+async function assertFullyConsumed(cursor: StreamingLineCursor, strict: boolean): Promise<void> {
+  if (!strict) {
+    return
+  }
+  const line = await cursor.peek()
+  if (line) {
+    throw new ToonDecodeError(
+      'Unexpected content after the document root',
+      { line: line.lineNumber, source: line.raw },
     )
   }
 }
@@ -290,6 +335,12 @@ function* decodeObjectFieldsSync(
     if (line.depth === computedDepth) {
       cursor.advanceSync()
       yield* decodeKeyValueSync(line, cursor, computedDepth, options, seenKeys)
+    }
+    else if (computedDepth !== undefined && line.depth > computedDepth) {
+      if (options.strict) {
+        throw overIndentedLineError(line, computedDepth)
+      }
+      cursor.advanceSync()
     }
     else {
       break
@@ -719,6 +770,7 @@ export async function* decodeStream(
       await cursor.advance()
       yield { type: 'startArray', length: 0 }
       yield { type: 'endArray' }
+      await assertFullyConsumed(cursor, resolvedOptions.strict)
       return
     }
 
@@ -728,6 +780,7 @@ export async function* decodeStream(
       if (headerInfo) {
         await cursor.advance()
         yield* decodeArrayFromHeaderAsync(headerInfo.header, headerInfo.inlineValues, cursor, 0, resolvedOptions, first)
+        await assertFullyConsumed(cursor, resolvedOptions.strict)
         return
       }
     }
@@ -755,9 +808,18 @@ export async function* decodeStream(
     // Process remaining object fields
     while (!(await cursor.atEnd())) {
       const line = await cursor.peek()
-      if (!line || line.depth !== 0) {
+      if (!line) {
         break
       }
+
+      if (line.depth !== 0) {
+        if (resolvedOptions.strict) {
+          throw overIndentedLineError(line, 0)
+        }
+        await cursor.advance()
+        continue
+      }
+
       await cursor.advance()
       yield* decodeKeyValueAsync(line, cursor, 0, resolvedOptions, rootSeenKeys)
     }
@@ -852,6 +914,12 @@ async function* decodeObjectFieldsAsync(
     if (line.depth === computedDepth) {
       await cursor.advance()
       yield* decodeKeyValueAsync(line, cursor, computedDepth, options, seenKeys)
+    }
+    else if (computedDepth !== undefined && line.depth > computedDepth) {
+      if (options.strict) {
+        throw overIndentedLineError(line, computedDepth)
+      }
+      await cursor.advance()
     }
     else {
       break
