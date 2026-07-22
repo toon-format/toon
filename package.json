@@ -1,7 +1,7 @@
 {
   "name": "@toon-format/monorepo",
   "type": "module",
-  "version": "2.3.1",
+  "version": "4.0.0",
   "private": true,
   "packageManager": "pnpm@11.13.0",
   "scripts": {
