@@ -574,7 +574,7 @@ By default (`strict: true`), the decoder validates input strictly:
 - **Array length mismatches**: Throws when declared length doesn't match actual count
 - **Keyed tabular mismatches**: Throws when the entry-row count doesn't match the declared count or a row's cell count doesn't match the header's leaf fields (§9.5)
 - **Header delimiter mismatch**: Throws when the bracket-declared delimiter differs from the field-list delimiter (§14.2)
-- **Indentation errors**: Throws when leading spaces aren't exact multiples of `indent`, and on depth jumps of more than one level into a nested scope
+- **Indentation errors**: Throws when leading spaces aren't exact multiples of `indent`, on depth jumps of more than one level into a nested scope, and on over-indented lines that belong to no scope (§14.2) – strict decoding never silently discards input, including trailing content after a completed root array or keyed tabular root (§5)
 - **Header structure**: Throws on leading-zero or non-integer array lengths, malformed keyed markers, and intervening content between bracket/fields/colon
 - **Duplicate sibling keys**: Throws when an object has two children with the same key, including duplicate entry keys (§14.3)
 
@@ -603,7 +603,7 @@ type JsonStreamEvent
     | { type: 'endObject' }
     | { type: 'startArray', length: number }
     | { type: 'endArray' }
-    | { type: 'key', key: string, wasQuoted?: boolean }
+    | { type: 'key', key: string }
     | { type: 'primitive', value: JsonPrimitive }
 ```
 
