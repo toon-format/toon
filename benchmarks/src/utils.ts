@@ -49,3 +49,47 @@ export function tokenize(text: string): number {
 export async function ensureDir(dirPath: string): Promise<void> {
   await fsp.mkdir(dirPath, { recursive: true })
 }
+
+/**
+ * Bounds of a Wilson score confidence interval for a proportion.
+ */
+export interface WilsonInterval {
+  /** Lower bound of the interval, in 0..1 */
+  lower: number
+  /** Upper bound of the interval, in 0..1 */
+  upper: number
+  /** Half-width of the interval, in 0..1, equal to (upper - lower) / 2 */
+  halfWidth: number
+}
+
+/**
+ * Wilson score confidence interval for a binomial proportion.
+ *
+ * @remarks
+ * Unlike the normal approximation, the Wilson interval stays inside 0..1 and
+ * behaves sensibly for small samples and proportions near the boundaries.
+ *
+ * @example
+ * wilsonInterval(80, 100) // { lower: 0.711…, upper: 0.867…, halfWidth: 0.078… }
+ */
+export function wilsonInterval(
+  correctCount: number,
+  totalCount: number,
+  confidenceZ = 1.959963984540054, // 95%
+): WilsonInterval {
+  // A zero sample has no proportion to bound – avoid dividing by totalCount
+  if (totalCount === 0)
+    return { lower: 0, upper: 0, halfWidth: 0 }
+
+  const proportion = correctCount / totalCount
+  const zSquared = confidenceZ * confidenceZ
+  const denominator = 1 + zSquared / totalCount
+  const center = (proportion + zSquared / (2 * totalCount)) / denominator
+  const margin = (confidenceZ / denominator)
+    * Math.sqrt(proportion * (1 - proportion) / totalCount + zSquared / (4 * totalCount * totalCount))
+
+  const lower = center - margin
+  const upper = center + margin
+
+  return { lower, upper, halfWidth: (upper - lower) / 2 }
+}
