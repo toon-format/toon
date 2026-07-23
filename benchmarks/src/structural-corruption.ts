@@ -181,7 +181,7 @@ function fieldIndexFromHeader(formatName: string, headLines: string[], fieldName
     return fields.indexOf(fieldName)
   }
 
-  // csv column header row
+  // CSV column header row
   return headLines[1]!.split(',').indexOf(fieldName)
 }
 
@@ -195,7 +195,7 @@ function isFieldLine(formatName: string, line: string, fieldName: string): boole
   if (formatName === 'yaml')
     return trimmed.startsWith(`${fieldName}:`)
 
-  // xml
+  // XML
   return trimmed.startsWith(`<${fieldName}>`)
 }
 
@@ -231,26 +231,26 @@ function dropFieldFromRecords(
 // Compact JSON is a single line, so surgery runs on the parsed object and is
 // re-serialized – the lossy-pipeline outcome is identical to editing the text
 function corruptJsonCompactText(text: string, corruption: StructuralCorruption): string {
-  const parsed = JSON.parse(text) as { employees: Record<string, unknown>[] }
+  const parsedDocument = JSON.parse(text) as { employees: Record<string, unknown>[] }
 
   switch (corruption.kind) {
     case 'truncated':
-      parsed.employees = parsed.employees.slice(0, parsed.employees.length - corruption.removeRecordCount!)
+      parsedDocument.employees = parsedDocument.employees.slice(0, parsedDocument.employees.length - corruption.removeRecordCount)
       break
 
     case 'extra-rows':
-      parsed.employees = [...parsed.employees, ...corruption.appendRecords!]
+      parsedDocument.employees = [...parsedDocument.employees, ...corruption.appendRecords]
       break
 
     case 'width-mismatch':
     case 'missing-fields':
-      for (const index of corruption.targetRecordIndices!) {
-        delete parsed.employees[index]![corruption.targetFieldName!]
+      for (const index of corruption.targetRecordIndices) {
+        delete parsedDocument.employees[index]![corruption.targetFieldName]
       }
       break
   }
 
-  return JSON.stringify(parsed)
+  return JSON.stringify(parsedDocument)
 }
 
 /**
@@ -279,7 +279,7 @@ export function corruptEncodedText(
 
   switch (corruption.kind) {
     case 'truncated':
-      return dropTrailingRecordBlocks(formatName, encodedText, corruption.removeRecordCount!)
+      return dropTrailingRecordBlocks(formatName, encodedText, corruption.removeRecordCount)
 
     case 'extra-rows': {
       const appendText = FORMATS[formatName]!.encode({ employees: corruption.appendRecords })
@@ -288,7 +288,7 @@ export function corruptEncodedText(
 
     case 'width-mismatch':
     case 'missing-fields':
-      return dropFieldFromRecords(formatName, encodedText, corruption.targetRecordIndices!, corruption.targetFieldName!)
+      return dropFieldFromRecords(formatName, encodedText, corruption.targetRecordIndices, corruption.targetFieldName)
   }
 }
 

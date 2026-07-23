@@ -95,35 +95,35 @@ const corruptedDatasets = [
 
 for (const formatName of jsonParsableFormats) {
   for (const name of corruptedDatasets) {
-    let parsed = false
+    let isParsed = false
     try {
       JSON.parse(encode(formatName, name))
-      parsed = true
+      isParsed = true
     }
     catch {}
-    assert(parsed, `${formatName} ${name}: JSON.parse succeeds`)
+    assert(isParsed, `${formatName} ${name}: JSON.parse succeeds`)
   }
 }
 
 for (const name of corruptedDatasets) {
-  let parsed = false
+  let isParsed = false
   try {
     parseYaml(encode('yaml', name))
-    parsed = true
+    isParsed = true
   }
   catch {}
-  assert(parsed, `yaml ${name}: YAML.parse succeeds`)
+  assert(isParsed, `yaml ${name}: YAML.parse succeeds`)
 }
 
 const xmlParser = new XMLParser()
 for (const name of corruptedDatasets) {
-  let parsed = false
+  let isParsed = false
   try {
     xmlParser.parse(encode('xml', name))
-    parsed = true
+    isParsed = true
   }
   catch {}
-  assert(parsed, `xml ${name}: XMLParser.parse succeeds`)
+  assert(isParsed, `xml ${name}: XMLParser.parse succeeds`)
 }
 
 // --- CSV: no length metadata, but a narrower row still surfaces width loss ---

@@ -12,34 +12,29 @@ export interface DatasetMetadata {
 }
 
 /**
- * Kind of structural corruption applied to a dataset's encoded text.
- */
-export type StructuralCorruptionKind
-  = | 'control'
-    | 'truncated'
-    | 'extra-rows'
-    | 'width-mismatch'
-    | 'missing-fields'
-
-/**
  * Descriptor for corrupting a dataset's encoded text after it is emitted.
  *
  * @remarks
  * The corruption is applied to each format's rendered text – not the source
  * data – so formats that carry length or width metadata (TOON) surface the
- * damage while metadata-less formats stay syntactically valid.
+ * damage while metadata-less formats stay syntactically valid. Each variant is
+ * discriminated on `kind` and carries exactly the fields that kind requires.
  */
-export interface StructuralCorruption {
-  kind: StructuralCorruptionKind
-  /** Number of trailing records to remove – `truncated` */
-  removeRecordCount?: number
-  /** Records appended beyond the declared length – `extra-rows` */
-  appendRecords?: Record<string, unknown>[]
-  /** Record indices to edit – `width-mismatch`, `missing-fields` */
-  targetRecordIndices?: number[]
-  /** Field dropped from the targeted records – `width-mismatch`, `missing-fields` */
-  targetFieldName?: string
-}
+export type StructuralCorruption
+  = | { kind: 'control' }
+  // Number of trailing records to remove
+    | { kind: 'truncated', removeRecordCount: number }
+  // Records appended beyond the declared length
+    | { kind: 'extra-rows', appendRecords: Record<string, unknown>[] }
+  // Record indices to narrow and the field dropped from each
+    | { kind: 'width-mismatch', targetRecordIndices: number[], targetFieldName: string }
+  // Record indices to edit and the field removed from each
+    | { kind: 'missing-fields', targetRecordIndices: number[], targetFieldName: string }
+
+/**
+ * Kind of structural corruption applied to a dataset's encoded text.
+ */
+export type StructuralCorruptionKind = StructuralCorruption['kind']
 
 export interface Dataset {
   name: DatasetName

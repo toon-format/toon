@@ -121,41 +121,41 @@ function verifyNestedGroupGroundTruth(): void {
 
   for (const question of questions) {
     const { prompt, groundTruth } = question
-    let ok = false
+    let isDerivable = false
     let match: RegExpMatchArray | null = null
 
     if (prompt === 'How many contacts are in the dataset?') {
-      ok = groundTruth === String(contacts.length)
+      isDerivable = groundTruth === String(contacts.length)
     }
     else if (prompt.startsWith('List the top-level field names for contacts')) {
-      ok = groundTruth === 'name,age,email,address,plan'
+      isDerivable = groundTruth === 'name,age,email,address,plan'
     }
     else if (prompt.startsWith('What are the field names within a contact\'s address')) {
-      ok = groundTruth === 'city,country'
+      isDerivable = groundTruth === 'city,country'
     }
     else if (prompt.startsWith('What are the field names within a contact\'s plan')) {
-      ok = groundTruth === 'name,price'
+      isDerivable = groundTruth === 'name,price'
     }
     else if (prompt === 'What is the 3rd top-level field name for contacts?') {
-      ok = groundTruth === 'email'
+      isDerivable = groundTruth === 'email'
     }
     else if (prompt === 'What country does the last contact in the dataset live in?') {
-      ok = groundTruth === lastContact.address.country
+      isDerivable = groundTruth === lastContact.address.country
     }
     else if ((match = prompt.match(/What city is (.+?)'s address in\?/))) {
-      ok = byName(match[1]!).some(c => c.address.city === groundTruth)
+      isDerivable = byName(match[1]!).some(c => c.address.city === groundTruth)
     }
     else if ((match = prompt.match(/What country does (.+?) live in\?/))) {
-      ok = byName(match[1]!).some(c => c.address.country === groundTruth)
+      isDerivable = byName(match[1]!).some(c => c.address.country === groundTruth)
     }
     else if ((match = prompt.match(/What plan is (.+?) on\?/))) {
-      ok = byName(match[1]!).some(c => c.plan.name === groundTruth)
+      isDerivable = byName(match[1]!).some(c => c.plan.name === groundTruth)
     }
     else if ((match = prompt.match(/What is the price of (.+?)'s plan\?/))) {
-      ok = byName(match[1]!).some(c => String(c.plan.price) === groundTruth)
+      isDerivable = byName(match[1]!).some(c => String(c.plan.price) === groundTruth)
     }
     else if ((match = prompt.match(/How old is (.+?)\?/))) {
-      ok = byName(match[1]!).some(c => String(c.age) === groundTruth)
+      isDerivable = byName(match[1]!).some(c => String(c.age) === groundTruth)
     }
     else {
       failures.push(`nested-group: no derivation for prompt "${prompt}"`)
@@ -163,7 +163,7 @@ function verifyNestedGroupGroundTruth(): void {
       continue
     }
 
-    assert(ok, `nested-group: groundTruth "${groundTruth}" not derivable for "${prompt}"`)
+    assert(isDerivable, `nested-group: groundTruth "${groundTruth}" not derivable for "${prompt}"`)
   }
 }
 
