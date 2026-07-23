@@ -5,10 +5,6 @@ import { QuestionBuilder, rotateQuestions, SAMPLE_STRIDES } from './utils.ts'
 
 /**
  * Generate keyed feature flag questions
- *
- * @remarks
- * Exercises TOON's keyed tabular form: entries are looked up by their map key
- * (`flags[N:]{fields}:` with one `entrykey: values` row per flag).
  */
 export function generateKeyedQuestions(flags: Record<string, FeatureFlag>, getId: () => string): Question[] {
   const questions: Question[] = []

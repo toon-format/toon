@@ -5,10 +5,6 @@ import { QuestionBuilder, rotateQuestions, SAMPLE_STRIDES } from './utils.ts'
 
 /**
  * Generate nested-group contact questions
- *
- * @remarks
- * Exercises TOON's nested field groups: nested address and plan fields fold into
- * the tabular header (`contacts[N]{name,address{city,country},plan{name,price}}:`).
  */
 export function generateNestedGroupQuestions(contacts: Contact[], getId: () => string): Question[] {
   const questions: Question[] = []

@@ -158,10 +158,6 @@ export interface Product {
 
 /**
  * Feature flag structure for keyed tabular dataset
- *
- * @remarks
- * A flat record of primitive fields so a map of these values triggers TOON's
- * keyed tabular form (`key[N:]{fields}:` with one `entrykey: values` row per entry).
  */
 export interface FeatureFlag {
   enabled: boolean
@@ -172,11 +168,6 @@ export interface FeatureFlag {
 
 /**
  * Contact structure for nested field group dataset
- *
- * @remarks
- * Uniform-object columns (`address`, `plan`) with no array-valued fields so the
- * records stay tabular and the header carries nested field groups
- * (e.g. `contacts[N]{name,address{city,country}}:`).
  */
 export interface Contact {
   name: string
@@ -831,12 +822,9 @@ export const TOKEN_EFFICIENCY_DATASETS: Dataset[] = [
   nestedConfigDataset,
 ]
 
-// The v4 keyed-tabular and nested-field-group datasets are generated here, after
-// every existing dataset has consumed the shared faker stream, and behind their
-// own explicit seeds. Generating them earlier would shift the RNG stream for the
-// datasets above and silently mutate their data (and the committed ground truth
-// and results derived from it). Attaching via `.push()` onto the already-declared
-// arrays keeps that ordering intact – the arrays are only iterated after init.
+// The v4 datasets generate after every existing dataset has consumed the shared
+// faker stream, behind explicit seeds – generating them earlier would shift the
+// stream and silently mutate every dataset above (and its ground truths)
 
 faker.seed(67890)
 
@@ -844,7 +832,7 @@ faker.seed(67890)
  * Keyed dataset: Feature flags keyed by name
  *
  * @remarks
- * Exercises TOON's keyed tabular form (`flags[N:]{fields}:` with one entry row per flag).
+ * Tests TOON's keyed tabular form.
  */
 export const keyedDataset: Dataset = {
   name: 'keyed',
@@ -874,7 +862,7 @@ faker.seed(67891)
  * Nested-group dataset: Contacts with nested address and plan objects
  *
  * @remarks
- * Exercises TOON's nested field groups (`contacts[N]{name,address{city,country},plan{name,price}}:`).
+ * Tests TOON's nested field groups.
  */
 export const nestedGroupDataset: Dataset = {
   name: 'nested-group',
