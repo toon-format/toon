@@ -65,6 +65,8 @@ export const DATASET_NAMES = [
   'structural-validation-extra-rows',
   'structural-validation-width-mismatch',
   'structural-validation-missing-fields',
+  'keyed',
+  'nested-group',
 ] as const
 
 /**
@@ -159,5 +161,11 @@ export const QUESTION_LIMITS = {
   nestedConfig: {
     fieldRetrieval: 10,
     filteringComplex: 5,
+  },
+  keyed: {
+    fieldRetrieval: 12,
+  },
+  nestedGroup: {
+    fieldRetrieval: 12,
   },
 } as const

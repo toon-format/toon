@@ -10,6 +10,8 @@ export const SAMPLE_STRIDES = {
   METRIC_FIELD: 3,
   REPO_FIELD: 7,
   EVENT_LOG_FIELD: 5,
+  FLAG_FIELD: 3,
+  CONTACT_FIELD: 3,
 } as const
 
 /**
