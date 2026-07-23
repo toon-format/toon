@@ -272,6 +272,48 @@ The replacer is called in a depth-first manner:
 Following `JSON.stringify` behavior, array indices are passed as strings (`'0'`, `'1'`, `'2'`, etc.) to the replacer, not as numbers.
 :::
 
+### Raw String Output
+
+Return `rawString(...)` from a replacer to emit a string verbatim at the value position, bypassing TOON's quoting, escaping, and number/keyword detection. Compose it with `escapeString` to control quoting yourself without reimplementing escape handling.
+
+```ts
+import { encode, escapeString, rawString } from '@toon-format/toon'
+
+const data = { name: 'Ada', age: 30 }
+
+// Always-quote mode: wrap every leaf in quotes
+console.log(encode(data, {
+  replacer: (key, value) => rawString(`"${escapeString(String(value))}"`)
+}))
+```
+
+**Output:**
+
+<!-- eslint-skip -->
+
+```yaml
+name: "Ada"
+age: "30"
+```
+
+#### Semantics
+
+- A `rawString` is only honored where a primitive would go. Returned for an object or array value, it is ignored and the container is encoded normally – this lets "wrap every value" replacers recurse into containers instead of collapsing them.
+- A value containing a line whose first non-space character is `#` throws at `rawString(...)` time – regardless of where the value would be emitted – since decoders silently strip such comment lines and the data would vanish without an error.
+
+#### `escapeString(value)`
+
+Escapes backslashes, quotes, and control characters for use inside a quoted TOON string. The decision whether a value needs quoting at all stays with the caller.
+
+```ts
+escapeString('a "quoted" value') // a \"quoted\" value
+escapeString('line1\nline2') // line1\nline2 (escaped)
+```
+
+::: warning One-Way Escape Hatch
+Raw emission bypasses the encoder's correctness guarantees: the output is not guaranteed to be valid TOON or to round-trip losslessly. In the example above, `age` decodes back as the string `"30"`, not the number `30`.
+:::
+
 ## Decoding Functions
 
 ### `decode(input, options?)`
