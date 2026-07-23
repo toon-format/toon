@@ -1,5 +1,6 @@
 import type { ArrayHeaderInfo, DecodeStreamOptions, Depth, FieldNode, JsonPrimitive, JsonStreamEvent, ParsedLine } from '../types.ts'
 import type { LineReader, LineRule } from './line-reader.ts'
+import type { ArrayHeaderParseResult } from './parser.ts'
 import { COLON, DEFAULT_DELIMITER, LIST_ITEM_MARKER, LIST_ITEM_PREFIX } from '../constants.ts'
 import { findClosingQuote, findUnquotedChar, trimSpaces } from '../shared/string-utils.ts'
 import { ToonDecodeError, withLine } from './errors.ts'
@@ -59,7 +60,7 @@ function* decodeDocument(reader: LineReader, options: DecoderContext): LineRule 
   }
 
   if (isArrayHeaderContent(first.content)) {
-    const headerInfo = withLine(first, () => parseArrayHeaderLine(first.content, DEFAULT_DELIMITER, options.strict))
+    const headerInfo = withLine(first, () => resolveArrayHeader(parseArrayHeaderLine(first.content, DEFAULT_DELIMITER), options.strict))
     if (headerInfo) {
       yield* readLine(reader)
       yield* decodeArrayFromHeader(headerInfo.header, headerInfo.inlineValues, reader, 0, options, first)
@@ -192,7 +193,7 @@ function* decodeKeyValue(
 ): LineRule {
   const content = line.content
 
-  const arrayHeader = withLine(line, () => parseArrayHeaderLine(content, DEFAULT_DELIMITER, options.strict))
+  const arrayHeader = withLine(line, () => resolveArrayHeader(parseArrayHeaderLine(content, DEFAULT_DELIMITER), options.strict))
   if (arrayHeader && arrayHeader.header.key !== undefined) {
     assertNoDuplicateKey(arrayHeader.header.key, line, seenKeys)
     yield { type: 'key', key: arrayHeader.header.key }
@@ -560,7 +561,7 @@ function* decodeListItem(
   const itemLine: ParsedLine = { ...line, content: afterHyphen }
 
   if (isArrayHeaderContent(afterHyphen)) {
-    const arrayHeader = withLine(itemLine, () => parseArrayHeaderLine(afterHyphen, DEFAULT_DELIMITER, options.strict))
+    const arrayHeader = withLine(itemLine, () => resolveArrayHeader(parseArrayHeaderLine(afterHyphen, DEFAULT_DELIMITER), options.strict))
     if (arrayHeader) {
       // There is no keyless keyed (`- [N:]{fields}:`) or fields-bearing
       // (`- [N]{fields}:`) list-item form.
@@ -577,7 +578,7 @@ function* decodeListItem(
   }
 
   // Tabular-first list-item object: `- key[N]{fields}:`
-  const headerInfo = withLine(itemLine, () => parseArrayHeaderLine(afterHyphen, DEFAULT_DELIMITER, options.strict))
+  const headerInfo = withLine(itemLine, () => resolveArrayHeader(parseArrayHeaderLine(afterHyphen, DEFAULT_DELIMITER), options.strict))
   if (headerInfo && headerInfo.header.key !== undefined && headerInfo.header.fields !== undefined) {
     const header = headerInfo.header
     const seenKeys = options.strict ? new Set<string>([header.key!]) : undefined
@@ -650,6 +651,34 @@ function isKeyValueLine(line: ParsedLine): boolean {
 // #endregion
 
 // #region Shared decoder helpers
+
+// Applies strict-mode policy to a parsed array-header result, keeping the
+// detection/parse split in parser.ts free of error decisions. A bare
+// SyntaxError is thrown on purpose so the caller's `withLine` wrapper enriches
+// it into a `ToonDecodeError` with a `cause`, matching the direct-throw path.
+function resolveArrayHeader(
+  result: ArrayHeaderParseResult,
+  strict: boolean,
+): { header: ArrayHeaderInfo, inlineValues?: string } | undefined {
+  if (result.kind === 'notHeader') {
+    return undefined
+  }
+
+  if (result.kind === 'invalid') {
+    if (strict) {
+      throw new SyntaxError(result.reason)
+    }
+    return undefined
+  }
+
+  // A valid header may still carry a strict-only violation (duplicate field
+  // names) that non-strict mode resolves via last-write-wins.
+  if (strict && result.strictError !== undefined) {
+    throw new SyntaxError(result.strictError)
+  }
+
+  return { header: result.header, inlineValues: result.inlineValues }
+}
 
 function* yieldObjectFromFields(
   fields: readonly FieldNode[],

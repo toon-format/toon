@@ -5,11 +5,19 @@ import { findClosingQuote, findUnquotedChar, trimSpaces, unescapeString } from '
 
 // #region Array header parsing
 
+export type ArrayHeaderParseResult
+  = | { kind: 'header', header: ArrayHeaderInfo, inlineValues?: string, strictError?: string }
+    | { kind: 'notHeader' }
+    | { kind: 'invalid', reason: string }
+
+/**
+ * Detects and parses an array-header line into a typed result, staying free of
+ * strict-mode policy: callers decide how to treat `invalid` and `strictError`.
+ */
 export function parseArrayHeaderLine(
   content: string,
   defaultDelimiter: Delimiter,
-  strict: boolean = false,
-): { header: ArrayHeaderInfo, inlineValues?: string } | undefined {
+): ArrayHeaderParseResult {
   const trimmedToken = content.trimStart()
 
   // Find the bracket segment, accounting for quoted keys that may contain brackets
@@ -19,12 +27,12 @@ export function parseArrayHeaderLine(
   if (trimmedToken.startsWith(DOUBLE_QUOTE)) {
     const closingQuoteIndex = findClosingQuote(trimmedToken, 0)
     if (closingQuoteIndex === -1) {
-      return
+      return { kind: 'notHeader' }
     }
 
     const afterQuote = trimmedToken.slice(closingQuoteIndex + 1)
     if (!afterQuote.startsWith(OPEN_BRACKET)) {
-      return
+      return { kind: 'notHeader' }
     }
 
     // Calculate position in original content and find bracket after the quoted key
@@ -38,18 +46,18 @@ export function parseArrayHeaderLine(
   }
 
   if (bracketStart === -1) {
-    return
+    return { kind: 'notHeader' }
   }
 
   // A header key can't contain an unquoted colon, so this is a key-value line
   const firstColonIndex = findUnquotedChar(content, COLON)
   if (firstColonIndex !== -1 && firstColonIndex < bracketStart) {
-    return
+    return { kind: 'notHeader' }
   }
 
   const bracketEnd = findUnquotedChar(content, CLOSE_BRACKET, bracketStart)
   if (bracketEnd === -1) {
-    return
+    return { kind: 'notHeader' }
   }
 
   // Find the colon that comes after all brackets and braces
@@ -61,13 +69,13 @@ export function parseArrayHeaderLine(
   if (braceStart !== -1 && braceStart < findUnquotedChar(content, COLON, bracketEnd)) {
     const gapBeforeBrace = content.slice(bracketEnd + 1, braceStart)
     if (gapBeforeBrace !== '') {
-      if (strict) {
-        const trimmedGap = gapBeforeBrace.trim()
-        throw new SyntaxError(trimmedGap === ''
+      const trimmedGap = gapBeforeBrace.trim()
+      return {
+        kind: 'invalid',
+        reason: trimmedGap === ''
           ? `Unexpected whitespace between bracket and fields segment`
-          : `Unexpected content "${trimmedGap}" between bracket and fields segment`)
+          : `Unexpected content "${trimmedGap}" between bracket and fields segment`,
       }
-      return
     }
 
     const foundBraceEnd = findMatchingBrace(content, braceStart)
@@ -78,25 +86,29 @@ export function parseArrayHeaderLine(
 
   colonIndex = findUnquotedChar(content, COLON, Math.max(bracketEnd, braceEnd))
   if (colonIndex === -1) {
-    return
+    return { kind: 'notHeader' }
   }
 
   const gapStart = Math.max(bracketEnd + 1, braceEnd)
   const gapBeforeColon = content.slice(gapStart, colonIndex)
   if (gapBeforeColon !== '') {
-    if (strict) {
-      const trimmedGap = gapBeforeColon.trim()
-      throw new SyntaxError(trimmedGap === ''
+    const trimmedGap = gapBeforeColon.trim()
+    return {
+      kind: 'invalid',
+      reason: trimmedGap === ''
         ? `Unexpected whitespace between bracket segment and colon`
-        : `Unexpected content "${trimmedGap}" between bracket segment and colon`)
+        : `Unexpected content "${trimmedGap}" between bracket segment and colon`,
     }
-    return
   }
 
   // Extract and parse the key (might be quoted)
   let key: string | undefined
   if (bracketStart > 0) {
     const rawKey = content.slice(0, bracketStart).trim()
+    // The upstream quote and bracket guards make a malformed quoted key
+    // unreachable here, so this literal parse never actually throws; leaving
+    // it uncaught preserves today's both-modes throw instead of adding a
+    // non-strict swallow – do not "finish" the purity by catching it.
     key = rawKey.startsWith(DOUBLE_QUOTE) ? parseStringLiteral(rawKey) : rawKey
   }
 
@@ -108,9 +120,7 @@ export function parseArrayHeaderLine(
     parsedBracket = parseBracketSegment(bracketContent, defaultDelimiter)
   }
   catch (error) {
-    if (strict)
-      throw error
-    return
+    return { kind: 'invalid', reason: (error as Error).message }
   }
 
   const { length, delimiter, keyed } = parsedBracket
@@ -123,43 +133,43 @@ export function parseArrayHeaderLine(
 
       const mismatchedDelimiter = findUnquotedMismatchedDelimiter(fieldsContent, delimiter)
       if (mismatchedDelimiter !== undefined) {
-        if (strict)
-          throw new SyntaxError(`Header delimiter mismatch: bracket declares "${formatDelimiter(delimiter)}" but fields segment contains unquoted "${formatDelimiter(mismatchedDelimiter)}"`)
-        return
+        return {
+          kind: 'invalid',
+          reason: `Header delimiter mismatch: bracket declares "${formatDelimiter(delimiter)}" but fields segment contains unquoted "${formatDelimiter(mismatchedDelimiter)}"`,
+        }
       }
 
       try {
         fields = parseFieldEntries(fieldsContent, delimiter)
       }
       catch (error) {
-        if (strict)
-          throw error
-        return
-      }
-
-      // Duplicate field names produce duplicate sibling keys in every
-      // decoded element: strict mode errors, non-strict LWW applies.
-      if (strict) {
-        assertNoDuplicateFieldNames(fields)
+        return { kind: 'invalid', reason: (error as Error).message }
       }
     }
   }
 
+  // Duplicate field names produce duplicate sibling keys in every decoded
+  // element: non-strict LWW applies, strict mode errors. The dual nature is
+  // why the reason rides along on the otherwise-valid header as strictError,
+  // and why the trailing-content check below prefers it – strict reports the
+  // duplicate before the trailing-content violation.
+  const duplicateFieldName = fields ? findDuplicateFieldName(fields) : undefined
+  const duplicateReason = duplicateFieldName
+    ? `Duplicate field name "${duplicateFieldName}" in fields segment`
+    : undefined
+
   if (keyed && !fields) {
-    if (strict)
-      throw new SyntaxError('Keyed header requires a fields segment')
-    return
+    return { kind: 'invalid', reason: 'Keyed header requires a fields segment' }
   }
 
   // A fields-bearing header, keyed or not, carries no inline content;
   // decoding the values as an inline array would silently drop the fields.
   if (fields && afterColon) {
-    if (strict)
-      throw new SyntaxError('Unexpected content after fields-bearing header colon')
-    return
+    return { kind: 'invalid', reason: duplicateReason ?? 'Unexpected content after fields-bearing header colon' }
   }
 
   return {
+    kind: 'header',
     header: {
       key,
       length,
@@ -168,6 +178,7 @@ export function parseArrayHeaderLine(
       keyed,
     },
     inlineValues: afterColon || undefined,
+    strictError: duplicateReason,
   }
 }
 
@@ -336,17 +347,21 @@ export function findMatchingBrace(content: string, braceStart: number): number {
   return -1
 }
 
-function assertNoDuplicateFieldNames(fields: readonly FieldNode[]): void {
+function findDuplicateFieldName(fields: readonly FieldNode[]): string | undefined {
   const seenNames = new Set<string>()
   for (const field of fields) {
     if (seenNames.has(field.name)) {
-      throw new SyntaxError(`Duplicate field name "${field.name}" in fields segment`)
+      return field.name
     }
     seenNames.add(field.name)
     if (field.children) {
-      assertNoDuplicateFieldNames(field.children)
+      const nestedDuplicate = findDuplicateFieldName(field.children)
+      if (nestedDuplicate !== undefined) {
+        return nestedDuplicate
+      }
     }
   }
+  return undefined
 }
 
 /**
