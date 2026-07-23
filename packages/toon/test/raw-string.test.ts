@@ -80,6 +80,17 @@ describe('rawString', () => {
     })
   })
 
+  describe('comment-line rejection', () => {
+    it('throws when a line starts with the comment marker', () => {
+      expect(() => rawString('#hi')).toThrowError(TypeError)
+      expect(() => rawString('  # indented')).toThrowError(TypeError)
+      expect(() => rawString('note\n# hidden')).toThrowError(TypeError)
+    })
+
+    it('allows the comment marker after other content on the same line', () => {
+      expect(encode({ tag: rawString('a #tag') })).toBe('tag: a #tag')
+    })
+  })
 })
 
 describe('escapeString', () => {

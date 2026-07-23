@@ -1,4 +1,9 @@
 import type { JsonPrimitive } from '../types.ts'
+import { COMMENT_MARKER } from '../constants.ts'
+
+// A line whose first non-space character is the comment marker would be
+// silently stripped by decoders, so raw output must never form one
+const COMMENT_LINE_PATTERN = new RegExp(`(?:^|\\n) *${COMMENT_MARKER}`)
 
 /**
  * Pre-formatted string that the encoder emits verbatim at a primitive value
@@ -11,6 +16,9 @@ export class RawString {
   readonly value: string
 
   constructor(value: string) {
+    if (COMMENT_LINE_PATTERN.test(value)) {
+      throw new TypeError(`Raw string must not contain a line starting with "${COMMENT_MARKER}": ${JSON.stringify(value)}`)
+    }
     this.value = value
   }
 }
