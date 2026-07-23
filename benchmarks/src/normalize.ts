@@ -187,8 +187,6 @@ function normalizeBoolean(text: string): NormalizedResult {
 function normalizeDate(text: string): NormalizedResult {
   const cleaned = stripWrappingQuotes(text)
 
-  // ISO date-only strings are already in target form – taking them verbatim
-  // avoids the Date round-trip entirely
   const isoMatch = cleaned.match(ISO_DATE_PREFIX_PATTERN)
   if (isoMatch)
     return { success: true, value: isoMatch[0] }
@@ -198,8 +196,7 @@ function normalizeDate(text: string): NormalizedResult {
   if (Number.isNaN(parsedDate.getTime()))
     return { success: false, error: `Invalid date: "${text}"` }
 
-  // Non-ISO strings ("Nov 1, 2025") parse in local time, so local getters
-  // recover the intended calendar date regardless of the machine's timezone
+  // Non-ISO strings parse in local time, so local getters avoid day shifts
   const year = parsedDate.getFullYear()
   const monthPadded = String(parsedDate.getMonth() + MONTH_OFFSET).padStart(DATE_COMPONENT_WIDTH, DATE_PAD_CHAR)
   const dayPadded = String(parsedDate.getDate()).padStart(DATE_COMPONENT_WIDTH, DATE_PAD_CHAR)
