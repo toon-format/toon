@@ -1,5 +1,5 @@
 import type { Format } from './formats.ts'
-import type { Dataset, EfficiencyRanking, EvaluationResult, FormatResult, Question } from './types.ts'
+import type { Dataset, DatasetName, EfficiencyRanking, EvaluationResult, FormatResult, Question } from './types.ts'
 import { QUESTION_TYPE_LABELS, QUESTION_TYPES } from './constants.ts'
 import { ACCURACY_DATASETS } from './datasets.ts'
 import { MODELS } from './evaluate.ts'
@@ -9,6 +9,12 @@ import { encodeDataset } from './structural-corruption.ts'
 import { createProgressBar, tokenize } from './utils.ts'
 
 const EFFICIENCY_CHART_STYLE: 'vertical' | 'horizontal' = 'horizontal'
+
+// Datasets flat enough for CSV to represent – the shared population every format
+// can answer, used to compare CSV against the other formats on equal footing
+const FLAT_DATASET_NAMES: ReadonlySet<DatasetName> = new Set(
+  ACCURACY_DATASETS.filter(supportsCSV).map(dataset => dataset.name),
+)
 
 /**
  * Calculate token counts for all format+dataset combinations
@@ -41,10 +47,16 @@ export function calculateTokenCounts(
 
 /**
  * Calculate per-format statistics from evaluation results
+ *
+ * @remarks
+ * When `tokenDatasetNames` is provided, the average-token figure is restricted
+ * to those datasets so every format is compared over the same population –
+ * accuracy is always taken over the passed (pre-filtered) results.
  */
 export function calculateFormatResults(
   results: EvaluationResult[],
   tokenCounts: Record<string, number>,
+  tokenDatasetNames?: ReadonlySet<DatasetName>,
 ): FormatResult[] {
   const formatNames = [...new Set(results.map(r => r.format))]
 
@@ -54,9 +66,19 @@ export function calculateFormatResults(
     const totalCount = formatResults.length
     const accuracy = correctCount / totalCount
 
-    // Calculate average tokens across all datasets for this format
+    // Calculate average tokens across the in-scope datasets for this format
     const formatTokenEntries = Object.entries(tokenCounts)
-      .filter(([key]) => key.startsWith(`${formatName}-`))
+      .filter(([key]) => {
+        if (!key.startsWith(`${formatName}-`))
+          return false
+
+        // Slice after the known formatName prefix – both format and dataset
+        // names contain hyphens, so splitting on '-' would be ambiguous
+        if (!tokenDatasetNames)
+          return true
+
+        return tokenDatasetNames.has(key.slice(formatName.length + 1) as DatasetName)
+      })
     const avgTokens = formatTokenEntries.reduce((sum, [, tokens]) => sum + tokens, 0) / formatTokenEntries.length
 
     const averageLatency = formatResults.reduce((sum, r) => sum + r.latencyMs, 0) / totalCount
@@ -77,13 +99,35 @@ export function calculateFormatResults(
  */
 export function generateAccuracyReport(
   results: EvaluationResult[],
-  formatResults: FormatResult[],
   tokenCounts: Record<string, number>,
 ): string {
   const questions = generateQuestions()
   const totalQuestions = [...new Set(results.map(r => r.questionId))].length
   const modelIds = MODELS.map(m => m.id)
   const modelNames = modelIds.filter(id => results.some(r => r.model === id))
+
+  // Overall track excludes CSV entirely – it cannot represent nested datasets,
+  // so its numbers would otherwise cover an easier subset than every other format
+  const allDatasetsFormatResults = calculateFormatResults(
+    results.filter(r => r.format !== 'csv'),
+    tokenCounts,
+  )
+
+  // Flat-only track puts every format on the same question population, the one
+  // CSV can actually represent, so CSV can be compared fairly here
+  const flatQuestionIds = new Set(
+    questions.filter(question => FLAT_DATASET_NAMES.has(question.dataset)).map(question => question.id),
+  )
+  const flatOnlyFormatResults = calculateFormatResults(
+    results.filter(r => flatQuestionIds.has(r.questionId)),
+    tokenCounts,
+    FLAT_DATASET_NAMES,
+  )
+  const flatOnlyCsvResult = flatOnlyFormatResults.find(r => r.format === 'csv')
+
+  // Detailed breakdowns recompute accuracy from raw results, so keeping CSV in
+  // their full-population input is intentional
+  const fullFormatResults = calculateFormatResults(results, tokenCounts)
 
   return `
 Benchmarks test LLM comprehension across different input formats using ${totalQuestions} data retrieval questions on ${modelNames.length} ${modelNames.length === 1 ? 'model' : 'models'}.
@@ -97,12 +141,50 @@ ${generateDatasetCatalog(ACCURACY_DATASETS)}
 
 #### Efficiency Ranking (Accuracy per 1K Tokens)
 
-${generateEfficiencyRankingReport(formatResults, totalQuestions, modelNames.length)}
+${generateEfficiencyRankingReport(allDatasetsFormatResults, flatOnlyCsvResult, totalQuestions, modelNames.length)}
+
+#### Accuracy by Format
+
+${generateAccuracyComparisonTables(allDatasetsFormatResults, flatOnlyFormatResults, modelNames.length)}
 
 #### Per-Model Accuracy
 
-${generateDetailedAccuracyReport(formatResults, results, questions, tokenCounts)}
+${generateDetailedAccuracyReport(fullFormatResults, results, questions, tokenCounts, flatQuestionIds.size)}
 `.trimStart()
+}
+
+/**
+ * Render the overall (CSV-excluded) and flat-only (all formats) accuracy tables
+ */
+function generateAccuracyComparisonTables(
+  allDatasetsFormatResults: FormatResult[],
+  flatOnlyFormatResults: FormatResult[],
+  modelCount: number,
+): string {
+  const renderRows = (formatResults: FormatResult[]): string =>
+    formatResults.map(fr =>
+      `| \`${fr.format}\` | ${(fr.accuracy * 100).toFixed(1)}% | ${fr.correctCount}/${fr.totalCount} | ${fr.totalTokens.toLocaleString('en-US')} |`,
+    ).join('\n')
+
+  const flatQuestionCount = flatOnlyFormatResults.length > 0
+    ? flatOnlyFormatResults[0]!.totalCount / modelCount
+    : 0
+
+  return `
+##### All datasets (CSV excluded – cannot represent nested structures)
+
+| Format | Accuracy | Correct/Total | Avg Tokens |
+| ------ | -------- | ------------- | ---------- |
+${renderRows(allDatasetsFormatResults)}
+
+##### Flat datasets only (all formats, same question set)
+
+Every format answers the same ${flatQuestionCount} flat-dataset questions per model.
+
+| Format | Accuracy | Correct/Total | Avg Tokens |
+| ------ | -------- | ------------- | ---------- |
+${renderRows(flatOnlyFormatResults)}
+`.trim()
 }
 
 /**
@@ -146,18 +228,16 @@ ${rows}
  * Generate efficiency ranking report
  */
 function generateEfficiencyRankingReport(
-  formatResults: FormatResult[],
+  allDatasetsFormatResults: FormatResult[],
+  flatOnlyCsvResult: FormatResult | undefined,
   totalQuestions: number,
   modelCount: number,
 ): string {
-  const toon = formatResults.find(r => r.format === 'toon')
-  const json = formatResults.find(r => r.format === 'json-pretty')
-  const csv = formatResults.find(r => r.format === 'csv')
+  const toon = allDatasetsFormatResults.find(r => r.format === 'toon')
+  const json = allDatasetsFormatResults.find(r => r.format === 'json-pretty')
 
-  // Build efficiency ranking (accuracy per 1k tokens)
-  const efficiencyRanking = formatResults
-    // Exclude CSV since it only supports a subset of datasets (~half the questions)
-    .filter(fr => fr.format !== 'csv')
+  // Build efficiency ranking (accuracy per 1k tokens) – input is already CSV-free
+  const efficiencyRanking = allDatasetsFormatResults
     .map((fr) => {
       const efficiency = (fr.accuracy * 100) / (fr.totalTokens / 1000)
       return {
@@ -183,9 +263,9 @@ function generateEfficiencyRankingReport(
 
   // Add CSV note if available
   let csvNote = ''
-  if (csv) {
+  if (flatOnlyCsvResult) {
     // CSV totalCount is evaluations (questions × models), so divide by number of models to get question count
-    const csvQuestionCount = csv.totalCount / modelCount
+    const csvQuestionCount = flatOnlyCsvResult.totalCount / modelCount
     csvNote = `**Note on CSV:** Excluded from ranking as it only supports ${csvQuestionCount} of ${totalQuestions} questions (flat tabular data only). While CSV is highly token-efficient for simple tabular data, it cannot represent nested structures that other formats handle.`
   }
 
@@ -213,6 +293,7 @@ function generateDetailedAccuracyReport(
   results: EvaluationResult[],
   questions: Question[],
   tokenCounts: Record<string, number>,
+  flatQuestionCount: number,
 ): string {
   const toon = formatResults.find(r => r.format === 'toon')
   const json = formatResults.find(r => r.format === 'json-pretty')
@@ -264,6 +345,8 @@ Accuracy across ${modelNames.length} ${modelNames.length === 1 ? 'LLM' : 'LLMs'}
 \`\`\`
 ${modelBreakdown}
 \`\`\`
+
+*CSV answers only the ${flatQuestionCount} flat-dataset questions, so its per-model cells cover a smaller, easier population than the other formats.*
 
 ${summaryComparison}
 

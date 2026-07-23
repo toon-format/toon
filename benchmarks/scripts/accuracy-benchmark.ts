@@ -11,7 +11,7 @@ import { ACCURACY_DATASETS } from '../src/datasets.ts'
 import { evaluateQuestion, MODELS } from '../src/evaluate.ts'
 import { FORMATS, supportsCSV } from '../src/formats.ts'
 import { generateQuestions } from '../src/questions/index.ts'
-import { calculateFormatResults, calculateTokenCounts, generateAccuracyReport } from '../src/report.ts'
+import { calculateTokenCounts, generateAccuracyReport } from '../src/report.ts'
 import { getAllModelResults, hasModelResults, saveModelResults } from '../src/storage.ts'
 import { encodeDataset } from '../src/structural-corruption.ts'
 import { ensureDir } from '../src/utils.ts'
@@ -190,8 +190,7 @@ if (allResults.length === 0) {
 }
 
 const tokenCounts = calculateTokenCounts(FORMATS)
-const formatResults = calculateFormatResults(allResults, tokenCounts)
-const accuracyReport = generateAccuracyReport(allResults, formatResults, tokenCounts)
+const accuracyReport = generateAccuracyReport(allResults, tokenCounts)
 
 const resultsDir = path.join(BENCHMARKS_DIR, 'results')
 await ensureDir(resultsDir)
