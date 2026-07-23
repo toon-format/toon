@@ -1,10 +1,12 @@
-import type { AnalyticsMetric, Employee, EventLog, NestedConfig, Order, Repository } from '../datasets.ts'
+import type { AnalyticsMetric, Contact, Employee, EventLog, FeatureFlag, NestedConfig, Order, Repository } from '../datasets.ts'
 import type { Question } from '../types.ts'
 import { ACCURACY_DATASETS } from '../datasets.ts'
 import { generateAnalyticsQuestions } from './analytics.ts'
 import { generateEventLogsQuestions } from './event-logs.ts'
 import { generateGithubQuestions } from './github.ts'
+import { generateKeyedQuestions } from './keyed.ts'
 import { generateNestedConfigQuestions } from './nested-config.ts'
+import { generateNestedGroupQuestions } from './nested-group.ts'
 import { generateNestedQuestions } from './nested.ts'
 import { generateStructuralValidationQuestions } from './structural-validation.ts'
 import { generateStructureQuestions } from './structure.ts'
@@ -36,6 +38,8 @@ export function generateQuestions(): Question[] {
   const github = (ACCURACY_DATASETS.find(d => d.name === 'github')?.data.repositories as Repository[]) ?? []
   const eventLogs = (ACCURACY_DATASETS.find(d => d.name === 'event-logs')?.data.logs as EventLog[]) ?? []
   const nestedConfig = ACCURACY_DATASETS.find(d => d.name === 'nested-config')?.data as NestedConfig | undefined
+  const keyed = (ACCURACY_DATASETS.find(d => d.name === 'keyed')?.data.flags as Record<string, FeatureFlag>) ?? {}
+  const nestedGroup = (ACCURACY_DATASETS.find(d => d.name === 'nested-group')?.data.contacts as Contact[]) ?? []
 
   // Generate questions for each dataset
   questions.push(...generateTabularQuestions(tabular, getId))
@@ -44,6 +48,8 @@ export function generateQuestions(): Question[] {
   questions.push(...generateGithubQuestions(github, getId))
   questions.push(...generateEventLogsQuestions(eventLogs, getId))
   questions.push(...generateNestedConfigQuestions(nestedConfig, getId))
+  questions.push(...generateKeyedQuestions(keyed, getId))
+  questions.push(...generateNestedGroupQuestions(nestedGroup, getId))
 
   // Generate structure-awareness questions (tests format-native affordances)
   questions.push(...generateStructureQuestions(tabular, nested, analytics, github, eventLogs, getId))

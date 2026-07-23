@@ -110,7 +110,12 @@ ${generateDetailedAccuracyReport(formatResults, results, questions, tokenCounts)
 function generateDatasetCatalog(datasets: Dataset[]): string {
   const rows = datasets.map((dataset) => {
     const csvSupport = supportsCSV(dataset) ? '✓' : '✗'
-    const rowCount = Object.values(dataset.data)[0]?.length ?? 1
+    const first = Object.values(dataset.data)[0]
+    // Keyed maps expose their entries as an object, not an array – count keys so
+    // the catalog reports the real entry count instead of a misleading 1
+    const rowCount = Array.isArray(first)
+      ? first.length
+      : (first && typeof first === 'object' ? Object.keys(first).length : 1)
     const structure = dataset.metadata.structureClass
     const eligibility = `${dataset.metadata.tabularEligibility}%`
 
@@ -245,6 +250,8 @@ function generateDetailedAccuracyReport(
   const githubSize = ACCURACY_DATASETS.find(d => d.name === 'github')?.data.repositories?.length || 0
   const eventLogsSize = ACCURACY_DATASETS.find(d => d.name === 'event-logs')?.data.logs?.length || 0
   const nestedConfigSize = 1 // Single config object
+  const keyedSize = Object.keys(ACCURACY_DATASETS.find(d => d.name === 'keyed')?.data.flags ?? {}).length
+  const nestedGroupSize = ACCURACY_DATASETS.find(d => d.name === 'nested-group')?.data.contacts?.length || 0
 
   // Calculate number of formats and evaluations
   const formatCount = formatResults.length
@@ -282,7 +289,7 @@ This benchmark tests **LLM comprehension and data retrieval accuracy** across di
 
 #### Datasets Tested
 
-Eleven datasets designed to test different structural patterns and validation capabilities:
+Thirteen datasets designed to test different structural patterns and validation capabilities:
 
 **Primary datasets:**
 
@@ -292,14 +299,16 @@ Eleven datasets designed to test different structural patterns and validation ca
 4. **GitHub** (${githubSize} repositories): Real-world data from top GitHub repos by stars.
 5. **Event Logs** (${eventLogsSize} logs): Semi-uniform data with ~50% flat logs and ~50% with nested error objects.
 6. **Nested Config** (${nestedConfigSize} configuration): Deeply nested configuration with minimal tabular eligibility.
+7. **Keyed** (${keyedSize} feature flags): Map of uniform flat objects – exercises TOON's keyed tabular form (\`key[N:]{fields}:\`).
+8. **Nested Group** (${nestedGroupSize} contacts): Uniform records with nested address and plan objects – exercises TOON's nested field groups.
 
 **Structural validation datasets:**
 
-7. **Control**: Valid complete dataset (baseline for validation)
-8. **Truncated**: Array with 3 rows removed from end (tests \`[N]\` length detection)
-9. **Extra rows**: Array with 3 additional rows beyond declared length
-10. **Width mismatch**: Inconsistent field count (missing salary in row 10)
-11. **Missing fields**: Systematic field omissions (no email in multiple rows)
+9. **Control**: Valid complete dataset (baseline for validation)
+10. **Truncated**: Array with 3 rows removed from end (tests \`[N]\` length detection)
+11. **Extra rows**: Array with 3 additional rows beyond declared length
+12. **Width mismatch**: Inconsistent field count (missing salary in row 10)
+13. **Missing fields**: Systematic field omissions (no email in multiple rows)
 
 #### Question Types
 

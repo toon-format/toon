@@ -157,6 +157,33 @@ export interface Product {
 }
 
 /**
+ * Feature flag structure for keyed tabular dataset
+ */
+export interface FeatureFlag {
+  enabled: boolean
+  rollout: number
+  owner: string
+  updatedAt: string
+}
+
+/**
+ * Contact structure for nested field group dataset
+ */
+export interface Contact {
+  name: string
+  age: number
+  email: string
+  address: {
+    city: string
+    country: string
+  }
+  plan: {
+    name: string
+    price: number
+  }
+}
+
+/**
  * Internal types for structural validation pattern generation
  */
 type StructuralValidationType = 'truncated' | 'extra-rows' | 'width-mismatch' | 'missing-fields'
@@ -551,6 +578,63 @@ export function generateProducts(count: number): { products: Product[] } {
 }
 
 /**
+ * Generate feature flags keyed by unique flag name
+ *
+ * @remarks
+ * Keys carry a loop-index prefix so colliding nouns never dedupe entries, which
+ * would otherwise silently shrink the map and break the declared entry count.
+ * Every entry shares the identical flat primitive field set so the encoder emits
+ * keyed tabular form rather than a plain per-key object fallback.
+ */
+export function generateFeatureFlags(count: number): { flags: Record<string, FeatureFlag> } {
+  const flags: Record<string, FeatureFlag> = {}
+
+  for (let i = 0; i < count; i++) {
+    const key = `flag_${i}_${faker.word.noun()}`
+    flags[key] = {
+      enabled: faker.datatype.boolean(0.6),
+      rollout: faker.number.int({ min: 0, max: 100 }),
+      owner: faker.person.firstName(),
+      updatedAt: faker.date.recent({ days: 90 }).toISOString().split('T')[0]!,
+    }
+  }
+
+  return { flags }
+}
+
+/**
+ * Generate contacts with uniform nested address and plan objects
+ *
+ * @remarks
+ * Only primitive and uniform-object columns are used – a single array-valued or
+ * non-uniform column would drop the records to list-item fallback and kill the
+ * nested field group header.
+ */
+export function generateContacts(count: number): { contacts: Contact[] } {
+  const planNames = ['free', 'starter', 'pro', 'enterprise'] as const
+  const planPrices = [0, 15, 40, 120] as const
+
+  return {
+    contacts: Array.from({ length: count }, (): Contact => {
+      const planIndex = faker.number.int({ min: 0, max: planNames.length - 1 })
+      return {
+        name: faker.person.fullName(),
+        age: faker.number.int({ min: 18, max: 80 }),
+        email: faker.internet.email().toLowerCase(),
+        address: {
+          city: faker.location.city(),
+          country: faker.location.country(),
+        },
+        plan: {
+          name: planNames[planIndex]!,
+          price: planPrices[planIndex]!,
+        },
+      }
+    }),
+  }
+}
+
+/**
  * Generate structural validation fixtures from employee data
  *
  * @remarks
@@ -751,3 +835,70 @@ export const TOKEN_EFFICIENCY_DATASETS: Dataset[] = [
   // Nested config: 1 config (same as accuracy)
   nestedConfigDataset,
 ]
+
+// The v4 datasets generate after every existing dataset has consumed the shared
+// faker stream, behind explicit seeds – generating them earlier would shift the
+// stream and silently mutate every dataset above (and its ground truths)
+
+faker.seed(67890)
+
+/**
+ * Keyed dataset: Feature flags keyed by name
+ *
+ * @remarks
+ * Tests TOON's keyed tabular form.
+ */
+export const keyedDataset: Dataset = {
+  name: 'keyed',
+  description: 'Feature flags keyed by name',
+  data: generateFeatureFlags(40),
+  metadata: {
+    supportsCSV: false,
+    structureClass: 'uniform',
+    tabularEligibility: 100, // Every entry shares one flat primitive field set – fully keyed-tabular
+  },
+}
+
+const keyedTokenDataset: Dataset = {
+  name: 'keyed',
+  description: 'Feature flags keyed by name',
+  data: generateFeatureFlags(500),
+  metadata: {
+    supportsCSV: false,
+    structureClass: 'uniform',
+    tabularEligibility: 100,
+  },
+}
+
+faker.seed(67891)
+
+/**
+ * Nested-group dataset: Contacts with nested address and plan objects
+ *
+ * @remarks
+ * Tests TOON's nested field groups.
+ */
+export const nestedGroupDataset: Dataset = {
+  name: 'nested-group',
+  description: 'Contacts with nested address and plan groups',
+  data: generateContacts(50),
+  metadata: {
+    supportsCSV: false,
+    structureClass: 'nested',
+    tabularEligibility: 100, // Uniform records whose object columns fold into nested field groups
+  },
+}
+
+const nestedGroupTokenDataset: Dataset = {
+  name: 'nested-group',
+  description: 'Contacts with nested address and plan groups',
+  data: generateContacts(1000),
+  metadata: {
+    supportsCSV: false,
+    structureClass: 'nested',
+    tabularEligibility: 100,
+  },
+}
+
+ACCURACY_DATASETS.push(keyedDataset, nestedGroupDataset)
+TOKEN_EFFICIENCY_DATASETS.push(keyedTokenDataset, nestedGroupTokenDataset)

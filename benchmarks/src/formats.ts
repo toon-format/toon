@@ -50,7 +50,7 @@ export const FORMATS: Record<string, Format> = {
   'toon': {
     name: 'toon',
     encode: data => encodeToon(data),
-    primer: 'TOON: Indentation-based. Arrays declare length and fields (e.g., items[N]{f1,f2}:). Rows use single delimiter. Values may be quoted.',
+    primer: 'TOON: Indentation-based. Arrays declare length and fields (e.g., items[N]{f1,f2}:). Rows use single delimiter. Values may be quoted. Keyed maps use key[N:]{fields}: with one `entrykey: values` row per entry. A tabular field may carry sub-fields, e.g. users[N]{name,address{city,country}}:.',
     fence: 'toon',
     displayName: 'TOON',
   },
