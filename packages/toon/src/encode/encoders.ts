@@ -1,12 +1,13 @@
-import type { Depth, FieldNode, JsonArray, JsonObject, JsonPrimitive, JsonValue, ResolvedEncodeOptions } from '../types.ts'
+import type { Depth, FieldNode, JsonArray, JsonObject, JsonValue, ResolvedEncodeOptions } from '../types.ts'
+import type { EncodablePrimitive } from './raw-string.ts'
 import { LIST_ITEM_MARKER, LIST_ITEM_PREFIX } from '../constants.ts'
-import { isArrayOfArrays, isArrayOfObjects, isArrayOfPrimitives, isEmptyObject, isJsonArray, isJsonObject, isJsonPrimitive } from './normalize.ts'
+import { isArrayOfArrays, isArrayOfObjects, isArrayOfPrimitives, isEmptyObject, isEncodablePrimitive, isJsonArray, isJsonObject } from './normalize.ts'
 import { encodeAndJoinPrimitives, encodeKey, encodePrimitive, formatHeader } from './primitives.ts'
 
 // #region Encode normalized JsonValue
 
 export function* encodeJsonValue(value: JsonValue, options: ResolvedEncodeOptions, depth: Depth): Generator<string> {
-  if (isJsonPrimitive(value)) {
+  if (isEncodablePrimitive(value)) {
     // Primitives at root level are returned as a single line
     const encodedPrimitive = encodePrimitive(value, options.delimiter)
 
@@ -53,7 +54,7 @@ export function* encodeKeyValuePairLines(
 ): Generator<string> {
   const encodedKey = encodeKey(key)
 
-  if (isJsonPrimitive(value)) {
+  if (isEncodablePrimitive(value)) {
     yield indentedLine(depth, `${encodedKey}: ${encodePrimitive(value, options.delimiter)}`, options.indent)
   }
   else if (isJsonArray(value)) {
@@ -111,7 +112,7 @@ function* encodeKeyedEntryRowsLines(
   options: ResolvedEncodeOptions,
 ): Generator<string> {
   for (const [entryKey, entryValue] of entries) {
-    const leaves: JsonPrimitive[] = []
+    const leaves: EncodablePrimitive[] = []
     collectLeafValues(entryValue as JsonObject, fields, leaves)
     yield indentedLine(depth, `${encodeKey(entryKey)}: ${encodeAndJoinPrimitives(leaves, options.delimiter)}`, options.indent)
   }
@@ -186,7 +187,7 @@ export function* encodeArrayOfArraysAsListItemsLines(
   }
 }
 
-export function encodeInlineArrayLine(values: readonly JsonPrimitive[], delimiter: string, prefix?: string): string {
+export function encodeInlineArrayLine(values: readonly EncodablePrimitive[], delimiter: string, prefix?: string): string {
   const header = formatHeader(values.length, { key: prefix, delimiter })
   const joinedValue = encodeAndJoinPrimitives(values, delimiter)
 
@@ -247,7 +248,7 @@ export function extractTabularHeader(rows: readonly JsonObject[]): FieldNode[] |
 
 function classifyColumn(name: string, values: readonly JsonValue[]): FieldNode | undefined {
   // Uniform-primitive column: a bare leaf field
-  if (values.every(value => isJsonPrimitive(value))) {
+  if (values.every(value => isEncodablePrimitive(value))) {
     return { name }
   }
 
@@ -265,14 +266,14 @@ function classifyColumn(name: string, values: readonly JsonValue[]): FieldNode |
   return { name, children }
 }
 
-function collectLeafValues(row: JsonObject, fields: readonly FieldNode[], leaves: JsonPrimitive[]): void {
+function collectLeafValues(row: JsonObject, fields: readonly FieldNode[], leaves: EncodablePrimitive[]): void {
   for (const field of fields) {
     const value = row[field.name]
     if (field.children) {
       collectLeafValues(value as JsonObject, field.children, leaves)
     }
     else {
-      leaves.push(value as JsonPrimitive)
+      leaves.push(value as EncodablePrimitive)
     }
   }
 }
@@ -284,7 +285,7 @@ function* writeTabularRowsLines(
   options: ResolvedEncodeOptions,
 ): Generator<string> {
   for (const row of rows) {
-    const leaves: JsonPrimitive[] = []
+    const leaves: EncodablePrimitive[] = []
     collectLeafValues(row, header, leaves)
     yield indentedLine(depth, encodeAndJoinPrimitives(leaves, options.delimiter), options.indent)
   }
@@ -359,7 +360,7 @@ export function* encodeObjectAsListItemLines(
 
   const encodedKey = encodeKey(firstKey)
 
-  if (isJsonPrimitive(firstValue)) {
+  if (isEncodablePrimitive(firstValue)) {
     // Primitive value: `- key: value`
     const encodedValue = encodePrimitive(firstValue, options.delimiter)
     yield indentedListItem(depth, `${encodedKey}: ${encodedValue}`, options.indent)
@@ -407,7 +408,7 @@ function* encodeListItemValueLines(
   depth: Depth,
   options: ResolvedEncodeOptions,
 ): Generator<string> {
-  if (isJsonPrimitive(value)) {
+  if (isEncodablePrimitive(value)) {
     yield indentedListItem(depth, encodePrimitive(value, options.delimiter), options.indent)
   }
   else if (isJsonArray(value)) {

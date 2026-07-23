@@ -1,6 +1,7 @@
 import type { EncodeReplacer, JsonArray, JsonObject, JsonValue } from '../types.ts'
 import { setOwnProperty } from '../shared/object-utils.ts'
-import { isJsonArray, isJsonObject, normalizeValue } from './normalize.ts'
+import { isEncodablePrimitive, isJsonArray, isJsonObject, normalizeValue } from './normalize.ts'
+import { isRawString } from './raw-string.ts'
 
 /**
  * Applies a replacer function to a `JsonValue` and all its descendants.
@@ -23,11 +24,32 @@ export function applyReplacer(root: JsonValue, replacer: EncodeReplacer): JsonVa
     return transformChildren(root, replacer, [])
   }
 
-  // Normalize the replaced value (in case user returned non-JsonValue)
-  const normalizedRoot = normalizeValue(replacedRoot)
+  return transformReplaced(root, replacedRoot, replacer, [])
+}
 
-  // Recursively transform children
-  return transformChildren(normalizedRoot, replacer, [])
+/**
+ * Resolves a replacer's (non-`undefined`) return value at a single position.
+ *
+ * A `RawString` only stands in for a primitive: returned for an object or
+ * array value, it is ignored and the original container is traversed normally.
+ *
+ * @param original - The value at this position before replacement
+ * @param replaced - The replacer's return value
+ * @param replacer - The replacer function to apply
+ * @param path - Current path from root
+ */
+function transformReplaced(
+  original: JsonValue,
+  replaced: unknown,
+  replacer: EncodeReplacer,
+  path: readonly (string | number)[],
+): JsonValue {
+  if (isRawString(replaced) && !isEncodablePrimitive(original)) {
+    return transformChildren(original, replacer, path)
+  }
+
+  // Normalize the replaced value (in case user returned non-JsonValue)
+  return transformChildren(normalizeValue(replaced), replacer, path)
 }
 
 /**
@@ -80,11 +102,7 @@ function transformObject(
       continue
     }
 
-    // Normalize the replaced value
-    const normalizedValue = normalizeValue(replacedValue)
-
-    // Recursively transform children of the replaced value
-    setOwnProperty(result, key, transformChildren(normalizedValue, replacer, childPath))
+    setOwnProperty(result, key, transformReplaced(value, replacedValue, replacer, childPath))
   }
 
   return result
@@ -116,11 +134,7 @@ function transformArray(
       continue
     }
 
-    // Normalize the replaced value
-    const normalizedValue = normalizeValue(replacedValue)
-
-    // Recursively transform children of the replaced value
-    result.push(transformChildren(normalizedValue, replacer, childPath))
+    result.push(transformReplaced(value, replacedValue, replacer, childPath))
   }
 
   return result

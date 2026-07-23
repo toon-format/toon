@@ -8,6 +8,9 @@ import { applyReplacer } from './encode/replacer.ts'
 
 export { DEFAULT_DELIMITER, DELIMITERS } from './constants.ts'
 export { ToonDecodeError } from './decode/errors.ts'
+export { rawString } from './encode/raw-string.ts'
+export type { RawString } from './encode/raw-string.ts'
+export { escapeString } from './shared/string-utils.ts'
 export type {
   DecodeOptions,
   DecodeStreamOptions,

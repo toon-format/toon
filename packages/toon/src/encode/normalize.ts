@@ -1,5 +1,7 @@
 import type { JsonArray, JsonObject, JsonPrimitive, JsonValue } from '../types.ts'
+import type { EncodablePrimitive } from './raw-string.ts'
 import { setOwnProperty } from '../shared/object-utils.ts'
+import { isRawString } from './raw-string.ts'
 
 // #region Normalization (unknown → JsonValue)
 
@@ -7,6 +9,12 @@ export function normalizeValue(value: unknown): JsonValue {
   // null
   if (value === null) {
     return null
+  }
+
+  // RawString markers pass through untouched; encode-side guards treat
+  // them as primitives, never as objects
+  if (isRawString(value)) {
+    return value as unknown as JsonValue
   }
 
   // Objects with toJSON: delegate to its result before host-type normalization
@@ -101,12 +109,16 @@ export function isJsonPrimitive(value: unknown): value is JsonPrimitive {
   )
 }
 
+export function isEncodablePrimitive(value: unknown): value is EncodablePrimitive {
+  return isJsonPrimitive(value) || isRawString(value)
+}
+
 export function isJsonArray(value: unknown): value is JsonArray {
   return Array.isArray(value)
 }
 
 export function isJsonObject(value: unknown): value is JsonObject {
-  return value !== null && typeof value === 'object' && !Array.isArray(value)
+  return value !== null && typeof value === 'object' && !Array.isArray(value) && !isRawString(value)
 }
 
 export function isEmptyObject(value: JsonObject): boolean {
@@ -126,8 +138,8 @@ export function isPlainObject(value: unknown): value is Record<string, unknown> 
 
 // #region Array type detection
 
-export function isArrayOfPrimitives(value: JsonArray): value is readonly JsonPrimitive[] {
-  return value.length === 0 || value.every(item => isJsonPrimitive(item))
+export function isArrayOfPrimitives(value: JsonArray | readonly EncodablePrimitive[]): value is readonly EncodablePrimitive[] {
+  return value.length === 0 || value.every(item => isEncodablePrimitive(item))
 }
 
 export function isArrayOfArrays(value: JsonArray): value is readonly JsonArray[] {
