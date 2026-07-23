@@ -2,8 +2,8 @@ import type { Dataset } from './types.ts'
 import { faker } from '@faker-js/faker'
 import githubRepos from '../data/github-repos.json' with { type: 'json' }
 
-// Seed for reproducibility
 faker.seed(12345)
+faker.setDefaultRefDate('2025-06-01T00:00:00.000Z')
 
 /**
  * Employee record structure for tabular dataset
