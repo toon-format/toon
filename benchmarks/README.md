@@ -1,9 +1,9 @@
 # TOON Benchmarks
 
-Benchmarks measuring TOON's **token efficiency** and **retrieval accuracy** compared to JSON, XML, YAML, and CSV.
+Benchmarks measuring TOON's **token efficiency**, **retrieval accuracy**, and **structured-output generation** compared to JSON, XML, YAML, and CSV.
 
 > [!NOTE]
-> Results are automatically embedded in the [main README](https://github.com/toon-format/toon/#benchmarks). This guide focuses on running the benchmarks locally.
+> Token-efficiency and retrieval-accuracy results are automatically embedded in the [main README](https://github.com/toon-format/toon/#benchmarks). This guide focuses on running the benchmarks locally.
 
 ## Quick Start
 
@@ -13,6 +13,9 @@ pnpm benchmark:tokens
 
 # Run retrieval accuracy benchmark (requires API keys)
 pnpm benchmark:accuracy
+
+# Run structured generation benchmark (requires a Nebius API key)
+pnpm benchmark:generation
 ```
 
 ## Token Efficiency Benchmark
@@ -83,11 +86,61 @@ Edit [`src/constants.ts`](./src/constants.ts) to adjust:
 - `DEFAULT_CONCURRENCY` – Parallel tasks (default: 10)
 - `DRY_RUN_LIMITS` – Questions per dry run (default: 10)
 
+## Structured Generation Benchmark
+
+Compares three ways to generate the same four typed payloads:
+
+1. Plain JSON text
+2. JSON object mode (`response_format: { type: "json_object" }`)
+3. TOON text decoded with the local TypeScript implementation
+
+Each response is validated with strict, case-specific rules, canonicalized, and compared with gold data. Invalid responses receive up to two repair attempts. The benchmark records one-shot accuracy, final accuracy, attempts, and prompt/completion token usage.
+
+This TypeScript implementation ports the methodology from [`vetertann/TOON-generation-benchmark`](https://github.com/vetertann/TOON-generation-benchmark), while using the monorepo's local TOON encoder and decoder instead of Python and CLI subprocesses.
+
+### Setup
+
+1. Add a [Nebius Token Factory](https://tokenfactory.nebius.com/) key to `.env`:
+   ```bash
+   NEBIUS_API_KEY=your_key
+   ```
+2. Optionally choose models and the number of runs:
+   ```bash
+   GENERATION_MODELS=openai/gpt-oss-120b GENERATION_RUNS=1 pnpm benchmark:generation
+   ```
+3. Run the full default matrix (21 models, 10 runs each):
+   ```bash
+   pnpm benchmark:generation
+   ```
+
+For a one-model, one-run smoke test, set `DRY_RUN=true`. Results are checkpointed after every completed run in `results/generation/` as raw, per-case, and per-model CSV files.
+
+Gold JSON and TOON fixtures are committed in `data/generation/`. Regenerate them after changing a case:
+
+```bash
+pnpm generate:generation-fixtures
+```
+
+### Published Results
+
+The committed baseline contains 10 runs for each of 21 models. Accuracy is reported for the first attempt (1-S) and after up to two repairs (Fin); Tok is the average prompt plus completion token count.
+
+| Case | JSON 1-S | JSON Fin | JSON Tok | JSON-object 1-S | JSON-object Fin | JSON-object Tok | TOON 1-S | TOON Fin | TOON Tok |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| users | 94.8% | 94.8% | 1,078 | 92.9% | 100% | 556 | 90.5% | 90.5% | 840 |
+| order | 81.9% | 81.9% | 1,746 | 78.6% | 83.3% | 1,255 | 74.3% | 78.6% | 1,585 |
+| company | 18.6% | 43.8% | 3,575 | 21.9% | 48.1% | 2,592 | 0% | 48.6% | 2,567 |
+| invoice | 90.0% | 90.0% | 1,723 | 87.6% | 95.2% | 1,349 | 0% | 52.4% | 3,626 |
+
+See the [raw runs](./results/generation/eval-runs.csv), [per-case aggregates](./results/generation/eval-results-by-case.csv), and [per-model aggregates](./results/generation/eval-results-by-model.csv).
+
 ## Project Structure
 
 ```
 scripts/
 ├── accuracy-benchmark.ts         # Retrieval accuracy benchmark
+├── generation-benchmark.ts       # Structured output generation benchmark
+├── generate-generation-fixtures.ts # Regenerate generation gold data
 ├── token-efficiency-benchmark.ts # Token counting benchmark
 └── fetch-github-repos.ts         # Update GitHub dataset
 src/
@@ -100,6 +153,7 @@ src/
 ├── storage.ts                    # Result caching
 ├── types.ts                      # Type definitions
 ├── utils.ts                      # Helpers
+├── generation/                   # Generation cases, evaluation, and reports
 └── questions/                    # Question generators
     ├── analytics.ts
     ├── event-logs.ts
@@ -112,8 +166,10 @@ src/
     ├── tabular.ts
     └── utils.ts
 data/
+├── generation/                   # Gold JSON and TOON generation fixtures
 └── github-repos.json             # Top 100 GitHub repos
 results/
+├── generation/                   # Generation run and aggregate CSV files
 ├── token-efficiency.md           # Token savings report
 ├── retrieval-accuracy.md         # Accuracy report
 └── accuracy/models/              # Per-model results (JSON)
