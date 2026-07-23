@@ -6,6 +6,7 @@
     "benchmark:tokens": "node scripts/token-efficiency-benchmark.ts",
     "benchmark:accuracy": "node --env-file=.env scripts/accuracy-benchmark.ts",
     "verify:datasets": "node scripts/verify-feature-datasets.ts",
+    "verify:structural": "node scripts/verify-structural-corruption.ts",
     "fetch:github-repos": "node scripts/fetch-github-repos.ts"
   },
   "devDependencies": {

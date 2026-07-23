@@ -13,6 +13,7 @@ import { FORMATS, supportsCSV } from '../src/formats.ts'
 import { generateQuestions } from '../src/questions/index.ts'
 import { calculateFormatResults, calculateTokenCounts, generateAccuracyReport } from '../src/report.ts'
 import { getAllModelResults, hasModelResults, saveModelResults } from '../src/storage.ts'
+import { encodeDataset } from '../src/structural-corruption.ts'
 import { ensureDir } from '../src/utils.ts'
 
 // Constants
@@ -151,7 +152,7 @@ for (const descriptor of activeModels) {
     queue.add(async () => {
       // Format data on-demand
       const dataset = ACCURACY_DATASETS.find(d => d.name === task.question.dataset)!
-      const formattedData = task.format.encode(dataset.data)
+      const formattedData = encodeDataset(task.format, dataset)
 
       const result = await evaluateQuestion({
         question: task.question,

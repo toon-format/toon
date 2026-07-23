@@ -11,11 +11,43 @@ export interface DatasetMetadata {
   tabularEligibility: number
 }
 
+/**
+ * Kind of structural corruption applied to a dataset's encoded text.
+ */
+export type StructuralCorruptionKind
+  = | 'control'
+    | 'truncated'
+    | 'extra-rows'
+    | 'width-mismatch'
+    | 'missing-fields'
+
+/**
+ * Descriptor for corrupting a dataset's encoded text after it is emitted.
+ *
+ * @remarks
+ * The corruption is applied to each format's rendered text – not the source
+ * data – so formats that carry length or width metadata (TOON) surface the
+ * damage while metadata-less formats stay syntactically valid.
+ */
+export interface StructuralCorruption {
+  kind: StructuralCorruptionKind
+  /** Number of trailing records to remove – `truncated` */
+  removeRecordCount?: number
+  /** Records appended beyond the declared length – `extra-rows` */
+  appendRecords?: Record<string, unknown>[]
+  /** Record indices to edit – `width-mismatch`, `missing-fields` */
+  targetRecordIndices?: number[]
+  /** Field dropped from the targeted records – `width-mismatch`, `missing-fields` */
+  targetFieldName?: string
+}
+
 export interface Dataset {
   name: DatasetName
   description: string
   data: Record<string, any>
   metadata: DatasetMetadata
+  /** Post-encode text corruption applied only to structural-validation datasets */
+  corruption?: StructuralCorruption
 }
 
 export interface Question {

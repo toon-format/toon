@@ -5,6 +5,7 @@ import { ACCURACY_DATASETS } from './datasets.ts'
 import { MODELS } from './evaluate.ts'
 import { FORMATS, getFormat, supportsCSV } from './formats.ts'
 import { generateQuestions } from './questions/index.ts'
+import { encodeDataset } from './structural-corruption.ts'
 import { createProgressBar, tokenize } from './utils.ts'
 
 const EFFICIENCY_CHART_STYLE: 'vertical' | 'horizontal' = 'horizontal'
@@ -26,7 +27,7 @@ export function calculateTokenCounts(
       if (formatName === 'csv' && !supportsCSV(dataset))
         continue
 
-      const formattedData = format.encode(dataset.data)
+      const formattedData = encodeDataset(format, dataset)
       const primer = format.primer
       // Include primer in token count for fair comparison
       const fullPrompt = primer ? `${primer}\n\n${formattedData}` : formattedData
@@ -304,11 +305,13 @@ Thirteen datasets designed to test different structural patterns and validation 
 
 **Structural validation datasets:**
 
-9. **Control**: Valid complete dataset (baseline for validation)
-10. **Truncated**: Array with 3 rows removed from end (tests \`[N]\` length detection)
-11. **Extra rows**: Array with 3 additional rows beyond declared length
-12. **Width mismatch**: Inconsistent field count (missing salary in row 10)
-13. **Missing fields**: Systematic field omissions (no email in multiple rows)
+Each carries the same valid 20-row dataset; the corruption is applied to the encoded text after it is emitted, so TOON's \`[N]\` length and \`{fields}\` width still declare the original shape while JSON, YAML, XML, and CSV render the lossy-pipeline outcome.
+
+9. **Control**: Valid complete dataset, text passed through untouched (baseline for validation)
+10. **Truncated**: Last 3 row lines removed – TOON still declares \`[20]\`, so the shortfall is detectable; formats without length metadata stay valid and undetectable in principle
+11. **Extra rows**: 3 rows appended past the declared \`[20]\` – detectable in TOON, valid and undetectable elsewhere
+12. **Width mismatch**: One cell dropped from row 10 – TOON's row is narrower than its \`{fields}\` header (CSV narrower than its column row); JSON/YAML/XML only drop the property, a schema-level signal
+13. **Missing fields**: The email value removed from every 5th record, surfacing the same way as width mismatch
 
 #### Question Types
 
@@ -334,10 +337,10 @@ ${totalQuestions} questions are generated dynamically across five categories:
   - Example: "List the field names for employees" → \`id, name, email, department, salary, yearsExperience, active\`
   - Example: "What is the department of the last employee?" → \`Sales\`
 
-- **Structural validation (${structuralValidationPercent}%)**: Tests ability to detect incomplete, truncated, or corrupted data using structural metadata
+- **Structural validation (${structuralValidationPercent}%)**: Tests ability to detect incomplete, truncated, or corrupted data from the encoded text alone
   - Example: "Is this data complete and valid?" → \`YES\` (control dataset) or \`NO\` (corrupted datasets)
-  - Tests TOON's \`[N]\` length validation and \`{fields}\` consistency checking
-  - Demonstrates CSV's lack of structural validation capabilities
+  - The text is corrupted post-encode: TOON's \`[N]\` length and \`{fields}\` width still declare the original shape, so truncation, extra rows, and width drops are detectable
+  - JSON, YAML, XML, and CSV carry no length metadata, so their truncated and extra-row variants stay syntactically valid and cannot be flagged in principle – that contrast is the demonstration
 
 #### Evaluation Process
 

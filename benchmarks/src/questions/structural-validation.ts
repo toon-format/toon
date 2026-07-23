@@ -4,13 +4,16 @@ import { QuestionBuilder } from './utils.ts'
 /**
  * Generate structural validation questions for all incompleteness fixtures
  *
- * These questions test the ability to detect incomplete, truncated, or corrupted data
- * by validating structural metadata (TOON's [N] length declarations and {fields} headers).
+ * These questions test the ability to detect incomplete, truncated, or corrupted
+ * data from the encoded text alone. Each fixture carries the same valid 20-row
+ * dataset; the corruption is applied to each format's rendered text after it is
+ * emitted, so TOON's [N] length and {fields} width still declare the original shape
+ * while metadata-less formats render the lossy-pipeline outcome.
  *
  * @remarks
- * - TOON's advantage: Explicit [N] and {fields} enable validation
- * - CSV disadvantage: No structural metadata to validate against
- * - JSON/YAML disadvantage: Require manual counting and schema inference
+ * - TOON's advantage: [N] and {fields} still declare the original shape, so the damage shows
+ * - CSV disadvantage: No length metadata; only a narrower row can hint at width loss
+ * - JSON/YAML/XML disadvantage: Truncation and extra rows stay valid and undetectable in principle
  */
 export function generateStructuralValidationQuestions(
   getId: () => string,
@@ -19,11 +22,11 @@ export function generateStructuralValidationQuestions(
 
   // Dataset names and their expected validity
   const validationFixtures = [
-    { dataset: 'structural-validation-control', isValid: true, description: 'Valid complete dataset (control)' },
-    { dataset: 'structural-validation-truncated', isValid: false, description: 'Array truncated: 3 rows removed from end' },
-    { dataset: 'structural-validation-extra-rows', isValid: false, description: 'Extra rows added beyond declared length' },
-    { dataset: 'structural-validation-width-mismatch', isValid: false, description: 'Inconsistent field count (missing salary in row 10)' },
-    { dataset: 'structural-validation-missing-fields', isValid: false, description: 'Missing required fields (no email in multiple rows)' },
+    { dataset: 'structural-validation-control', isValid: true, description: 'Valid complete dataset, text passed through untouched (control)' },
+    { dataset: 'structural-validation-truncated', isValid: false, description: 'Encoded text truncated: last 3 row lines removed' },
+    { dataset: 'structural-validation-extra-rows', isValid: false, description: 'Encoded text gains 3 rows past the declared length' },
+    { dataset: 'structural-validation-width-mismatch', isValid: false, description: 'One cell dropped from row 10 of the encoded text' },
+    { dataset: 'structural-validation-missing-fields', isValid: false, description: 'Email value removed from every 5th record of the encoded text' },
   ] as const
 
   // Generate one validation question per fixture

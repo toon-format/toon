@@ -1,4 +1,4 @@
-import type { Dataset } from './types.ts'
+import type { Dataset, StructuralCorruption } from './types.ts'
 import { faker } from '@faker-js/faker'
 import githubRepos from '../data/github-repos.json' with { type: 'json' }
 
@@ -201,7 +201,7 @@ interface StructuralValidationFixture {
   type: StructuralValidationType
   description: string
   data: Record<string, unknown>
-  isValid: boolean
+  corruption: StructuralCorruption
 }
 
 /**
@@ -647,71 +647,52 @@ export function generateContacts(count: number): { contacts: Contact[] } {
  * Generate structural validation fixtures from employee data
  *
  * @remarks
- * Creates deliberately corrupted datasets to test TOON's structural validation
- * capabilities via [N] length declarations and {fields} headers.
- * Internal function used to generate structural validation datasets.
+ * Every fixture carries the identical valid 20-row dataset – the corruption is
+ * applied post-encode to each format's rendered text, not to the source data, so
+ * ground-truth NO stays derivable from what the model actually reads. TOON keeps
+ * its `[N]` length and `{fields}` width, while metadata-less formats render the
+ * lossy-pipeline outcome. Internal function used to build the validation datasets.
  */
 function generateStructuralValidationFixtures(): StructuralValidationFixture[] {
   const baseData = generateEmployees(20)
+  // Ids 21-23 continue the sequence so the appended rows read as a plausible tail
+  const appendRecords = generateEmployees(23).employees.slice(20) as unknown as Record<string, unknown>[]
 
   return [
-    // Valid baseline
+    // Valid baseline – encoded text passes through untouched
     {
       type: 'truncated' as const,
       description: 'Valid complete dataset (control)',
       data: { employees: baseData.employees },
-      isValid: true,
+      corruption: { kind: 'control' },
     },
-    // Truncated array (missing last 3 rows)
+    // Remove the last 3 record lines while TOON keeps its declared [20]
     {
       type: 'truncated' as const,
       description: 'Array truncated: 3 rows removed from end',
-      data: { employees: baseData.employees.slice(0, -3) },
-      isValid: false, // [N] won't match actual row count in TOON
+      data: { employees: baseData.employees },
+      corruption: { kind: 'truncated', removeRecordCount: 3 },
     },
-    // Extra rows (3 more than original)
+    // Append 3 rows past the declared [20]
     {
       type: 'extra-rows' as const,
       description: 'Extra rows added beyond declared length',
-      data: {
-        employees: [
-          ...baseData.employees,
-          ...generateEmployees(3).employees,
-        ],
-      },
-      isValid: false, // [N] won't match actual row count in TOON
+      data: { employees: baseData.employees },
+      corruption: { kind: 'extra-rows', appendRecords },
     },
-    // Width mismatch (inconsistent field count)
+    // Drop one cell from row 10 so the row is narrower than the {fields} header
     {
       type: 'width-mismatch' as const,
       description: 'Inconsistent field count (missing salary in row 10)',
-      data: {
-        employees: baseData.employees.map((emp, i) => {
-          if (i === 9) {
-            // Row 10, missing salary field
-            const { salary, ...rest } = emp
-            return rest
-          }
-          return emp
-        }),
-      },
-      isValid: false, // Not all objects have same fields (tabular requirement)
+      data: { employees: baseData.employees },
+      corruption: { kind: 'width-mismatch', targetRecordIndices: [9], targetFieldName: 'salary' },
     },
-    // Missing required fields
+    // Drop the email value from every 5th record
     {
       type: 'missing-fields' as const,
       description: 'Missing required fields (no email in multiple rows)',
-      data: {
-        employees: baseData.employees.map((emp, i) => {
-          if (i % 5 === 0) {
-            // Every 5th row, missing email
-            const { email, ...rest } = emp
-            return rest
-          }
-          return emp
-        }),
-      },
-      isValid: false, // Not all objects have same fields (tabular requirement)
+      data: { employees: baseData.employees },
+      corruption: { kind: 'missing-fields', targetRecordIndices: [0, 5, 10, 15], targetFieldName: 'email' },
     },
   ]
 }
@@ -754,8 +735,12 @@ const nestedConfigDataset: Dataset = {
  * Structural validation datasets: Tests ability to detect incomplete, truncated, or corrupted data
  *
  * @remarks
- * These datasets test TOON's structural validation advantages via [N] length declarations
- * and {fields} headers. CSV is included to demonstrate its lack of structural metadata.
+ * All five carry the identical valid 20-row dataset and a corruption descriptor.
+ * The corruption is applied to each format's encoded text after it is emitted, so
+ * TOON's `[N]` length and `{fields}` width still declare the original shape and
+ * expose the damage, while metadata-less formats (JSON, YAML, XML, CSV) render the
+ * lossy-pipeline outcome. CSV is included to demonstrate it cannot flag truncation
+ * or extra rows at all.
  */
 const structuralValidationDatasets: Dataset[] = generateStructuralValidationFixtures().map((fixture, index) => {
   const datasetNames = [
@@ -770,6 +755,7 @@ const structuralValidationDatasets: Dataset[] = generateStructuralValidationFixt
     name: datasetNames[index]!,
     description: fixture.description,
     data: fixture.data,
+    corruption: fixture.corruption,
     metadata: {
       supportsCSV: true, // Include CSV to show it can't validate structure
       structureClass: 'uniform',
