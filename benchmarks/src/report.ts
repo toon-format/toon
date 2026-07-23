@@ -6,7 +6,7 @@ import { MODELS } from './evaluate.ts'
 import { FORMATS, getFormat, supportsCSV } from './formats.ts'
 import { generateQuestions } from './questions/index.ts'
 import { encodeDataset } from './structural-corruption.ts'
-import { createProgressBar, tokenize } from './utils.ts'
+import { createProgressBar, tokenize, wilsonInterval } from './utils.ts'
 
 const EFFICIENCY_CHART_STYLE: 'vertical' | 'horizontal' = 'horizontal'
 
@@ -162,9 +162,12 @@ function generateAccuracyComparisonTables(
   modelCount: number,
 ): string {
   const renderRows = (formatResults: FormatResult[]): string =>
-    formatResults.map(fr =>
-      `| \`${fr.format}\` | ${(fr.accuracy * 100).toFixed(1)}% | ${fr.correctCount}/${fr.totalCount} | ${fr.totalTokens.toLocaleString('en-US')} |`,
-    ).join('\n')
+    formatResults.map((fr) => {
+      const confidenceInterval = wilsonInterval(fr.correctCount, fr.totalCount)
+      const marginString = `±${(confidenceInterval.halfWidth * 100).toFixed(1)}`
+
+      return `| \`${fr.format}\` | ${(fr.accuracy * 100).toFixed(1)}% ${marginString} | ${fr.correctCount}/${fr.totalCount} | ${fr.totalTokens.toLocaleString('en-US')} |`
+    }).join('\n')
 
   const flatQuestionCount = flatOnlyFormatResults.length > 0
     ? flatOnlyFormatResults[0]!.totalCount / modelCount
@@ -245,6 +248,8 @@ function generateEfficiencyRankingReport(
         efficiency,
         accuracy: fr.accuracy,
         tokens: fr.totalTokens,
+        correctCount: fr.correctCount,
+        totalCount: fr.totalCount,
       }
     })
     .sort((a, b) => b.efficiency - a.efficiency)
@@ -345,6 +350,8 @@ Accuracy across ${modelNames.length} ${modelNames.length === 1 ? 'LLM' : 'LLMs'}
 \`\`\`
 ${modelBreakdown}
 \`\`\`
+
+> Accuracy figures include Wilson 95% confidence intervals (±); when two formats' intervals overlap, the difference between them is not statistically meaningful.
 
 *CSV answers only the ${flatQuestionCount} flat-dataset questions, so its per-model cells cover a smaller, easier population than the other formats.*
 
@@ -460,23 +467,26 @@ function generateModelBreakdown(
       const correctCount = modelFormatResults.filter(r => r.isCorrect).length
       const totalCount = modelFormatResults.length
       const accuracy = totalCount > 0 ? correctCount / totalCount : 0
+      const confidenceInterval = wilsonInterval(correctCount, totalCount)
 
       return {
         format: fr.format,
         accuracy,
         correctCount,
         totalCount,
+        halfWidth: confidenceInterval.halfWidth,
       }
     }).sort((a, b) => b.accuracy - a.accuracy)
 
     const formatLines = modelResults.map((result) => {
       const bar = createProgressBar(result.accuracy, 1, progressBarWidth)
       const accuracyString = `${(result.accuracy * 100).toFixed(1)}%`.padStart(6)
+      const marginString = `±${(result.halfWidth * 100).toFixed(1)}`
       const countString = `(${result.correctCount}/${result.totalCount})`
       const prefix = result.format === 'toon' ? '→ ' : '  '
       const displayName = getFormat(result.format).displayName
 
-      return `${prefix}${displayName.padEnd(maxDisplayNameWidth)}   ${bar}   ${accuracyString} ${countString}`
+      return `${prefix}${displayName.padEnd(maxDisplayNameWidth)}   ${bar}   ${accuracyString} ${marginString} ${countString}`
     }).join('\n')
 
     // Add blank line before model name, except for first model
@@ -665,9 +675,11 @@ function generateHorizontalEfficiencyChart(
       const formatName = displayName.padEnd(maxFormatWidth)
       const efficiency = r.efficiency.toFixed(1).padStart(4)
       const accuracy = `${(r.accuracy * 100).toFixed(1)}%`.padStart(5)
+      const confidenceInterval = wilsonInterval(r.correctCount, r.totalCount)
+      const marginString = `±${(confidenceInterval.halfWidth * 100).toFixed(1)}`
       const tokens = r.tokens.toLocaleString('en-US').padStart(5)
 
-      return `${formatName}   ${bar}   ${efficiency} acc%/1K tok  │  ${accuracy} acc  │  ${tokens} tokens`
+      return `${formatName}   ${bar}   ${efficiency} acc%/1K tok  │  ${accuracy} ${marginString} acc  │  ${tokens} tokens`
     })
     .join('\n')
 }
