@@ -160,7 +160,7 @@ The `replacer` option allows you to transform or filter values during encoding. 
 
 #### Type Signature
 
-```typescript
+```ts
 type EncodeReplacer = (
   key: string,
   value: JsonValue,
@@ -187,7 +187,7 @@ type EncodeReplacer = (
 
 **Filtering sensitive data:**
 
-```typescript
+```ts
 import { encode } from '@toon-format/toon'
 
 const data = {
@@ -213,7 +213,7 @@ user:
 
 **Transforming values:**
 
-```typescript
+```ts
 const data = { user: 'alice', role: 'admin' }
 
 function replacer(key, value) {
@@ -234,7 +234,7 @@ role: ADMIN
 
 **Path-based transformations:**
 
-```typescript
+```ts
 const data = {
   metadata: { created: '2025-01-01' },
   user: { created: '2025-01-02' }
