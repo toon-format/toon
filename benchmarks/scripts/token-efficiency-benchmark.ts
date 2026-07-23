@@ -332,6 +332,8 @@ ${separator}
 const markdown = `
 ${barChartSection}
 
+Token counts use \`gpt-tokenizer\` with \`o200k_base\` encoding (GPT-5 tokenizer). Other providers tokenize differently, so absolute counts are tokenizer-specific; relative differences between formats hold directionally.
+
 <details>
 <summary><strong>Show detailed examples</strong></summary>
 

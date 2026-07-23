@@ -318,6 +318,7 @@ ${totalQuestions} questions are generated dynamically across five categories:
 - **Filtering (${filteringPercent}%)**: Multi-condition queries requiring compound logic (AND constraints across fields)
   - Example: "How many employees in Sales have salary > 80000?" → \`5\`
   - Example: "How many active employees have more than 10 years of experience?" → \`8\`
+  - Note: With reasoning disabled, multi-row arithmetic is hard in every format – aggregation and filtering scores mostly measure computation under format friction and sit near the floor for all formats.
 
 - **Structure awareness (${structureAwarenessPercent}%)**: Tests format-native structural affordances (TOON's \`[N]\` count and \`{fields}\`, CSV's header row)
   - Example: "How many employees are in the dataset?" → \`100\`
@@ -338,7 +339,8 @@ ${totalQuestions} questions are generated dynamically across five categories:
 #### Models & Configuration
 
 - **Models tested**: ${modelNames.map(m => `\`${m}\``).join(', ')}
-- **Token counting**: Using \`gpt-tokenizer\` with \`o200k_base\` encoding (GPT-5 tokenizer)
+- **Token counting**: Using \`gpt-tokenizer\` with \`o200k_base\` encoding (GPT-5 tokenizer). Other providers tokenize differently, so absolute counts are tokenizer-specific; relative differences between formats hold directionally.
+- **Reasoning**: Disabled via the AI SDK's universal \`reasoning: 'none'\` (Gemini 3 floors at minimal thinking)
 - **Temperature**: Not set (models use their defaults)
 - **Total evaluations**: ${totalQuestions} questions × ${formatCount} formats × ${modelNames.length} models = ${totalEvaluations.toLocaleString('en-US')} LLM calls
 `.trim()
