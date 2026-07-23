@@ -122,7 +122,7 @@ async function writeStream(
       isFirst = false
     }
 
-    // stdout gets a trailing newline so the shell prompt resumes on a fresh line; files end exactly at content
+    // Stdout gets a trailing newline so the shell prompt resumes on a fresh line; files end exactly at content
     if (!outputPath)
       process.stdout.write('\n')
   }

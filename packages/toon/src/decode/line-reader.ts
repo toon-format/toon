@@ -14,7 +14,7 @@ export const FETCH_LINE: unique symbol = Symbol('fetch-line')
 // receiving each fetched raw line (or `undefined` at end of input) back.
 export type LineRule = Generator<JsonStreamEvent | typeof FETCH_LINE, void, string | undefined>
 
-// A pure line effect only fetches lines; it emits no data-model events.
+// A pure line effect only fetches lines; it emits no data-model events
 export type LineEffect<TReturn> = Generator<typeof FETCH_LINE, TReturn, string | undefined>
 
 // #endregion

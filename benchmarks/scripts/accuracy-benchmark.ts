@@ -103,7 +103,6 @@ const activeModels = MODELS.filter(m => selectedModels.includes(m.id))
 
 prompts.log.info(`Selected ${activeModels.length} model(s): ${activeModels.map(m => m.id).join(', ')}`)
 
-// Check which models already have results
 const existingModelResults = await checkExistingResults(activeModels)
 
 if (Object.keys(existingModelResults).length > 0) {
@@ -136,7 +135,6 @@ for (const descriptor of activeModels) {
 
   prompts.log.step(`Running benchmark for ${modelId}`)
 
-  // Generate evaluation tasks for this model
   const tasks = generateEvaluationTasks(questions)
 
   const total = tasks.length
@@ -162,14 +160,12 @@ for (const descriptor of activeModels) {
         model: languageModel,
       })
 
-      // Progress update after task completes
       updateProgress()
 
       return result
     }),
   )
 
-  // Wait for all tasks to complete
   const modelResults = await Promise.all(modelResultPromises)
 
   evalSpinner.stop(`Evaluation complete for ${modelId}`)

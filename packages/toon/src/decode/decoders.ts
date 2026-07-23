@@ -588,7 +588,6 @@ function* decodeListItem(
     // Use baseDepth + 1 for the array so rows are at baseDepth + 2
     yield* decodeArrayFromHeader(header, headerInfo.inlineValues, reader, baseDepth + 1, options, itemLine)
 
-    // Read sibling fields
     yield* followSiblingFields(reader, baseDepth + 1, options, seenKeys)
 
     yield { type: 'endObject' }
@@ -600,7 +599,6 @@ function* decodeListItem(
     yield { type: 'startObject' }
     yield* decodeKeyValue(itemLine, reader, baseDepth + 1, options, seenKeys)
 
-    // Read subsequent fields
     yield* followSiblingFields(reader, baseDepth + 1, options, seenKeys)
 
     yield { type: 'endObject' }
@@ -697,6 +695,7 @@ function* yieldObjectFromFields(
         yield { type: 'primitive', value: primitives[cellIndex++]! }
       }
     }
+
     yield { type: 'endObject' }
   }
 

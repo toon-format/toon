@@ -214,19 +214,14 @@ function generateDetailedAccuracyReport(
   const modelIds = MODELS.map(m => m.id)
   const modelNames = modelIds.filter(id => results.some(r => r.model === id))
 
-  // Generate model breakdown section
   const modelBreakdown = generateModelBreakdown(formatResults, results, modelNames)
 
-  // Generate summary comparison
   const summaryComparison = generateSummaryComparison(toon, json)
 
-  // Generate performance by dataset
   const datasetBreakdown = generateDatasetBreakdown(formatResults, results, questions, tokenCounts)
 
-  // Generate performance by model
   const modelPerformance = generateModelPerformanceTable(formatResults, results, modelNames)
 
-  // Generate question type breakdown
   const questionTypeBreakdown = generateQuestionTypeBreakdown(formatResults, results, questions)
   const totalQuestions = [...new Set(results.map(r => r.questionId))].length
 
@@ -383,6 +378,7 @@ function generateModelBreakdown(
       const countString = `(${result.correctCount}/${result.totalCount})`
       const prefix = result.format === 'toon' ? '→ ' : '  '
       const displayName = getFormat(result.format).displayName
+
       return `${prefix}${displayName.padEnd(maxDisplayNameWidth)}   ${bar}   ${accuracyString} ${countString}`
     }).join('\n')
 
@@ -453,6 +449,7 @@ function generateDatasetBreakdown(
     datasetResults.sort((a, b) => {
       const effA = (a.accuracy ** 2) / (a.tokens / 1000)
       const effB = (b.accuracy ** 2) / (b.tokens / 1000)
+
       return effB - effA
     })
 
@@ -499,6 +496,7 @@ function generateQuestionTypeBreakdown(
       const correctCount = formatTypeResults.filter(r => r.isCorrect).length
       const totalCount = formatTypeResults.length
       const accuracy = totalCount > 0 ? correctCount / totalCount : 0
+
       return `${(accuracy * 100).toFixed(1)}%`
     })
 
@@ -609,6 +607,7 @@ function generateVerticalEfficiencyChart(
           else
             char = '░' // Rest
         }
+
         return char
       })
       .join('    ')

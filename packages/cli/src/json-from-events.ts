@@ -7,7 +7,7 @@ type JsonContext
   = | { type: 'object', needsComma: boolean, expectValue: boolean }
     | { type: 'array', needsComma: boolean }
 
-// array elements own their separator because no key event precedes them, whereas object values are already positioned by the preceding key
+// Array elements own their separator because no key event precedes them, unlike object values positioned by the preceding key
 function* emitValuePrefix(
   parent: JsonContext | undefined,
   depth: number,
@@ -17,6 +17,7 @@ function* emitValuePrefix(
     if (parent.needsComma) {
       yield ','
     }
+
     if (indent > 0) {
       yield '\n'
       yield ' '.repeat(depth * indent)

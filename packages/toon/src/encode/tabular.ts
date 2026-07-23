@@ -16,6 +16,7 @@ export function extractTabularHeader(rows: readonly JsonObject[]): FieldNode[] |
     if (Object.keys(row).length !== firstKeys.length) {
       return
     }
+
     for (const key of firstKeys) {
       if (!Object.hasOwn(row, key)) {
         return
@@ -43,6 +44,7 @@ export function extractKeyedFields(value: JsonObject): FieldNode[] | undefined {
   if (entryValues.length < 2) {
     return
   }
+
   if (!entryValues.every(entryValue => isJsonObject(entryValue) && !isEmptyObject(entryValue))) {
     return
   }

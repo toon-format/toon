@@ -54,6 +54,7 @@ function formatComparisonLine(format: FormatMetrics, isLast: boolean = false): s
     : `+${Math.abs(format.savingsPercent).toFixed(1)}%`
   const connector = isLast ? '└─' : '├─'
   const tokenStr = format.tokens.toLocaleString('en-US').padStart(TOKEN_PADDING)
+
   return `${connector} vs ${label.padEnd(13)} ${`(${signedPercent})`.padEnd(20)}   ${tokenStr} tokens`
 }
 
@@ -73,6 +74,7 @@ function calculateTotalMetrics(datasets: BenchmarkResult[], formatNames: readonl
     }, 0)
     const savings = totalTokens - totalToonTokens
     const savingsPercent = (savings / totalTokens) * 100
+
     return { name: formatName, tokens: totalTokens, savingsPercent }
   })
 
