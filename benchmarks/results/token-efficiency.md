@@ -5,11 +5,11 @@ Datasets with nested or semi-uniform structures. CSV excluded as it cannot prope
 ```
 🛒 E-commerce orders with nested structures  ┊  Tabular: 33%
    │
-   TOON                █████████████░░░░░░░    73,126 tokens
-   ├─ vs JSON          (−33.3%)               109,599 tokens
-   ├─ vs JSON compact  (+5.3%)                 69,459 tokens
-   ├─ vs YAML          (−14.4%)                85,415 tokens
-   └─ vs XML           (−40.7%)               123,344 tokens
+   TOON                █████████████░░░░░░░    72,832 tokens
+   ├─ vs JSON          (−32.9%)               108,611 tokens
+   ├─ vs JSON compact  (+5.6%)                 68,944 tokens
+   ├─ vs YAML          (−14.0%)                84,701 tokens
+   └─ vs XML           (−40.4%)               122,119 tokens
 
 🧾 Semi-uniform event logs  ┊  Tabular: 50%
    │
@@ -21,18 +21,34 @@ Datasets with nested or semi-uniform structures. CSV excluded as it cannot prope
 
 🧩 Deeply nested configuration  ┊  Tabular: 0%
    │
-   TOON                ██████████████░░░░░░       620 tokens
-   ├─ vs JSON          (−31.9%)                   911 tokens
-   ├─ vs JSON compact  (+11.1%)                   558 tokens
-   ├─ vs YAML          (−6.3%)                    662 tokens
-   └─ vs XML           (−38.2%)                 1,003 tokens
+   TOON                █████████████░░░░░░░       589 tokens
+   ├─ vs JSON          (−34.9%)                   905 tokens
+   ├─ vs JSON compact  (+6.7%)                    552 tokens
+   ├─ vs YAML          (−11.0%)                   662 tokens
+   └─ vs XML           (−40.9%)                   997 tokens
+
+📊 Feature flags keyed by name  ┊  Tabular: 100%
+   │
+   TOON                █████████░░░░░░░░░░░    10,503 tokens
+   ├─ vs JSON          (−54.6%)                23,141 tokens
+   ├─ vs JSON compact  (−32.8%)                15,635 tokens
+   ├─ vs YAML          (−41.3%)                17,905 tokens
+   └─ vs XML           (−63.3%)                28,655 tokens
+
+📊 Contacts with nested address and plan groups  ┊  Tabular: 100%
+   │
+   TOON                ███████░░░░░░░░░░░░░    26,726 tokens
+   ├─ vs JSON          (−66.5%)                79,779 tokens
+   ├─ vs JSON compact  (−42.9%)                46,791 tokens
+   ├─ vs YAML          (−51.8%)                55,475 tokens
+   └─ vs XML           (−70.4%)                90,306 tokens
 
 ──────────────────────────────────── Total ────────────────────────────────────
-   TOON                ████████████████░░░░   227,830 tokens
-   ├─ vs JSON          (−21.9%)               291,711 tokens
-   ├─ vs JSON compact  (+14.7%)               198,546 tokens
-   ├─ vs YAML          (−5.7%)                241,474 tokens
-   └─ vs XML           (−31.0%)               330,206 tokens
+   TOON                █████████████░░░░░░░   264,734 tokens
+   ├─ vs JSON          (−32.7%)               393,637 tokens
+   ├─ vs JSON compact  (+1.6%)                260,451 tokens
+   ├─ vs YAML          (−15.7%)               314,140 tokens
+   └─ vs XML           (−40.9%)               447,936 tokens
 ```
 
 #### Flat-Only Track
@@ -42,12 +58,12 @@ Datasets with flat tabular structures where CSV is applicable.
 ```
 👥 Uniform employee records  ┊  Tabular: 100%
    │
-   CSV                 ███████████████████░    47,102 tokens
-   TOON                ████████████████████    49,919 tokens   (+6.0% vs CSV)
-   ├─ vs JSON          (−60.7%)               127,063 tokens
-   ├─ vs JSON compact  (−36.9%)                79,059 tokens
-   ├─ vs YAML          (−50.1%)               100,011 tokens
-   └─ vs XML           (−65.9%)               146,579 tokens
+   CSV                 ███████████████████░    47,153 tokens
+   TOON                ████████████████████    49,978 tokens   (+6.0% vs CSV)
+   ├─ vs JSON          (−60.7%)               127,061 tokens
+   ├─ vs JSON compact  (−36.8%)                79,057 tokens
+   ├─ vs YAML          (−50.0%)               100,054 tokens
+   └─ vs XML           (−65.9%)               146,605 tokens
 
 📈 Time-series analytics data  ┊  Tabular: 100%
    │
@@ -60,21 +76,23 @@ Datasets with flat tabular structures where CSV is applicable.
 
 ⭐ Top 100 GitHub repositories  ┊  Tabular: 100%
    │
-   CSV                 ███████████████████░     8,512 tokens
-   TOON                ████████████████████     8,744 tokens   (+2.7% vs CSV)
-   ├─ vs JSON          (−42.3%)                15,144 tokens
-   ├─ vs JSON compact  (−23.7%)                11,454 tokens
-   ├─ vs YAML          (−33.4%)                13,128 tokens
-   └─ vs XML           (−48.9%)                17,095 tokens
+   CSV                 ███████████████████░     8,711 tokens
+   TOON                ████████████████████     8,937 tokens   (+2.6% vs CSV)
+   ├─ vs JSON          (−41.7%)                15,337 tokens
+   ├─ vs JSON compact  (−23.2%)                11,640 tokens
+   ├─ vs YAML          (−33.0%)                13,337 tokens
+   └─ vs XML           (−48.3%)                17,294 tokens
 
 ──────────────────────────────────── Total ────────────────────────────────────
-   CSV                 ███████████████████░    63,997 tokens
-   TOON                ████████████████████    67,778 tokens   (+5.9% vs CSV)
-   ├─ vs JSON          (−58.8%)               164,452 tokens
-   ├─ vs JSON compact  (−35.3%)               104,724 tokens
-   ├─ vs YAML          (−48.3%)               130,997 tokens
-   └─ vs XML           (−64.4%)               190,290 tokens
+   CSV                 ███████████████████░    64,247 tokens
+   TOON                ████████████████████    68,030 tokens   (+5.9% vs CSV)
+   ├─ vs JSON          (−58.7%)               164,643 tokens
+   ├─ vs JSON compact  (−35.2%)               104,908 tokens
+   ├─ vs YAML          (−48.2%)               131,249 tokens
+   └─ vs XML           (−64.3%)               190,515 tokens
 ```
+
+Token counts use `gpt-tokenizer` with `o200k_base` encoding (GPT-5 tokenizer). Other providers tokenize differently, so absolute counts are tokenizer-specific; relative differences between formats hold directionally.
 
 <details>
 <summary><strong>Show detailed examples</strong></summary>
@@ -147,37 +165,24 @@ metrics[5]{date,views,clicks,conversions,revenue,bounceRate}:
 
 #### ⭐ Top 100 GitHub repositories
 
-**Savings:** 6,400 tokens (42.3% reduction vs JSON)
+**Savings:** 6,400 tokens (41.7% reduction vs JSON)
 
-**JSON** (15,144 tokens):
+**JSON** (15,337 tokens):
 
 ```json
 {
   "repositories": [
-    {
-      "id": 28457823,
-      "name": "freeCodeCamp",
-      "repo": "freeCodeCamp/freeCodeCamp",
-      "description": "freeCodeCamp.org's open-source codebase and curriculum. Learn math, programming,…",
-      "createdAt": "2014-12-24T17:49:19Z",
-      "updatedAt": "2025-10-28T11:58:08Z",
-      "pushedAt": "2025-10-28T10:17:16Z",
-      "stars": 430886,
-      "watchers": 8583,
-      "forks": 42146,
-      "defaultBranch": "main"
-    },
     {
       "id": 132750724,
       "name": "build-your-own-x",
       "repo": "codecrafters-io/build-your-own-x",
       "description": "Master programming by recreating your favorite technologies from scratch.",
       "createdAt": "2018-05-09T12:03:18Z",
-      "updatedAt": "2025-10-28T12:37:11Z",
-      "pushedAt": "2025-10-10T18:45:01Z",
-      "stars": 430877,
-      "watchers": 6332,
-      "forks": 40453,
+      "updatedAt": "2026-07-23T18:57:15Z",
+      "pushedAt": "2026-07-14T19:25:58Z",
+      "stars": 530712,
+      "watchers": 6778,
+      "forks": 50205,
       "defaultBranch": "master"
     },
     {
@@ -186,24 +191,37 @@ metrics[5]{date,views,clicks,conversions,revenue,bounceRate}:
       "repo": "sindresorhus/awesome",
       "description": "😎 Awesome lists about all kinds of interesting topics",
       "createdAt": "2014-07-11T13:42:37Z",
-      "updatedAt": "2025-10-28T12:40:21Z",
-      "pushedAt": "2025-10-27T17:57:31Z",
-      "stars": 410052,
-      "watchers": 8017,
-      "forks": 32029,
+      "updatedAt": "2026-07-23T18:57:24Z",
+      "pushedAt": "2026-06-30T18:21:16Z",
+      "stars": 488074,
+      "watchers": 8292,
+      "forks": 36010,
+      "defaultBranch": "main"
+    },
+    {
+      "id": 28457823,
+      "name": "freeCodeCamp",
+      "repo": "freeCodeCamp/freeCodeCamp",
+      "description": "freeCodeCamp.org's open-source codebase and curriculum. Learn math, programming,…",
+      "createdAt": "2014-12-24T17:49:19Z",
+      "updatedAt": "2026-07-22T07:01:33Z",
+      "pushedAt": "2026-07-21T18:00:51Z",
+      "stars": 452380,
+      "watchers": 8590,
+      "forks": 45624,
       "defaultBranch": "main"
     }
   ]
 }
 ```
 
-**TOON** (8,744 tokens):
+**TOON** (8,937 tokens):
 
 ```
 repositories[3]{id,name,repo,description,createdAt,updatedAt,pushedAt,stars,watchers,forks,defaultBranch}:
-  28457823,freeCodeCamp,freeCodeCamp/freeCodeCamp,"freeCodeCamp.org's open-source codebase and curriculum. Learn math, programming,…","2014-12-24T17:49:19Z","2025-10-28T11:58:08Z","2025-10-28T10:17:16Z",430886,8583,42146,main
-  132750724,build-your-own-x,codecrafters-io/build-your-own-x,Master programming by recreating your favorite technologies from scratch.,"2018-05-09T12:03:18Z","2025-10-28T12:37:11Z","2025-10-10T18:45:01Z",430877,6332,40453,master
-  21737465,awesome,sindresorhus/awesome,😎 Awesome lists about all kinds of interesting topics,"2014-07-11T13:42:37Z","2025-10-28T12:40:21Z","2025-10-27T17:57:31Z",410052,8017,32029,main
+  132750724,build-your-own-x,codecrafters-io/build-your-own-x,Master programming by recreating your favorite technologies from scratch.,"2018-05-09T12:03:18Z","2026-07-23T18:57:15Z","2026-07-14T19:25:58Z",530712,6778,50205,master
+  21737465,awesome,sindresorhus/awesome,😎 Awesome lists about all kinds of interesting topics,"2014-07-11T13:42:37Z","2026-07-23T18:57:24Z","2026-06-30T18:21:16Z",488074,8292,36010,main
+  28457823,freeCodeCamp,freeCodeCamp/freeCodeCamp,"freeCodeCamp.org's open-source codebase and curriculum. Learn math, programming,…","2014-12-24T17:49:19Z","2026-07-22T07:01:33Z","2026-07-21T18:00:51Z",452380,8590,45624,main
 ```
 
 </details>
