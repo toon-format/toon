@@ -340,6 +340,29 @@ const data = decode(toon, {
 
 Returns a JavaScript value (object, array, or primitive) representing the parsed TOON data.
 
+#### Numeric Precision
+
+Unquoted numeric tokens decode to JavaScript `number` values and follow IEEE 754 double-precision semantics. Finite values that exceed JavaScript's available precision may be rounded, including integers outside the safe integer range:
+
+```ts
+import { decode } from '@toon-format/toon'
+
+decode('unsafe: 9007199254740993')
+// { unsafe: 9007199254740992 }
+```
+
+Numeric tokens that overflow the finite `number` range decode as strings. If an exact high-precision value must survive decoding, emit it as a quoted string. The encoder follows this policy automatically for `BigInt` values outside the safe integer range:
+
+```ts
+import { decode, encode } from '@toon-format/toon'
+
+decode('exact: "9007199254740993"')
+// { exact: '9007199254740993' }
+
+decode(encode({ exact: 9007199254740993n }))
+// { exact: '9007199254740993' }
+```
+
 #### Example
 
 ```ts
