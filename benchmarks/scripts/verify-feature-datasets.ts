@@ -1,30 +1,13 @@
 import type { Contact, FeatureFlag } from '../src/datasets.ts'
 import type { Dataset } from '../src/types.ts'
-import process from 'node:process'
 import { encode } from '../../packages/toon/src/index.ts'
 import { ACCURACY_DATASETS, TOKEN_EFFICIENCY_DATASETS } from '../src/datasets.ts'
 import { generateQuestions } from '../src/questions/index.ts'
-
-const failures: string[] = []
-
-function assert(condition: boolean, message: string): void {
-  if (!condition) {
-    failures.push(message)
-    console.error(`FAIL: ${message}`)
-  }
-}
+import { assert, findDataset, reportAndExit } from './verify-utils.ts'
 
 function printHead(label: string, encoded: string): void {
   console.log(`\n=== ${label} (first 5 lines) ===`)
   console.log(encoded.split('\n').slice(0, 5).join('\n'))
-}
-
-function findDataset(datasets: Dataset[], name: string): Dataset {
-  const dataset = datasets.find(d => d.name === name)
-  if (!dataset)
-    throw new Error(`Dataset '${name}' not found`)
-
-  return dataset
 }
 
 // Keyed tabular form: `flags[N:]{fields}:` with one entry row per flag
@@ -158,8 +141,7 @@ function verifyNestedGroupGroundTruth(): void {
       isDerivable = byName(match[1]!).some(c => String(c.age) === groundTruth)
     }
     else {
-      failures.push(`nested-group: no derivation for prompt "${prompt}"`)
-      console.error(`FAIL: nested-group: no derivation for prompt "${prompt}"`)
+      assert(false, `nested-group: no derivation for prompt "${prompt}"`)
       continue
     }
 
@@ -176,9 +158,4 @@ verifyNestedGroupGroundTruth()
 
 console.log(`\nTotal questions: ${generateQuestions().length}`)
 
-if (failures.length > 0) {
-  console.error(`\n${failures.length} assertion(s) failed`)
-  process.exit(1)
-}
-
-console.log('\nAll feature dataset assertions passed')
+reportAndExit('All feature dataset assertions passed')

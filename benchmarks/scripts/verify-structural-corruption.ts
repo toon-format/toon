@@ -1,33 +1,12 @@
-import type { Dataset } from '../src/types.ts'
-import process from 'node:process'
 import { XMLParser } from 'fast-xml-parser'
 import { parse as parseYaml } from 'yaml'
 import { ACCURACY_DATASETS } from '../src/datasets.ts'
 import { FORMATS } from '../src/formats.ts'
 import { encodeDataset } from '../src/structural-corruption.ts'
-
-const failures: string[] = []
-
-function assert(condition: boolean, message: string): void {
-  if (condition) {
-    console.log(`PASS: ${message}`)
-  }
-  else {
-    failures.push(message)
-    console.error(`FAIL: ${message}`)
-  }
-}
-
-function findDataset(name: string): Dataset {
-  const dataset = ACCURACY_DATASETS.find(d => d.name === name)
-  if (!dataset)
-    throw new Error(`Dataset '${name}' not found`)
-
-  return dataset
-}
+import { assert, findDataset, reportAndExit } from './verify-utils.ts'
 
 function encode(formatName: string, name: string): string {
-  return encodeDataset(FORMATS[formatName]!, findDataset(name))
+  return encodeDataset(FORMATS[formatName]!, findDataset(ACCURACY_DATASETS, name))
 }
 
 // TOON row lines are every line after the `employees[N]{...}:` header
@@ -60,7 +39,7 @@ assert(toonDeclaredCount(toonExtra) === 20, 'TOON extra-rows: header still decla
 assert(toonRowLines(toonExtra).length === 23, 'TOON extra-rows: 23 row lines present')
 
 const toonWidth = encode('toon', 'structural-validation-width-mismatch')
-const toonHeaderFieldCount = FORMATS.toon!.encode(findDataset('structural-validation-control').data)
+const toonHeaderFieldCount = FORMATS.toon!.encode(findDataset(ACCURACY_DATASETS, 'structural-validation-control').data)
   .split('\n')[0]!
   .replace(/^[^{]*\{/, '')
   .replace(/\}.*$/, '')
@@ -138,9 +117,4 @@ assert(
   'CSV width-mismatch: exactly one data line is one cell short',
 )
 
-if (failures.length > 0) {
-  console.error(`\n${failures.length} assertion(s) failed`)
-  process.exit(1)
-}
-
-console.log('\nAll structural corruption assertions passed')
+reportAndExit('All structural corruption assertions passed')

@@ -90,7 +90,10 @@ Rate limits now live on each [`src/evaluate.ts`](./src/evaluate.ts) `MODELS` ent
 scripts/
 ├── accuracy-benchmark.ts         # Retrieval accuracy benchmark
 ├── token-efficiency-benchmark.ts # Token counting benchmark
-└── fetch-github-repos.ts         # Update GitHub dataset
+├── fetch-github-repos.ts         # Update GitHub dataset
+├── verify-feature-datasets.ts    # Keyed/nested-group dataset guards
+├── verify-structural-corruption.ts # Corruption invariant guards
+└── verify-utils.ts               # Shared verify script plumbing
 src/
 ├── constants.ts                  # Configuration
 ├── datasets.ts                   # Test data generators
@@ -99,6 +102,7 @@ src/
 ├── normalize.ts                  # Answer normalization
 ├── report.ts                     # Markdown reports
 ├── storage.ts                    # Result caching
+├── structural-corruption.ts      # Post-encode text corruption
 ├── types.ts                      # Type definitions
 ├── utils.ts                      # Helpers
 └── questions/                    # Question generators
