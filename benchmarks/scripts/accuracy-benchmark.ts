@@ -159,6 +159,7 @@ for (const descriptor of activeModels) {
         format: task.format,
         formattedData,
         model: languageModel,
+        reasoning: descriptor.reasoning,
       })
 
       updateProgress()

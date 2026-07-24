@@ -434,7 +434,7 @@ ${totalQuestions} questions are generated dynamically across five categories:
 
 - **Models tested**: ${modelNames.map(m => `\`${m}\``).join(', ')}
 - **Token counting**: Using \`gpt-tokenizer\` with \`o200k_base\` encoding (GPT-5 tokenizer). Other providers tokenize differently, so absolute counts are tokenizer-specific; relative differences between formats hold directionally.
-- **Reasoning**: Disabled via the AI SDK's universal \`reasoning: 'none'\` (Gemini 3 floors at minimal thinking)
+- **Reasoning**: Disabled via the AI SDK's universal \`reasoning: 'none'\` (Gemini 3 floors at minimal thinking, \`grok-4.5\` at \`low\`)
 - **Temperature**: Not set (models use their defaults)
 - **Total evaluations**: ${totalQuestions} questions × ${formatCount} formats × ${modelNames.length} models = ${totalEvaluations.toLocaleString('en-US')} LLM calls
 `.trim()

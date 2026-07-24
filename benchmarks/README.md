@@ -48,7 +48,7 @@ Tests how well LLMs can answer questions about data in different formats (TOON, 
      { id: 'gpt-5.4-nano', rpm: 50, create: () => openai('gpt-5.4-nano') },
      { id: 'claude-haiku-4-5-20251001', rpm: 50, create: () => anthropic('claude-haiku-4-5-20251001') },
      { id: 'gemini-3.6-flash', rpm: 25, create: () => google('gemini-3.6-flash') },
-     { id: 'grok-4.5', rpm: 25, create: () => xai('grok-4.5') },
+     { id: 'grok-4.5', rpm: 25, reasoning: 'low', create: () => xai('grok-4.5') },
      // Add your models here
    ]
    ```

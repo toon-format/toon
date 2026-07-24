@@ -1,4 +1,4 @@
-import type { LanguageModelV4 } from '@ai-sdk/provider'
+import type { LanguageModelV4, LanguageModelV4CallOptions } from '@ai-sdk/provider'
 import type { Format } from './formats.ts'
 import type { EvaluationResult, Question } from './types.ts'
 import { anthropic } from '@ai-sdk/anthropic'
@@ -16,6 +16,8 @@ export interface ModelDescriptor {
   id: string
   /** Requests-per-minute cap, or undefined for no limit */
   rpm?: number
+  /** Reasoning override for models that reject the default `none` (e.g. `grok-4.5` floors at `low`) */
+  reasoning?: LanguageModelV4CallOptions['reasoning']
   /** Lazily construct the provider model */
   create: () => LanguageModelV4
 }
@@ -27,7 +29,7 @@ export const MODELS: ModelDescriptor[] = [
   { id: 'claude-haiku-4-5-20251001', rpm: 50, create: () => anthropic('claude-haiku-4-5-20251001') },
   { id: 'gemini-3.6-flash', rpm: 25, create: () => google('gemini-3.6-flash') },
   { id: 'gpt-5.4-nano', rpm: 50, create: () => openai('gpt-5.4-nano') },
-  { id: 'grok-4.5', rpm: 25, create: () => xai('grok-4.5') },
+  { id: 'grok-4.5', rpm: 25, reasoning: 'low', create: () => xai('grok-4.5') },
 ]
 
 /**
@@ -39,12 +41,14 @@ export async function evaluateQuestion(
     format,
     formattedData,
     model,
+    reasoning,
   }:
   {
     question: Question
     format: Format
     formattedData: string
     model: LanguageModelV4
+    reasoning?: LanguageModelV4CallOptions['reasoning']
   },
 ): Promise<EvaluationResult> {
   const prompt = `
@@ -71,7 +75,7 @@ Answer:
   const { text, usage } = await generateText({
     model,
     prompt,
-    reasoning: 'none',
+    reasoning: reasoning ?? 'none',
   })
 
   const actual = text.trim()
