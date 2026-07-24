@@ -174,13 +174,15 @@ function generateAccuracyComparisonTables(
     : 0
 
   return `
-##### All datasets (CSV excluded – cannot represent nested structures)
+##### All Datasets
+
+CSV is excluded here – it cannot represent the nested datasets.
 
 | Format | Accuracy | Correct/Total | Avg Tokens |
 | ------ | -------- | ------------- | ---------- |
 ${renderRows(allDatasetsFormatResults)}
 
-##### Flat datasets only (all formats, same question set)
+##### Flat Datasets Only
 
 Every format answers the same ${flatQuestionCount} flat-dataset questions per model.
 
@@ -248,8 +250,6 @@ function generateEfficiencyRankingReport(
         efficiency,
         accuracy: fr.accuracy,
         tokens: fr.totalTokens,
-        correctCount: fr.correctCount,
-        totalCount: fr.totalCount,
       }
     })
     .sort((a, b) => b.efficiency - a.efficiency)
@@ -271,7 +271,7 @@ function generateEfficiencyRankingReport(
   if (flatOnlyCsvResult) {
     // CSV totalCount is evaluations (questions × models), so divide by number of models to get question count
     const csvQuestionCount = flatOnlyCsvResult.totalCount / modelCount
-    csvNote = `**Note on CSV:** Excluded from ranking as it only supports ${csvQuestionCount} of ${totalQuestions} questions (flat tabular data only). While CSV is highly token-efficient for simple tabular data, it cannot represent nested structures that other formats handle.`
+    csvNote = `> [!NOTE]\n> CSV is excluded from the ranking as it only supports ${csvQuestionCount} of ${totalQuestions} questions (flat tabular data only). While CSV is highly token-efficient for simple tabular data, it cannot represent nested structures that other formats handle.`
   }
 
   return `
@@ -300,15 +300,10 @@ function generateDetailedAccuracyReport(
   tokenCounts: Record<string, number>,
   flatQuestionCount: number,
 ): string {
-  const toon = formatResults.find(r => r.format === 'toon')
-  const json = formatResults.find(r => r.format === 'json-pretty')
-
   const modelIds = MODELS.map(m => m.id)
   const modelNames = modelIds.filter(id => results.some(r => r.model === id))
 
   const modelBreakdown = generateModelBreakdown(formatResults, results, modelNames)
-
-  const summaryComparison = generateSummaryComparison(toon, json)
 
   const datasetBreakdown = generateDatasetBreakdown(formatResults, results, questions, tokenCounts)
 
@@ -351,11 +346,8 @@ Accuracy across ${modelNames.length} ${modelNames.length === 1 ? 'LLM' : 'LLMs'}
 ${modelBreakdown}
 \`\`\`
 
-> Accuracy figures include Wilson 95% confidence intervals (±); when two formats' intervals overlap, the difference between them is not statistically meaningful.
-
-*CSV answers only the ${flatQuestionCount} flat-dataset questions, so its per-model cells cover a smaller, easier population than the other formats.*
-
-${summaryComparison}
+> [!NOTE]
+> Accuracy figures include Wilson 95% confidence intervals (±); when two formats' intervals overlap, the difference between them is not statistically meaningful. CSV answers only the ${flatQuestionCount} flat-dataset questions, so its per-model cells cover a smaller, easier population than the other formats.
 
 <details>
 <summary><strong>Performance by dataset, model, and question type</strong></summary>
@@ -390,8 +382,8 @@ Thirteen datasets designed to test different structural patterns and validation 
 4. **GitHub** (${githubSize} repositories): Real-world data from top GitHub repos by stars.
 5. **Event Logs** (${eventLogsSize} logs): Semi-uniform data with ~50% flat logs and ~50% with nested error objects.
 6. **Nested Config** (${nestedConfigSize} configuration): Deeply nested configuration with minimal tabular eligibility.
-7. **Keyed** (${keyedSize} feature flags): Map of uniform flat objects – exercises TOON's keyed tabular form (\`key[N:]{fields}:\`).
-8. **Nested Group** (${nestedGroupSize} contacts): Uniform records with nested address and plan objects – exercises TOON's nested field groups.
+7. **Keyed** (${keyedSize} feature flags): Map of uniform flat objects – exercises TOON's [keyed tabular form](https://github.com/toon-format/spec/blob/main/SPEC.md#95-keyed-objects--tabular-form) (\`key[N:]{fields}:\`).
+8. **Nested Group** (${nestedGroupSize} contacts): Uniform records with nested address and plan objects – exercises TOON's [nested field groups](https://github.com/toon-format/spec/blob/main/SPEC.md#93-arrays-of-objects--tabular-form).
 
 **Structural validation datasets:**
 
@@ -492,22 +484,6 @@ function generateModelBreakdown(
     // Add blank line before model name, except for first model
     return `${i > 0 ? '\n' : ''}${modelName}\n${formatLines}`
   }).join('\n')
-}
-
-/**
- * Generate summary comparison between TOON and JSON formats
- */
-function generateSummaryComparison(
-  toon: FormatResult | undefined,
-  json: FormatResult | undefined,
-): string {
-  if (!toon || !json)
-    return ''
-
-  return `
-> [!TIP]
-> TOON achieves **${(toon.accuracy * 100).toFixed(1)}% accuracy** (vs JSON's ${(json.accuracy * 100).toFixed(1)}%) while using **${((1 - toon.totalTokens / json.totalTokens) * 100).toFixed(1)}% fewer tokens** on these datasets.
-`.trim()
 }
 
 /**
@@ -675,11 +651,9 @@ function generateHorizontalEfficiencyChart(
       const formatName = displayName.padEnd(maxFormatWidth)
       const efficiency = r.efficiency.toFixed(1).padStart(4)
       const accuracy = `${(r.accuracy * 100).toFixed(1)}%`.padStart(5)
-      const confidenceInterval = wilsonInterval(r.correctCount, r.totalCount)
-      const marginString = `±${(confidenceInterval.halfWidth * 100).toFixed(1)}`
       const tokens = r.tokens.toLocaleString('en-US').padStart(5)
 
-      return `${formatName}   ${bar}   ${efficiency} acc%/1K tok  │  ${accuracy} ${marginString} acc  │  ${tokens} tokens`
+      return `${formatName}   ${bar}   ${efficiency} acc%/1K tok  │  ${accuracy} acc  │  ${tokens} tokens`
     })
     .join('\n')
 }

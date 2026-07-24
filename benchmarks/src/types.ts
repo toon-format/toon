@@ -88,6 +88,4 @@ export interface EfficiencyRanking {
   efficiency: number
   accuracy: number
   tokens: number
-  correctCount: number
-  totalCount: number
 }
