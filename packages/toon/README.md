@@ -751,6 +751,9 @@ pnpm add @toon-format/toon
 yarn add @toon-format/toon
 ```
 
+> [!NOTE]
+> Unquoted numeric tokens decode to JavaScript `number` values. They therefore follow IEEE 754 double-precision semantics and may be rounded when they exceed the precision JavaScript can represent, including integers outside the safe integer range. Numeric tokens that overflow the finite `number` range decode as strings. Emit exact high-precision values as quoted strings; `encode()` does this automatically for `BigInt` values outside the safe integer range.
+
 **Example usage:**
 
 ```ts
