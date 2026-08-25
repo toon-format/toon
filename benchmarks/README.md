@@ -102,6 +102,13 @@ Answers are validated deterministically with type-aware comparison (`50000` = `$
    cp .env.example .env
    ```
 
+> [!TIP]
+> OrcaRouter (`orcarouter/auto`) is included as a ready-made entry. It is an
+> OpenAI-compatible gateway, so the benchmark wires it up with
+> `createOpenAI({ baseURL: 'https://api.orcarouter.ai/v1' })` (via the chat
+> completions endpoint) and reads its key from `ORCAROUTER_API_KEY` (see
+> [`src/evaluate.ts`](./src/evaluate.ts)).
+
 ### Usage
 
 ```bash
