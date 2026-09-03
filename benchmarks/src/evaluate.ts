@@ -1,12 +1,26 @@
 import type { LanguageModelV4, LanguageModelV4CallOptions } from '@ai-sdk/provider'
 import type { Format } from './formats.ts'
 import type { EvaluationResult, Question } from './types.ts'
+import process from 'node:process'
 import { anthropic } from '@ai-sdk/anthropic'
 import { google } from '@ai-sdk/google'
-import { openai } from '@ai-sdk/openai'
+import { createOpenAI, openai } from '@ai-sdk/openai'
 import { xai } from '@ai-sdk/xai'
 import { generateText } from 'ai'
 import { compareAnswers } from './normalize.ts'
+
+/**
+ * OrcaRouter is an OpenAI-compatible AI gateway: one endpoint that routes each
+ * request across many models and providers. Point the OpenAI provider at its
+ * base URL and use the `orcarouter/auto` model id to let the gateway grade and
+ * route every prompt. `.chat()` is used so requests go to `/chat/completions`,
+ * which OrcaRouter serves as plain OpenAI-compatible chat.
+ */
+const orcarouter = createOpenAI({
+  name: 'orcarouter',
+  baseURL: 'https://api.orcarouter.ai/v1',
+  apiKey: process.env.ORCAROUTER_API_KEY,
+})
 
 /** A model paired with its rate limit and lazy provider constructor. */
 export interface ModelDescriptor {
@@ -25,6 +39,8 @@ export const MODELS: ModelDescriptor[] = [
   { id: 'gemini-3.6-flash', rpm: 25, create: () => google('gemini-3.6-flash') },
   { id: 'gpt-5.4-nano', rpm: 50, create: () => openai('gpt-5.4-nano') },
   { id: 'grok-4.5', rpm: 25, reasoning: 'low', create: () => xai('grok-4.5') },
+  // OrcaRouter: OpenAI-compatible gateway, `orcarouter/auto` routes each prompt adaptively
+  { id: 'orcarouter/auto', rpm: 50, create: () => orcarouter.chat('orcarouter/auto') },
 ]
 
 export async function evaluateQuestion(
