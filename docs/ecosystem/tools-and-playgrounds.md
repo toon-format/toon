@@ -53,3 +53,7 @@ Use YAML syntax highlighting as a close approximation. Most editors allow associ
 ### Tooner
 
 [Tooner](https://github.com/chaindead/tooner) – MCP proxy that converts JSON tool responses to TOON.
+
+### mcptoon
+
+[mcptoon](https://github.com/activeing123/mcptoon) – Zero-dependency CLI that renders MCP tool discovery as compact TOON manifests and calls servers across agent hosts.
