@@ -3,7 +3,7 @@ import { defineConfig } from 'tsdown/config'
 
 const config: UserConfig = defineConfig({
   entry: {
-    index: 'src/cli-entry.ts',
+    index: 'src/entry.ts',
   },
   dts: true,
 })

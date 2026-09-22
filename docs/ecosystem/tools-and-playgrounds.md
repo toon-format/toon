@@ -6,16 +6,9 @@ description: TOON playgrounds, CLI, editor support, and ecosystem tools.
 
 Experiment with TOON format interactively using these tools for token comparison, format conversion, and validation.
 
-## Playgrounds
-
-### Official Playground
+## Playground
 
 The [TOON Playground](/playground) lets you convert JSON or YAML to TOON in real time, compare token counts, and share your experiments via URL.
-
-### Community Playgrounds
-
-- [Format Tokenization Playground](https://www.curiouslychase.com/playground/format-tokenization-exploration)
-- [TOON Tools](https://toontools.vercel.app/)
 
 ## CLI Tool
 
@@ -54,26 +47,6 @@ Use YAML syntax highlighting as a close approximation. Most editors allow associ
 ### ToonStore
 
 [ToonStore](https://github.com/Kalama-Tech/toonstoredb) – Redis-compatible embedded database (Rust) that stores data in TOON format.
-
-## ORMs
-
-### TORM
-
-[TORM](https://github.com/Kalama-Tech/torm) – ORM that works with the ToonStore database, with SDKs for Node.js, Python, Go, and PHP.
-
-## Web APIs
-
-If you're building web applications that work with TOON, you can use the TypeScript library in the browser:
-
-```ts
-import { decode, encode } from '@toon-format/toon'
-
-// Works in browsers, Node.js, Deno, and Bun
-const toon = encode(data)
-const data = decode(toon)
-```
-
-See the [API Reference](/reference/api) for details.
 
 ## MCP
 

@@ -199,7 +199,7 @@ describe('replacer function', () => {
 
       encode(input, { replacer })
 
-      expect(paths).toContain('') // root
+      expect(paths).toContain('') // The root value's path is the empty string.
       expect(paths).toContain('user')
       expect(paths).toContain('user.profile')
       expect(paths).toContain('user.profile.name')
@@ -280,7 +280,6 @@ describe('replacer function', () => {
     it('re-normalizes non-JsonValue returns', () => {
       const input = { date: '2025-01-01' }
       const replacer: EncodeReplacer = (key, value) => {
-        // Return a Date object (will be normalized to ISO string)
         if (key === 'date')
           return new Date(value as string)
         return value
@@ -366,24 +365,6 @@ describe('replacer function', () => {
   })
 
   describe('integration with other options', () => {
-    it('works with keyFolding', () => {
-      const input = {
-        user: {
-          profile: {
-            name: 'Alice',
-          },
-        },
-      }
-      const replacer: EncodeReplacer = (key, value) => {
-        if (typeof value === 'string')
-          return value.toUpperCase()
-        return value
-      }
-
-      const result = encode(input, { replacer, keyFolding: 'safe' })
-      expect(result).toContain('user.profile.name: ALICE')
-    })
-
     it('works with custom delimiters', () => {
       const input = { items: [1, 2, 3] }
       const replacer: EncodeReplacer = (key, value) => {

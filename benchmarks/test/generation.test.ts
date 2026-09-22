@@ -19,6 +19,7 @@ describe('generation benchmark', () => {
   it('accepts the wrapper emitted by some TOON generations', () => {
     const order = GENERATION_CASES.find(benchmarkCase => benchmarkCase.id === 'order')!
     expect(canonicalizeGenerationValue('order', { order: order.gold })).toEqual(order.gold)
+    expect(() => canonicalizeGenerationValue('order', { order: order.gold, ignored: true })).toThrow('unexpected field')
   })
 
   it('rejects unknown and incorrectly typed fields', () => {

@@ -18,7 +18,7 @@ describe('toonDecodeError line context', () => {
     expect(error.line).toBe(2)
   })
 
-  it('includes line number when a list array has too few items', () => {
+  it('includes line number when an array in list form has too few items', () => {
     const error = captureDecodeError('_meta:\n  version: "1.0"\n\nrules[3]:\n  - first\n')
 
     expect(error.line).toBeDefined()

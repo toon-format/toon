@@ -1,29 +1,68 @@
-/**
- * Colors Theme
- * -------------------------------------------------------------------------- */
+/* #region Colors: Brand */
 
- :root {
-  --vp-c-brand-1: #d97c06;
-  --vp-c-brand-2: #C57105;
-  --vp-c-brand-3: #B16505;
+/* Single-source OKLCH palette – warm orange. Chroma is split per ladder
+   because sRGB runs out of gamut at the dark ladder's L82 well before it does
+   at the light ladder's L47. */
+
+:root {
+  --brand-h: 40;
+  --brand-c: 0.147;
+  --brand-c-dark: 0.11;
+
+  --vp-c-brand-1: oklch(47% var(--brand-c) var(--brand-h));
+  --vp-c-brand-2: oklch(52% var(--brand-c) var(--brand-h));
+  --vp-c-brand-3: oklch(55% var(--brand-c) var(--brand-h));
+  --vp-c-brand-soft: oklch(
+    55% calc(var(--brand-c) * 0.7) var(--brand-h) / 0.14
+  );
+}
+
+.dark {
+  --vp-c-brand-1: oklch(82% calc(var(--brand-c-dark) * 0.95) var(--brand-h));
+  --vp-c-brand-2: oklch(78% var(--brand-c-dark) var(--brand-h));
+  --vp-c-brand-3: oklch(74% var(--brand-c-dark) var(--brand-h));
+  --vp-c-brand-soft: oklch(
+    75% calc(var(--brand-c-dark) * 0.7) var(--brand-h) / 0.16
+  );
+}
+
+/* #endregion */
+
+/* #region Component: Button */
+
+.dark {
+  --vp-button-brand-text: oklch(25% 0.04 var(--brand-h));
+  --vp-button-brand-active-text: oklch(25% 0.04 var(--brand-h));
+  --vp-button-brand-hover-text: oklch(25% 0.04 var(--brand-h));
+}
+
+/* #endregion */
+
+/* #region Component: Nav */
+
+:root {
   --vp-nav-logo-height: 20px;
 }
 
-/**
- * Component: Home
- * -------------------------------------------------------------------------- */
+/* #endregion */
 
- :root {
+/* #region Component: Home */
+
+:root {
   --vp-home-hero-name-color: transparent;
-  --vp-home-hero-name-background: -webkit-linear-gradient(
+  --vp-home-hero-name-background: linear-gradient(
     120deg,
-    #fde98a 15%,
-    #d97c06
+    oklch(72% 0.17 var(--brand-h)) 30%,
+    oklch(80% 0.16 72)
   );
+  /* The glow does not mirror the name gradient above: the name is text and has
+     to stay legible on white, while the logo is monochrome, so the glow is the
+     only color in that half of the hero and needs the wider lightness spread
+     to read as a glow rather than a wash. */
   --vp-home-hero-image-background-image: linear-gradient(
     -45deg,
-    #d97c0660 30%,
-    #fde98a60
+    oklch(62% 0.19 var(--brand-h) / 0.55) 30%,
+    oklch(92% 0.165 100 / 0.55)
   );
   --vp-home-hero-image-filter: blur(30px);
 }
@@ -39,3 +78,5 @@
     --vp-home-hero-image-filter: blur(72px);
   }
 }
+
+/* #endregion */

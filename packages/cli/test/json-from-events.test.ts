@@ -344,7 +344,7 @@ describe('jsonStreamFromEvents', () => {
     it('throws on mismatched endObject event', async () => {
       const events = [
         { type: 'startArray' as const, length: 0 },
-        { type: 'endObject' as const }, // Wrong closing event
+        { type: 'endObject' as const },
       ]
 
       await expect(async () => {
@@ -355,7 +355,7 @@ describe('jsonStreamFromEvents', () => {
     it('throws on mismatched endArray event', async () => {
       const events = [
         { type: 'startObject' as const },
-        { type: 'endArray' as const }, // Wrong closing event
+        { type: 'endArray' as const },
       ]
 
       await expect(async () => {
@@ -377,13 +377,13 @@ describe('jsonStreamFromEvents', () => {
     it('throws on primitive in object without preceding key', async () => {
       const events = [
         { type: 'startObject' as const },
-        { type: 'primitive' as const, value: 'invalid' }, // No key before primitive
+        { type: 'primitive' as const, value: 'invalid' }, // No key before primitive.
         { type: 'endObject' as const },
       ]
 
       await expect(async () => {
         await join(jsonStreamFromEvents(asyncEvents(events), 0))
-      }).rejects.toThrow('Primitive event in object without preceding key')
+      }).rejects.toThrow('Primitive event without preceding key in object')
     })
 
     it('throws on incomplete event stream', async () => {
@@ -391,7 +391,7 @@ describe('jsonStreamFromEvents', () => {
         { type: 'startObject' as const },
         { type: 'key' as const, key: 'name' },
         { type: 'primitive' as const, value: 'Alice' },
-        // Missing `endObject`
+        // Missing `endObject`.
       ]
 
       await expect(async () => {
@@ -401,9 +401,6 @@ describe('jsonStreamFromEvents', () => {
   })
 })
 
-/**
- * Converts array of events to async iterable.
- */
 async function* asyncEvents(events: JsonStreamEvent[]): AsyncIterable<JsonStreamEvent> {
   for (const event of events) {
     await Promise.resolve()
@@ -411,9 +408,6 @@ async function* asyncEvents(events: JsonStreamEvent[]): AsyncIterable<JsonStream
   }
 }
 
-/**
- * Joins chunks from an async iterable into a single string.
- */
 async function join(iter: AsyncIterable<string>): Promise<string> {
   const chunks: string[] = []
   for await (const chunk of iter) {

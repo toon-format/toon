@@ -224,7 +224,7 @@ describe('JavaScript-specific type normalization', () => {
           return { type: 'custom-date', value: '2025-01-01' }
         },
       }
-      // Make it look like a Date but with toJSON
+      // Make it look like a `Date` but with `toJSON`.
       Object.setPrototypeOf(customDate, Date.prototype)
       const result = encode(customDate)
       expect(result).toBe('type: custom-date\nvalue: 2025-01-01')
@@ -268,7 +268,7 @@ describe('JavaScript-specific type normalization', () => {
         },
       }
       const replacer: EncodeReplacer = (key, value) => {
-        // Replacer should see the toJSON result, not the original object
+        // Replacer should see the `toJSON` result, not the original object.
         if (typeof value === 'object' && value !== null && 'public' in value) {
           return { ...value, extra: 'added' }
         }
@@ -288,7 +288,7 @@ describe('JavaScript-specific type normalization', () => {
         },
       }
       const replacer: EncodeReplacer = (key, value) => {
-        // The date should already be normalized to ISO string by the time replacer sees it
+        // The date should already be normalized to ISO string by the time replacer sees it.
         if (key === 'date' && typeof value === 'string') {
           return value.replace('2025', 'YEAR')
         }

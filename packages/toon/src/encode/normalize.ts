@@ -1,15 +1,23 @@
 import type { JsonArray, JsonObject, JsonPrimitive, JsonValue } from '../types.ts'
+import type { EncodablePrimitive } from './raw-string.ts'
 import { setOwnProperty } from '../shared/object-utils.ts'
+import { isRawString } from './raw-string.ts'
+
+const SURROGATE_PATTERN = /[\uD800-\uDFFF]/
 
 // #region Normalization (unknown → JsonValue)
 
 export function normalizeValue(value: unknown): JsonValue {
-  // null
   if (value === null) {
     return null
   }
 
-  // Objects with toJSON: delegate to its result before host-type normalization
+  // `RawString` markers pass through untouched, treated as primitives and never as objects.
+  if (isRawString(value)) {
+    return value as unknown as JsonValue
+  }
+
+  // A host `toJSON` hook takes precedence over the default host-type mappings below.
   if (
     typeof value === 'object'
     && value !== null
@@ -17,18 +25,21 @@ export function normalizeValue(value: unknown): JsonValue {
     && typeof value.toJSON === 'function'
   ) {
     const next = value.toJSON()
-    // Avoid infinite recursion when toJSON returns the same object
+    // Avoid infinite recursion when `toJSON` returns the same object.
     if (next !== value) {
       return normalizeValue(next)
     }
   }
 
-  // Primitives
-  if (typeof value === 'string' || typeof value === 'boolean') {
+  if (typeof value === 'string') {
+    assertNoLoneSurrogate(value, 'string value')
     return value
   }
 
-  // Numbers: canonicalize -0 to 0, handle NaN and Infinity
+  if (typeof value === 'boolean') {
+    return value
+  }
+
   if (typeof value === 'number') {
     if (Object.is(value, -0)) {
       return 0
@@ -39,44 +50,37 @@ export function normalizeValue(value: unknown): JsonValue {
     return value
   }
 
-  // BigInt → number (if safe) or string
   if (typeof value === 'bigint') {
-    // Try to convert to number if within safe integer range
     if (value >= Number.MIN_SAFE_INTEGER && value <= Number.MAX_SAFE_INTEGER) {
       return Number(value)
     }
-    // Otherwise convert to string (will be quoted in output)
     return value.toString()
   }
 
-  // Date → ISO string
   if (value instanceof Date) {
     return value.toISOString()
   }
 
-  // Array
   if (Array.isArray(value)) {
     return value.map(normalizeValue)
   }
 
-  // Set → array
   if (value instanceof Set) {
     return Array.from(value).map(normalizeValue)
   }
 
-  // Map → object
   if (value instanceof Map) {
     return Object.fromEntries(
       Array.from(value, ([k, v]) => [String(k), normalizeValue(v)]),
     )
   }
 
-  // Plain object
   if (isPlainObject(value)) {
     const encodedValues: Record<string, JsonValue> = {}
 
     for (const key in value) {
       if (Object.hasOwn(value, key)) {
+        assertNoLoneSurrogate(key, 'object key')
         setOwnProperty(encodedValues, key, normalizeValue(value[key]))
       }
     }
@@ -84,8 +88,32 @@ export function normalizeValue(value: unknown): JsonValue {
     return encodedValues
   }
 
-  // Fallback: function, symbol, undefined, or other → null
   return null
+}
+
+// A lone surrogate has no UTF-8 form, so emitting it would silently substitute U+FFFD and break round-tripping.
+function assertNoLoneSurrogate(value: string, context: string): void {
+  if (!SURROGATE_PATTERN.test(value)) {
+    return
+  }
+
+  for (let index = 0; index < value.length; index++) {
+    const code = value.charCodeAt(index)
+    if (code < 0xD800 || code > 0xDFFF) {
+      continue
+    }
+
+    const isHighSurrogate = code <= 0xDBFF
+    const next = value.charCodeAt(index + 1)
+    if (isHighSurrogate && next >= 0xDC00 && next <= 0xDFFF) {
+      index++
+      continue
+    }
+
+    throw new TypeError(
+      `Cannot encode ${context} containing an unpaired surrogate U+${code.toString(16).toUpperCase()} at index ${index}`,
+    )
+  }
 }
 
 // #endregion
@@ -101,12 +129,16 @@ export function isJsonPrimitive(value: unknown): value is JsonPrimitive {
   )
 }
 
+export function isEncodablePrimitive(value: unknown): value is EncodablePrimitive {
+  return isJsonPrimitive(value) || isRawString(value)
+}
+
 export function isJsonArray(value: unknown): value is JsonArray {
   return Array.isArray(value)
 }
 
 export function isJsonObject(value: unknown): value is JsonObject {
-  return value !== null && typeof value === 'object' && !Array.isArray(value)
+  return value !== null && typeof value === 'object' && !Array.isArray(value) && !isRawString(value)
 }
 
 export function isEmptyObject(value: JsonObject): boolean {
@@ -126,8 +158,8 @@ export function isPlainObject(value: unknown): value is Record<string, unknown> 
 
 // #region Array type detection
 
-export function isArrayOfPrimitives(value: JsonArray): value is readonly JsonPrimitive[] {
-  return value.length === 0 || value.every(item => isJsonPrimitive(item))
+export function isArrayOfPrimitives(value: JsonArray | readonly EncodablePrimitive[]): value is readonly EncodablePrimitive[] {
+  return value.length === 0 || value.every(item => isEncodablePrimitive(item))
 }
 
 export function isArrayOfArrays(value: JsonArray): value is readonly JsonArray[] {

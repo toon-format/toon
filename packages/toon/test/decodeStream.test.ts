@@ -81,7 +81,7 @@ describe('streaming decode', () => {
       ])
     })
 
-    it('decodes list array', () => {
+    it('decodes an array in list form', () => {
       const input = 'items[2]:\n  - Apple\n  - Banana'
       const lines = input.split('\n')
       const events = Array.from(decodeStreamSync(lines))
@@ -156,14 +156,6 @@ describe('streaming decode', () => {
       ])
     })
 
-    it('throws on expandPaths option', () => {
-      const input = 'name: Alice'
-      const lines = input.split('\n')
-
-      expect(() => Array.from(decodeStreamSync(lines, { expandPaths: 'safe' } as any)))
-        .toThrow('expandPaths is not supported in streaming decode')
-    })
-
     it('enforces strict mode validation', () => {
       const input = 'items[2]:\n  - Apple'
       const lines = input.split('\n')
@@ -188,10 +180,16 @@ describe('streaming decode', () => {
       { name: 'simple object', input: 'name: Alice\nage: 30' },
       { name: 'nested object', input: 'user:\n  name: Alice\n  age: 30' },
       { name: 'tabular array', input: 'users[2]{name,age}:\n  Alice, 30\n  Bob, 25' },
-      { name: 'list array', input: 'items[2]:\n  - Apple\n  - Banana' },
+      { name: 'list-form array', input: 'items[2]:\n  - Apple\n  - Banana' },
       { name: 'root primitive', input: 'Hello World' },
       { name: 'root array', input: '[2]:\n  - Apple\n  - Banana' },
       { name: 'empty input', input: '' },
+      { name: 'keyed tabular object', input: 'servers[2:]{host,port}:\n  alpha: a.example.com,8080\n  beta: b.example.com,9090' },
+      { name: 'keyless keyed root', input: '[2:]{age,city}:\n  alice: 30,Berlin\n  bob: 25,Paris' },
+      { name: 'nested field groups', input: 'orders[2]{id,customer{name,country},total}:\n  1,Ada,DE,9.99\n  2,Bob,FR,14.5' },
+      { name: 'comment lines around fields', input: '# header\na: 1\n# note\nb: 2' },
+      { name: 'comment lines between tabular rows', input: 'users[2]{name}:\n  Ada\n# note\n  Bob' },
+      { name: 'keyed tabular header on a hyphen line', input: 'items[1]:\n  - users[2:]{v}:\n      a: 1\n      b: 2\n    status: active' },
     ]
 
     for (const { name, input } of equivalenceCases) {
@@ -216,7 +214,7 @@ describe('streaming decode', () => {
 
       expect(events).toEqual([
         { type: 'startObject' },
-        { type: 'key', key: '\t:x', wasQuoted: true },
+        { type: 'key', key: '\t:x' },
         { type: 'primitive', value: 'v' },
         { type: 'endObject' },
       ])
@@ -273,14 +271,6 @@ describe('streaming decode', () => {
       expect(Object.getPrototypeOf(result)).toBe(Object.prototype)
     })
 
-    it('rejects expandPaths option', async () => {
-      const lines = ['name: Alice']
-
-      await expect(async () => {
-        await collect(decodeStream(asyncLines(lines), { expandPaths: 'safe' } as any))
-      }).rejects.toThrow('expandPaths is not supported in streaming decode')
-    })
-
     it('enforces strict mode validation', async () => {
       const lines = ['items[2]:', '  - Apple']
 
@@ -295,6 +285,23 @@ describe('streaming decode', () => {
 
       expect(events[0]).toEqual({ type: 'startObject' })
     })
+
+    const strictErrorCases = [
+      { name: 'an over-indented line under a primitive field', lines: ['a: 1', '    b: 2'], message: 'Over-indented line' },
+      { name: 'trailing content after a root array', lines: ['[2]: 1,2', 'junk: 3'], message: 'Unexpected content after the document root' },
+      { name: 'an over-indented line inside a keyed tabular object', lines: ['m[2:]{v}:', '  a: 1', '    x: 2', '  b: 2'], message: 'Unexpected indentation inside keyed tabular object' },
+      { name: 'an entry row without a colon', lines: ['m[1:]{v}:', '  noentrycolon'], message: 'Expected entry row inside keyed tabular object' },
+      { name: 'duplicate entry keys', lines: ['m[2:]{v}:', '  a: 1', '  a: 2'], message: 'Duplicate sibling key' },
+      { name: 'a keyed entry count mismatch', lines: ['m[2:]{v}:', '  a: 1'], message: 'keyed entries' },
+      { name: 'a keyed entry cell width mismatch', lines: ['m[1:]{v}:', '  a: 1,2'], message: 'keyed entry cells' },
+    ]
+
+    for (const { name, lines, message } of strictErrorCases) {
+      it(`rejects ${name}, matching decodeStreamSync`, async () => {
+        expect(() => Array.from(decodeStreamSync(lines))).toThrow(message)
+        await expect(collect(decodeStream(asyncLines(lines)))).rejects.toThrow(message)
+      })
+    }
   })
 
   describe('buildValueFromEvents', () => {
@@ -411,12 +418,8 @@ describe('streaming decode', () => {
       expect(decodeFromLines(lines)).toEqual(decode(input))
     })
 
-    it('supports expandPaths option', () => {
-      const lines = ['user.name: Alice', 'user.age: 30']
-
-      expect(decodeFromLines(lines, { expandPaths: 'safe' })).toEqual({
-        user: { name: 'Alice', age: 30 },
-      })
+    it('strips trailing carriage returns from caller-split lines', () => {
+      expect(decodeFromLines(['a: 1\r', 'b: 2\r'])).toEqual({ a: 1, b: 2 })
     })
 
     it('handles list item objects with empty string keyed tabular fields', () => {
@@ -438,7 +441,7 @@ describe('streaming decode', () => {
       { name: 'simple object', input: 'name: Alice\nage: 30' },
       { name: 'nested objects', input: 'user:\n  profile:\n    name: Alice\n    age: 30' },
       { name: 'mixed structures', input: 'name: Alice\nscores[3]: 95, 87, 92\naddress:\n  city: NYC\n  zip: 10001' },
-      { name: 'list array with objects', input: 'users[2]:\n  - name: Alice\n    age: 30\n  - name: Bob\n    age: 25' },
+      { name: 'list form with objects', input: 'users[2]:\n  - name: Alice\n    age: 30\n  - name: Bob\n    age: 25' },
       { name: 'tabular array', input: 'users[3]{name,age,city}:\n  Alice, 30, NYC\n  Bob, 25, LA\n  Charlie, 35, SF' },
       { name: 'root primitive number', input: '42' },
       { name: 'root primitive string', input: 'Hello World' },

@@ -25,8 +25,8 @@ export class ToonDecodeError extends SyntaxError {
  * Runs `fn` and re-throws any non-`ToonDecodeError` `Error` as a `ToonDecodeError`
  * with line context attached and the original error preserved as `cause`.
  *
- * Pure parser helpers (parser.ts, string-utils.ts) don't know which line they're
- * parsing; this wrapper is how the streaming decoder enriches their errors.
+ * Pure parser helpers don't know which line they're parsing; this wrapper is how
+ * the streaming decoder enriches their errors.
  */
 export function withLine<T>(line: ParsedLine, fn: () => T): T {
   try {

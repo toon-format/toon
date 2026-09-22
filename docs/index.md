@@ -14,6 +14,9 @@ hero:
       text: What is TOON?
       link: /guide/getting-started
     - theme: alt
+      text: New in v4
+      link: /guide/whats-new-in-v4
+    - theme: alt
       text: Benchmarks
       link: /guide/benchmarks
     - theme: alt
@@ -26,7 +29,7 @@ hero:
 features:
   - title: Token-Efficient & Accurate
     icon: 📊
-    details: TOON reaches 76.4% accuracy (vs JSON's 75.0%) while using ~40% fewer tokens in mixed-structure benchmarks across 4 models.
+    details: TOON matches JSON's retrieval accuracy (72.2% vs 71.4%) while using 42.6% fewer tokens.
     link: /guide/benchmarks
   - title: JSON Data Model
     icon: 🔁
@@ -34,18 +37,18 @@ features:
     link: /guide/format-overview
   - title: LLM-Friendly Guardrails
     icon: 🛤️
-    details: Explicit [N] lengths and {fields} headers give models a clear schema to follow, improving parsing reliability.
-    link: /guide/format-overview#arrays
+    details: "[N] declares how many rows, {fields} how wide – so truncated or malformed output can't slip through."
+    link: /guide/format-overview#array-headers
   - title: Minimal Syntax
     icon: 📐
     details: Uses indentation instead of braces and minimizes quoting, giving YAML-like readability with CSV-style compactness.
-    link: /guide/format-overview#arrays
-  - title: Tabular Arrays
+    link: /guide/format-overview#quoting-and-types
+  - title: Tabular Forms
     icon: 🧺
-    details: Uniform arrays of objects collapse into tables that declare fields once and stream row values line by line.
-    link: /guide/format-overview#arrays
+    details: Uniform objects – in an array or under keys – declare the field list once, then stream one row each.
+    link: /guide/format-overview#the-four-forms
   - title: Multi-Language Ecosystem
     icon: 🌐
-    details: Spec-driven implementations in TypeScript, Python, Go, Rust, .NET, and other languages.
+    details: Official implementations, plus dozens of community ports, all targeting one spec with a shared conformance test suite.
     link: /ecosystem/implementations
 ---

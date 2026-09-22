@@ -1,11 +1,17 @@
-import type { JsonPrimitive } from '../types.ts'
+import type { FieldNode } from '../types.ts'
+import type { EncodablePrimitive } from './raw-string.ts'
 import { COMMA, DEFAULT_DELIMITER, DOUBLE_QUOTE, NULL_LITERAL } from '../constants.ts'
 import { escapeString } from '../shared/string-utils.ts'
 import { isSafeUnquoted, isValidUnquotedKey } from '../shared/validation.ts'
+import { isRawString } from './raw-string.ts'
 
 // #region Primitive encoding
 
-export function encodePrimitive(value: JsonPrimitive, delimiter?: string): string {
+export function encodePrimitive(value: EncodablePrimitive, delimiter?: string): string {
+  if (isRawString(value)) {
+    return value.value
+  }
+
   if (value === null) {
     return NULL_LITERAL
   }
@@ -45,7 +51,7 @@ export function encodeKey(key: string): string {
 
 // #region Value joining
 
-export function encodeAndJoinPrimitives(values: readonly JsonPrimitive[], delimiter: string = DEFAULT_DELIMITER): string {
+export function encodeAndJoinPrimitives(values: readonly EncodablePrimitive[], delimiter: string = DEFAULT_DELIMITER): string {
   return values.map(v => encodePrimitive(v, delimiter)).join(delimiter)
 }
 
@@ -57,8 +63,10 @@ export function formatHeader(
   length: number,
   options?: {
     key?: string
-    fields?: readonly string[]
+    fields?: readonly FieldNode[]
     delimiter?: string
+    /** Keyed tabular header: emit the colon marker after the length. */
+    keyed?: boolean
   },
 ): string {
   const key = options?.key
@@ -71,17 +79,21 @@ export function formatHeader(
     header += encodeKey(key)
   }
 
-  // Only include delimiter if it's not the default (comma)
-  header += `[${length}${delimiter !== DEFAULT_DELIMITER ? delimiter : ''}]`
+  header += `[${length}${options?.keyed ? ':' : ''}${delimiter !== DEFAULT_DELIMITER ? delimiter : ''}]`
 
   if (fields) {
-    const quotedFields = fields.map(f => encodeKey(f))
-    header += `{${quotedFields.join(delimiter)}}`
+    header += `{${formatFieldSegment(fields, delimiter)}}`
   }
 
   header += ':'
 
   return header
+}
+
+function formatFieldSegment(fields: readonly FieldNode[], delimiter: string): string {
+  return fields
+    .map(field => encodeKey(field.name) + (field.children ? `{${formatFieldSegment(field.children, delimiter)}}` : ''))
+    .join(delimiter)
 }
 
 // #endregion

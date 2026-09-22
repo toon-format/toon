@@ -48,5 +48,3 @@ jobs:
 
       - name: Publish packages to npm
         run: npm install -g npm@latest && pnpm -r publish --access public --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

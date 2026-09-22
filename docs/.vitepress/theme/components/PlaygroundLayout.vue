@@ -11,7 +11,8 @@ import VPInput from './VPInput.vue'
 type InputFormat = 'json' | 'yaml'
 type JsonFormat = 'pretty-2' | 'pretty-4' | 'pretty-tab' | 'compact'
 
-interface PlaygroundState extends Required<Pick<EncodeOptions, 'delimiter' | 'indent' | 'keyFolding' | 'flattenDepth'>> {
+interface PlaygroundState extends Required<Pick<EncodeOptions, 'delimiter'>> {
+  indent: number
   input: string
   inputFormat: InputFormat
   jsonFormat: JsonFormat
@@ -28,41 +29,43 @@ function stringifyInputYaml(value: unknown): string {
 }
 
 const PRESETS = {
-  hikes: {
-    context: {
-      task: 'Our favorite hikes together',
-      location: 'Boulder',
-      season: 'spring_2025',
-    },
-    friends: ['ana', 'luis', 'sam'],
-    hikes: [
-      { id: 1, name: 'Blue Lake Trail', distanceKm: 7.5, elevationGain: 320, companion: 'ana', wasSunny: true },
-      { id: 2, name: 'Ridge Overlook', distanceKm: 9.2, elevationGain: 540, companion: 'luis', wasSunny: false },
-      { id: 3, name: 'Wildflower Loop', distanceKm: 5.1, elevationGain: 180, companion: 'sam', wasSunny: true },
+  weather: {
+    location: { city: 'Berlin', country: 'DE', units: 'metric' },
+    alerts: ['frost', 'wind'],
+    forecast: [
+      { day: 'Mon', temp: { min: -2, max: 4 }, condition: 'snow', rainChance: 80 },
+      { day: 'Tue', temp: { min: 1, max: 7 }, condition: 'cloudy', rainChance: 20 },
+      { day: 'Wed', temp: { min: 3, max: 11 }, condition: 'sunny', rainChance: 5 },
     ],
   },
   orders: {
     orders: [
       {
         orderId: 'ORD-001',
-        customer: { name: 'Alice Chen', email: 'alice@example.com' },
-        items: [
-          { sku: 'WIDGET-A', quantity: 2, price: 29.99 },
-          { sku: 'GADGET-B', quantity: 1, price: 49.99 },
-        ],
+        customer: { name: 'Ada Chen', country: 'DK' },
         total: 109.97,
         status: 'shipped',
       },
       {
         orderId: 'ORD-002',
-        customer: { name: 'Bob Smith', email: 'bob@example.com' },
-        items: [
-          { sku: 'THING-C', quantity: 3, price: 15.00 },
-        ],
+        customer: { name: 'Bob Smith', country: 'UK' },
         total: 45.00,
         status: 'delivered',
       },
+      {
+        orderId: 'ORD-003',
+        customer: { name: 'Cleo Faron', country: 'FR' },
+        total: 249.00,
+        status: 'pending',
+      },
     ],
+  },
+  environments: {
+    environments: {
+      production: { region: 'eu-central-1', replicas: 6, debug: false },
+      staging: { region: 'eu-central-1', replicas: 2, debug: true },
+      development: { region: 'local', replicas: 1, debug: true },
+    },
   },
   metrics: {
     metrics: [
@@ -92,10 +95,10 @@ const JSON_FORMAT_OPTIONS: { value: JsonFormat, label: string, indent: string | 
   { value: 'pretty-tab', label: 'Pretty (tabs)', indent: '\t' },
   { value: 'compact', label: 'Compact', indent: undefined },
 ]
-const DEFAULT_JSON = JSON.stringify(PRESETS.hikes, undefined, 2)
+const DEFAULT_JSON = JSON.stringify(PRESETS.weather, undefined, 2)
 const SHARE_URL_LIMIT = 8 * 1024
 
-// Input state
+// #region Input state
 const inputText = ref(DEFAULT_JSON)
 const inputFormat = ref<InputFormat>('json')
 const jsonFormat = ref<JsonFormat>('pretty-2')
@@ -111,23 +114,19 @@ const formattedInput = computed(() => {
     return inputText.value
   }
 })
+// #endregion
 
-// Encoder options
 const delimiter = ref<Delimiter>(DEFAULT_DELIMITER)
 const indent = ref(2)
-const keyFolding = ref<'off' | 'safe'>('safe')
-const flattenDepth = ref(2)
 
-// Encoding output
+// #region Encoding output
 const encodingResult = computed(() => {
   try {
     const parsedInput = parseInput(inputText.value, inputFormat.value)
     return {
       output: encode(parsedInput, {
-        indent: indent.value,
+        indentSize: indent.value,
         delimiter: delimiter.value,
-        keyFolding: keyFolding.value,
-        flattenDepth: flattenDepth.value,
       }),
       error: undefined,
     }
@@ -142,8 +141,9 @@ const encodingResult = computed(() => {
 })
 const toonOutput = computed(() => encodingResult.value.output)
 const error = computed(() => encodingResult.value.error)
+// #endregion
 
-// Token analysis
+// #region Token analysis
 const tokenizer = shallowRef<typeof import('gpt-tokenizer') | undefined>()
 const inputTokens = computed(() =>
   tokenizer.value?.encode(formattedInput.value).length,
@@ -161,8 +161,8 @@ const tokenSavings = computed(() => {
 
   return { diff, percent, sign, isSavings: diff > 0 }
 })
+// #endregion
 
-// UI state
 const canShareState = ref(true)
 const hasCopiedUrl = ref(false)
 
@@ -181,7 +181,7 @@ const updateUrl = useDebounceFn(() => {
   window.history.replaceState(null, '', `#${hash}`)
 }, 300)
 
-watch([inputText, delimiter, indent, keyFolding, flattenDepth, jsonFormat, inputFormat], () => {
+watch([inputText, delimiter, indent, jsonFormat, inputFormat], () => {
   updateUrl()
 })
 
@@ -216,8 +216,6 @@ onMounted(() => {
     inputText.value = state.input ?? state.json
     delimiter.value = state.delimiter
     indent.value = state.indent
-    keyFolding.value = state.keyFolding ?? 'safe'
-    flattenDepth.value = state.flattenDepth ?? 2
     jsonFormat.value = state.jsonFormat ?? 'pretty-2'
     inputFormat.value = state.inputFormat ?? 'json'
   }
@@ -233,8 +231,6 @@ function encodeState() {
     inputFormat: inputFormat.value,
     delimiter: delimiter.value,
     indent: indent.value,
-    keyFolding: keyFolding.value,
-    flattenDepth: flattenDepth.value,
     jsonFormat: jsonFormat.value,
   }
 
@@ -275,13 +271,11 @@ async function loadTokenizer() {
 <template>
   <div class="playground">
     <div class="playground-container">
-      <!-- Header -->
       <header class="playground-header">
         <h1>Playground</h1>
         <p>Convert JSON or YAML to TOON in real time.</p>
       </header>
 
-      <!-- Options Bar -->
       <div class="options-bar">
         <VPInput id="inputFormat" label="Input format">
           <select id="inputFormat" v-model="inputFormat">
@@ -312,38 +306,19 @@ async function loadTokenizer() {
           >
         </VPInput>
 
-        <VPInput id="keyFolding" label="Key Folding">
-          <select id="keyFolding" v-model="keyFolding">
-            <option value="off">
-              Off
-            </option>
-            <option value="safe">
-              Safe
-            </option>
-          </select>
-        </VPInput>
-
-        <VPInput id="flattenDepth" label="Flatten Depth">
-          <input
-            id="flattenDepth"
-            v-model.number="flattenDepth"
-            type="number"
-            min="1"
-            max="10"
-            :disabled="keyFolding === 'off'"
-          >
-        </VPInput>
-
         <VPInput id="preset" label="Preset">
           <select id="preset" @change="(e) => loadPreset((e.target as HTMLSelectElement).value as keyof typeof PRESETS)">
             <option value="" disabled selected>
               Load example…
             </option>
-            <option value="hikes">
-              Hikes (mixed structure)
+            <option value="weather">
+              Weather (mixed structure)
             </option>
             <option value="orders">
-              Orders (nested objects)
+              Orders (nested field groups)
+            </option>
+            <option value="environments">
+              Environments (keyed tabular)
             </option>
             <option value="metrics">
               Metrics (tabular data)
@@ -387,7 +362,6 @@ async function loadTokenizer() {
         </button>
       </div>
 
-      <!-- Editor Container -->
       <div class="editor-container">
         <!-- Input -->
         <div class="editor-pane">

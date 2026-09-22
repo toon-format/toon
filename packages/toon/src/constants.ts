@@ -11,7 +11,7 @@ export const COMMA = ','
 export const COLON = ':'
 export const SPACE = ' '
 export const PIPE = '|'
-export const DOT = '.'
+export const COMMENT_MARKER = '#'
 
 // #endregion
 
@@ -39,6 +39,7 @@ export const DOUBLE_QUOTE = '"'
 export const NEWLINE = '\n'
 export const CARRIAGE_RETURN = '\r'
 export const TAB = '\t'
+export const BYTE_ORDER_MARK = '﻿'
 
 // #endregion
 

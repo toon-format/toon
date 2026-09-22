@@ -1,6 +1,4 @@
-/**
- * Type of expected answer for deterministic comparison
- */
+/** Type of expected answer for deterministic comparison. */
 export type AnswerType
   = | 'integer'
     | 'number'
@@ -10,12 +8,9 @@ export type AnswerType
     | 'csv-list-ordered'
     | 'csv-list-unordered'
 
-/**
- * Options for answer normalization and comparison
- */
 export interface NormalizationOptions {
   /**
-   * Tolerance for floating-point number comparison (e.g., 1e-6).
+   * Tolerance for floating-point number comparison.
    * @default 1e-6
    */
   tolerance?: number
@@ -27,13 +22,14 @@ export interface NormalizationOptions {
   caseSensitive?: boolean
 
   /**
-   * Allow currency symbols ($, €, etc.) in number extraction.
+   * Whether to accept currency symbols ($, €, etc.) during number extraction.
    * @default true
    */
   allowCurrency?: boolean
 
   /**
-   * Allow percent signs (%) in number extraction (will divide by 100).
+   * Whether to accept percent signs (%) during number extraction; a percent
+   * value is divided by 100.
    * @default true
    */
   allowPercent?: boolean
@@ -51,9 +47,6 @@ interface NormalizedResult {
   error?: string
 }
 
-/**
- * Default normalization options
- */
 const DEFAULT_OPTIONS: Required<NormalizationOptions> = {
   tolerance: 1e-6,
   caseSensitive: false,
@@ -62,7 +55,6 @@ const DEFAULT_OPTIONS: Required<NormalizationOptions> = {
   decimalPlaces: undefined!,
 }
 
-// Regex pattern constants
 const INTEGER_PATTERN_WITH_CURRENCY = /[$€£¥]?\s*-?\d[\d,]*/
 const INTEGER_PATTERN = /-?\d[\d,]*/
 const NUMBER_PATTERN_WITH_CURRENCY = /[$€£¥]?\s*-?\d[\d,]*(?:\.\d+)?(?:e[+-]?\d+)?%?/i
@@ -72,36 +64,30 @@ const CODE_FENCE_PATTERN = /^```[\s\S]*?```$/g
 const LANGUAGE_IDENTIFIER_PATTERN = /^\w+\n/
 const CURRENCY_AND_FORMATTING_CHARS = /[$€£¥,\s]/g
 const NUMBER_CLEANUP_CHARS = /[$€£¥,%\s]/g
+const ISO_DATE_PREFIX_PATTERN = /^\d{4}-\d{2}-\d{2}/
 
-// Boolean value constants
 const TRUE_VALUES = new Set(['true', 'yes', 'y', '1'])
 const FALSE_VALUES = new Set(['false', 'no', 'n', '0'])
 
-// Numeric constants
 const PERCENTAGE_DIVISOR = 100
 const DECIMAL_BASE = 10
-const MONTH_OFFSET = 1 // JavaScript months are 0-indexed
+const MONTH_OFFSET = 1 // JavaScript months are 0-indexed.
 const DATE_COMPONENT_WIDTH = 2
 const DATE_PAD_CHAR = '0'
 
-// String constants
 const CSV_DELIMITER = ','
 
-/**
- * Strip wrapping quotes from a string
- */
 function stripWrappingQuotes(text: string): string {
   return text.trim().replace(WRAPPING_QUOTES_PATTERN, '')
 }
 
 /**
- * Extract and normalize an integer from a string
+ * Extracts and normalizes an integer from a string.
  *
  * @remarks
  * Handles: "42", "1,234", "$5,678", "  -99  ", "The answer is 42."
  */
 function normalizeInteger(text: string, options: Required<NormalizationOptions>): NormalizedResult {
-  // Strip common formatting, extract first integer-like token
   const pattern = options.allowCurrency
     ? INTEGER_PATTERN_WITH_CURRENCY
     : INTEGER_PATTERN
@@ -110,7 +96,7 @@ function normalizeInteger(text: string, options: Required<NormalizationOptions>)
   if (!match)
     return { success: false, error: `No integer found in: "${text}"` }
 
-  // Remove currency symbols, spaces, and thousand separators
+  // Remove currency symbols, spaces, and thousand separators.
   const normalizedValue = match[0].replace(CURRENCY_AND_FORMATTING_CHARS, '')
   const parsedNumber = Number.parseInt(normalizedValue, DECIMAL_BASE)
 
@@ -121,13 +107,13 @@ function normalizeInteger(text: string, options: Required<NormalizationOptions>)
 }
 
 /**
- * Extract and normalize a floating-point number from a string
+ * Extracts and normalizes a floating-point number from a string.
  *
  * @remarks
  * Handles: "3.14", "1,234.56", "$5,678.90", "42%", "1.5e-3", "Price: $99.99"
  */
 function normalizeNumber(text: string, options: Required<NormalizationOptions>): NormalizedResult {
-  // Extract first number-like token (supports scientific notation)
+  // Extract the first number-like token, scientific notation included.
   const pattern = options.allowCurrency
     ? NUMBER_PATTERN_WITH_CURRENCY
     : NUMBER_PATTERN
@@ -139,18 +125,16 @@ function normalizeNumber(text: string, options: Required<NormalizationOptions>):
   const token = match[0]
   const hasPercentSign = options.allowPercent && token.endsWith('%')
 
-  // Remove currency, commas, spaces, and percent sign
+  // Remove currency, commas, spaces, and percent sign.
   const normalizedToken = token.replace(NUMBER_CLEANUP_CHARS, '')
   let parsedNumber = Number.parseFloat(normalizedToken)
 
   if (Number.isNaN(parsedNumber))
     return { success: false, error: `Failed to parse number: "${token}"` }
 
-  // Convert percentage to decimal if present
   if (hasPercentSign)
     parsedNumber = parsedNumber / PERCENTAGE_DIVISOR
 
-  // Round to specified decimal places if requested
   if (options.decimalPlaces !== undefined) {
     const factor = DECIMAL_BASE ** options.decimalPlaces
     parsedNumber = Math.round(parsedNumber * factor) / factor
@@ -159,12 +143,7 @@ function normalizeNumber(text: string, options: Required<NormalizationOptions>):
   return { success: true, value: parsedNumber }
 }
 
-/**
- * Normalize a boolean/yes-no answer
- *
- * @remarks
- * Handles: "true", "false", "yes", "no", "y", "n", "1", "0" (case-insensitive)
- */
+/** Normalizes a boolean or yes/no answer, case-insensitively. */
 function normalizeBoolean(text: string): NormalizedResult {
   const normalizedValue = text.trim().toLowerCase()
 
@@ -178,7 +157,7 @@ function normalizeBoolean(text: string): NormalizedResult {
 }
 
 /**
- * Normalize a date string to YYYY-MM-DD format
+ * Normalizes a date string to YYYY-MM-DD format.
  *
  * @remarks
  * Handles: ISO dates, "Nov 1, 2025", "2025-11-01", RFC 2822, etc.
@@ -186,22 +165,25 @@ function normalizeBoolean(text: string): NormalizedResult {
 function normalizeDate(text: string): NormalizedResult {
   const cleaned = stripWrappingQuotes(text)
 
-  // Try parsing as date
+  const isoMatch = cleaned.match(ISO_DATE_PREFIX_PATTERN)
+  if (isoMatch)
+    return { success: true, value: isoMatch[0] }
+
   const parsedDate = new Date(cleaned)
   if (Number.isNaN(parsedDate.getTime()))
     return { success: false, error: `Invalid date: "${text}"` }
 
-  // Normalize to YYYY-MM-DD (UTC)
-  const year = parsedDate.getUTCFullYear()
-  const monthPadded = String(parsedDate.getUTCMonth() + MONTH_OFFSET).padStart(DATE_COMPONENT_WIDTH, DATE_PAD_CHAR)
-  const dayPadded = String(parsedDate.getUTCDate()).padStart(DATE_COMPONENT_WIDTH, DATE_PAD_CHAR)
+  // Non-ISO strings parse in local time, so local getters avoid day shifts.
+  const year = parsedDate.getFullYear()
+  const monthPadded = String(parsedDate.getMonth() + MONTH_OFFSET).padStart(DATE_COMPONENT_WIDTH, DATE_PAD_CHAR)
+  const dayPadded = String(parsedDate.getDate()).padStart(DATE_COMPONENT_WIDTH, DATE_PAD_CHAR)
   const normalized = `${year}-${monthPadded}-${dayPadded}`
 
   return { success: true, value: normalized }
 }
 
 /**
- * Normalize a string (trim, optionally case-insensitive)
+ * Normalizes a string, trimming it and optionally lowercasing it.
  *
  * @remarks
  * Handles wrapping quotes and code fences.
@@ -209,13 +191,11 @@ function normalizeDate(text: string): NormalizedResult {
 function normalizeString(text: string, options: Required<NormalizationOptions>): NormalizedResult {
   let trimmedText = text.trim()
 
-  // Strip wrapping quotes
   trimmedText = trimmedText.replace(WRAPPING_QUOTES_PATTERN, '')
 
-  // Strip code fences (```...```)
   trimmedText = trimmedText.replace(CODE_FENCE_PATTERN, (match) => {
     const inner = match.slice(3, -3).trim()
-    // Remove language identifier if present (e.g., ```json)
+    // Remove a leading language identifier such as ```json.
     return inner.replace(LANGUAGE_IDENTIFIER_PATTERN, '')
   })
 
@@ -226,7 +206,7 @@ function normalizeString(text: string, options: Required<NormalizationOptions>):
 }
 
 /**
- * Normalize a comma-separated list (ordered)
+ * Normalizes a comma-separated list, keeping the order.
  *
  * @remarks
  * Handles: "a,b,c", "a, b, c", " a , b , c "
@@ -246,7 +226,7 @@ function normalizeCsvListOrdered(text: string, options: Required<NormalizationOp
 }
 
 /**
- * Normalize a comma-separated list (unordered, compare as sets)
+ * Normalizes a comma-separated list for set comparison, ignoring the order.
  *
  * @remarks
  * Handles: "c,a,b" equals "a,b,c"
@@ -256,18 +236,15 @@ function normalizeCsvListUnordered(text: string, options: Required<Normalization
   if (!result.success)
     return result
 
-  // Type guard: ensure result.value is an array
   if (!Array.isArray(result.value))
     return { success: false, error: 'Expected array result from normalizeCsvListOrdered' }
 
-  // Sort for deterministic comparison
+  // Sort for deterministic comparison.
   const sorted = [...result.value].sort()
   return { success: true, value: sorted }
 }
 
-/**
- * Normalize a value based on its expected kind
- */
+/** Normalizes a value according to its expected kind. */
 export function normalizeAnswer(
   text: string,
   kind: AnswerType,
@@ -295,9 +272,7 @@ export function normalizeAnswer(
   }
 }
 
-/**
- * Compare two normalized values based on answer kind
- */
+/** Compares two normalized values according to the answer kind. */
 function compareValues(
   actual: unknown,
   expected: unknown,
@@ -316,7 +291,7 @@ function compareValues(
         return false
 
       if (options.decimalPlaces !== undefined) {
-        // Already rounded during normalization
+        // Already rounded during normalization.
         return actual === expected
       }
       return Math.abs(actual - expected) <= options.tolerance
@@ -333,7 +308,7 @@ function compareValues(
         return false
       if (actual.length !== expected.length)
         return false
-      // Already sorted during normalization
+      // Already sorted during normalization.
       return actual.every((item, i) => item === expected[i])
 
     default:
@@ -342,7 +317,7 @@ function compareValues(
 }
 
 /**
- * Compare actual and expected answers with deterministic, type-aware normalization
+ * Compares actual and expected answers with deterministic, type-aware normalization.
  *
  * @remarks
  * Returns true if answers match within the specified tolerance/rules.
@@ -355,11 +330,9 @@ export function compareAnswers(
 ): { match: boolean, details?: string } {
   const resolvedOptions: Required<NormalizationOptions> = { ...DEFAULT_OPTIONS, ...options }
 
-  // Normalize both answers
   const actualResult = normalizeAnswer(actual, kind, resolvedOptions)
   const expectedResult = normalizeAnswer(expected, kind, resolvedOptions)
 
-  // If either normalization failed, return false with details
   if (!actualResult.success) {
     return {
       match: false,
@@ -374,7 +347,6 @@ export function compareAnswers(
     }
   }
 
-  // Compare normalized values
   const match = compareValues(actualResult.value, expectedResult.value, kind, resolvedOptions)
 
   return {

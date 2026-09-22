@@ -206,7 +206,7 @@ $$
 { "id": 1, "name": "Ada" }
 ```
 
-```yaml [TOON (15 bytes)]
+```toon [TOON (15 bytes)]
 id: 1
 name: Ada
 ```
@@ -241,7 +241,7 @@ This formula is for a single nesting level. Each additional nesting level adds 2
 { "user": { "id": 1, "name": "Ada" } }
 ```
 
-```yaml [TOON (25 bytes)]
+```toon [TOON (25 bytes)]
 user:
   id: 1
   name: Ada
@@ -279,7 +279,7 @@ $$
 { "tags": ["foo", "bar", "baz"] }
 ```
 
-```yaml [TOON (20 bytes)]
+```toon [TOON (20 bytes)]
 tags[3]: foo,bar,baz
 ```
 
@@ -309,7 +309,7 @@ $$
 ["x", "y", "z"]
 ```
 
-```yaml [TOON (10 bytes)]
+```toon [TOON (10 bytes)]
 [3]: x,y,z
 ```
 
@@ -321,7 +321,7 @@ $$
 
 ### Tabular Arrays
 
-Uniform arrays of objects are TOON's sweet spot. JSON repeats every key for every row, while TOON declares the length and column names once (`key[N]{id,qty,...}:`) and streams rows as bare values.
+Uniform arrays of objects are TOON's sweet spot. JSON repeats every key for every row, while TOON declares the length and field list once (`key[N]{id,qty,...}:`) and streams rows as bare values.
 
 For arrays of objects with $n$ rows and $m$ fields, assuming numeric values and $|k| = 3$:
 
@@ -341,7 +341,7 @@ This is where TOON's design (declare fields once, stream rows) pays off most str
 { "items": [{ "id": 1, "qty": 5 }, { "id": 2, "qty": 3 }] }
 ```
 
-```yaml [TOON (29 bytes)]
+```toon [TOON (29 bytes)]
 items[2]{id,qty}:
   1,5
   2,3
@@ -386,7 +386,7 @@ $$
 { "pairs": [[1, 2], [3, 4]] }
 ```
 
-```yaml [TOON (35 bytes)]
+```toon [TOON (35 bytes)]
 pairs[2]:
   - [2]: 1,2
   - [2]: 3,4
@@ -418,7 +418,7 @@ $$
 { "version": "123", "enabled": "true" }
 ```
 
-```yaml [TOON (30 bytes)]
+```toon [TOON (30 bytes)]
 version: "123"
 enabled: "true"
 ```
@@ -449,7 +449,7 @@ $$
 
 For a field named `key`, JSON uses `{"key":[]}` in compact form, while TOON uses:
 
-```yaml
+```toon
 key: []
 ```
 

@@ -6,13 +6,9 @@ description: Prompting strategies for sending TOON to LLMs and validating TOON t
 
 TOON is designed for passing structured data to Large Language Models with reduced token costs and improved reliability. This guide shows how to use TOON effectively in prompts, both for input (sending data to models) and output (getting models to generate TOON).
 
-This guide is about the TOON format itself. Code examples use the TypeScript library for demonstration, but the same patterns and techniques apply regardless of which programming language you're using.
-
 ## Why TOON for LLMs
 
-LLM tokens cost money, and JSON is verbose – repeating every field name for every record in an array. TOON minimizes tokens especially for uniform arrays by declaring fields once and streaming data as rows, typically saving 30–60% compared to formatted JSON.
-
-TOON adds structure guardrails: explicit `[N]` lengths and `{fields}` headers make it easier for models to track rows and for you to validate output. Strict mode helps detect truncation and malformed TOON when decoding model responses.
+Beyond token savings (see [Benchmarks](/guide/benchmarks)), TOON adds structure guardrails: explicit `[N]` lengths and `{fields}` headers make it easier for models to track rows and for you to validate output. Strict mode helps detect truncation and malformed TOON when decoding model responses.
 
 ## Sending TOON as Input
 
@@ -25,18 +21,49 @@ Data is in TOON format (2-space indent, arrays show length and fields).
 
 ```toon
 users[3]{id,name,role,lastLogin}:
-  1,Alice,admin,"2025-01-15T10:30:00Z"
+  1,Ada,admin,"2025-01-15T10:30:00Z"
   2,Bob,user,"2025-01-14T15:22:00Z"
-  3,Charlie,user,"2025-01-13T09:45:00Z"
+  3,Cleo,user,"2025-01-13T09:45:00Z"
 ```
 
 Task: Summarize the user roles and their last activity.
 ````
 
-The indentation and headers are usually enough – models treat TOON like familiar YAML or CSV. The explicit array lengths (`[N]`) and field headers (`{fields}`) help the model track structure, especially for large tables.
+The indentation and headers are usually enough – models treat TOON like familiar YAML or CSV. The explicit array lengths (`[N]`) and field lists (`{fields}`) help the model track structure, especially for large tables.
 
 > [!NOTE]
 > Most models don't have built-in TOON syntax highlighting, so ` ```toon` or ` ```yaml` both work fine. The structure is what matters.
+
+### Nested and Keyed Data
+
+Uniform nested objects don't break the tabular form: a nested-object column folds into the header as a [nested field group](/guide/format-overview#nested-field-groups), and rows stay flat:
+
+```toon
+orders[2]{id,customer{name,country},total}:
+  1,Ada,DK,99
+  2,Bob,UK,149
+```
+
+Maps of uniform objects – feature flags, users by ID, per-environment config – collapse into the [keyed tabular form](/guide/format-overview#keyed-tabular-objects), where each entry row carries its own key:
+
+```toon
+environments[2:]{region,replicas,debug}:
+  production: eu-central-1,6,false
+  staging: eu-central-1,2,true
+```
+
+The same prompting rules apply: one example is enough, the header tells the model how to read the rows.
+
+### Annotating Data with Comments
+
+Decoders strip full-line `#` [comment lines](/guide/format-overview#comments) before parsing, so you can annotate prompt data by hand – and model output that includes `#` explainer lines still decodes cleanly. Encoders never emit comments, so round-trips stay canonical.
+
+```toon
+# Only active users, exported 2025-01-15
+users[2]{id,name,role}:
+  1,Ada,admin
+  2,Bob,user
+```
 
 ## Generating TOON from LLMs
 
@@ -52,9 +79,9 @@ Data is in TOON format (2-space indent, arrays show length and fields).
 
 ```toon
 users[3]{id,name,role,lastLogin}:
-  1,Alice,admin,"2025-01-15T10:30:00Z"
+  1,Ada,admin,"2025-01-15T10:30:00Z"
   2,Bob,user,"2025-01-14T15:22:00Z"
-  3,Charlie,user,"2025-01-13T09:45:00Z"
+  3,Cleo,user,"2025-01-13T09:45:00Z"
 ```
 
 Task: Return only users with role "user" as TOON. Use the same header format. Set [N] to match the row count. Output only the code block.
@@ -65,7 +92,7 @@ Task: Return only users with role "user" as TOON. Use the same header format. Se
 ```toon
 users[2]{id,name,role,lastLogin}:
   2,Bob,user,"2025-01-14T15:22:00Z"
-  3,Charlie,user,"2025-01-13T09:45:00Z"
+  3,Cleo,user,"2025-01-13T09:45:00Z"
 ```
 
 The model adjusts `[N]` to `2` and generates two rows.

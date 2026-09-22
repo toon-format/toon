@@ -8,24 +8,19 @@ TOON has official and community implementations across multiple programming lang
 
 The code examples throughout this documentation site use the TypeScript implementation by default, but the format and concepts apply equally to all languages.
 
-> [!NOTE]
-> When implementing TOON in other languages, please follow the [spec](https://github.com/toon-format/spec/blob/main/SPEC.md) to ensure compatibility across implementations. The [conformance tests](https://github.com/toon-format/spec/tree/main/tests) provide language-agnostic test fixtures that validate your implementation.
-
 ## Official Implementations
 
-These implementations are actively being developed by dedicated teams. Contributions are welcome! Join the effort by opening issues, submitting PRs, or discussing implementation details in the respective repositories.
-
-| Language | Repository | Status | Maintainer |
-|----------|------------|--------|------------|
-| **.NET** | [toon-dotnet](https://github.com/toon-format/toon-dotnet) | In Development | Official Team |
-| **Dart** | [toon-dart](https://github.com/toon-format/toon-dart) | In Development | Official Team |
-| **Go** | [toon-go](https://github.com/toon-format/toon-go) | In Development | Official Team |
-| **Java** | [toon-java](https://github.com/toon-format/toon-java) | ✅ Stable | Official Team |
-| **Julia** | [ToonFormat.jl](https://github.com/toon-format/ToonFormat.jl) | ✅ Stable | Official Team |
-| **Python** | [toon-python](https://github.com/toon-format/toon-python) | ✅ Stable | Official Team |
-| **Rust** | [toon-rust](https://github.com/toon-format/toon-rust) | ✅ Stable | Official Team |
-| **Swift** | [toon-swift](https://github.com/toon-format/toon-swift) | ✅ Stable | Official Team |
-| **TypeScript/JavaScript** | [toon](https://github.com/toon-format/toon/tree/main/packages/toon) | ✅ Stable | Official Team |
+| Language | Repository | Status |
+|----------|------------|--------|
+| **.NET** | [toon-dotnet](https://github.com/toon-format/toon-dotnet) | In Development |
+| **Dart** | [toon-dart](https://github.com/toon-format/toon-dart) | In Development |
+| **Go** | [toon-go](https://github.com/toon-format/toon-go) | In Development |
+| **Java** | [toon-java](https://github.com/toon-format/toon-java) | ✅ Stable |
+| **Julia** | [ToonFormat.jl](https://github.com/toon-format/ToonFormat.jl) | ✅ Stable |
+| **Python** | [toon-python](https://github.com/toon-format/toon-python) | ✅ Stable |
+| **Rust** | [toon-rust](https://github.com/toon-format/toon-rust) | ✅ Stable |
+| **Swift** | [toon-swift](https://github.com/toon-format/toon-swift) | ✅ Stable |
+| **TypeScript/JavaScript** | [toon](https://github.com/toon-format/toon/tree/main/packages/toon) | ✅ Stable |
 
 ## Community Implementations
 
@@ -37,6 +32,7 @@ Community members have created implementations in additional languages:
 | **C** | [TOONc](https://github.com/UsboKirishima/TOONc) | [@UsboKirishima](https://github.com/UsboKirishima) |
 | **C++** | [ctoon](https://github.com/mohammadraziei/ctoon) | [@mohammadraziei](https://github.com/mohammadraziei) |
 | **C#** | [ToonEncoder](https://github.com/Cysharp/ToonEncoder) | [@Cysharp](https://github.com/Cysharp/ToonEncoder) |
+| **C#** | [Corvus.JsonSchema](https://github.com/corvus-dotnet/Corvus.JsonSchema/blob/main/docs/Toon.md) | [@mwadams](https://github.com/corvus-dotnet/Corvus.JsonSchema/) |
 | **Clojure** | [toon](https://github.com/vadelabs/toon) | [@vadelabs](https://github.com/vadelabs) |
 | **Crystal** | [toon-crystal](https://github.com/mamantoha/toon-crystal) | [@mamantoha](https://github.com/mamantoha) |
 | **Delphi** | [delphi-toon](https://github.com/ernestoalconada/delphi-toon) | [@ernestoalconada](https://github.com/ernestoalconada) |
@@ -51,6 +47,7 @@ Community members have created implementations in additional languages:
 | **OCaml** | [ocaml-toon](https://github.com/davesnx/ocaml-toon) | [@davesnx](https://github.com/davesnx) |
 | **Perl** | [Data::TOON](https://github.com/ytnobody/p5-Data-TOON) | [@ytnobody](https://github.com/ytnobody) |
 | **PHP** | [toon-php](https://github.com/HelgeSverre/toon-php) | [@HelgeSverre](https://github.com/HelgeSverre) |
+| **PHP / TYPO3** | [t3-toon](https://github.com/therohanparmar/t3-toon) | [@therohanparmar](https://github.com/therohanparmar) |
 | **Python** (C++ backend) | [ctoon](https://github.com/mohammadraziei/ctoon) | [@mohammadraziei](https://github.com/mohammadraziei) |
 | **Python** (Rust backend) | [toons](https://github.com/alesanfra/toons) | [@alesanfra](https://github.com/alesanfra) |
 | **R** | [toon](https://github.com/laresbernardo/toon) | [@laresbernardo](https://github.com/laresbernardo) |
@@ -60,9 +57,9 @@ Community members have created implementations in additional languages:
 
 ## Contributing an Implementation
 
-Building a TOON implementation for a new language? Great! Here are some steps to get started:
+Building a TOON implementation for a new language? Here are the steps:
 
 1. **Follow the spec**: Implement the [latest specification](https://github.com/toon-format/spec/blob/main/SPEC.md).
-2. **Add tests**: Run the [reference test suite](https://github.com/toon-format/spec/tree/main/tests).
+2. **Add tests**: Run the [reference test suite](https://github.com/toon-format/spec/tree/main/tests) – its language-agnostic fixtures validate compatibility across implementations.
 3. **Document usage**: Provide a clear README with installation and usage examples.
 4. **Share it**: Open a PR to add your implementation to the README at [github.com/toon-format/toon](https://github.com/toon-format/toon).

@@ -1,32 +1,36 @@
 import type { JsonStreamEvent } from '../../toon/src/types.ts'
 
-/**
- * Context for tracking JSON structure state during event streaming.
- */
 type JsonContext
   = | { type: 'object', needsComma: boolean, expectValue: boolean }
     | { type: 'array', needsComma: boolean }
 
-/**
- * Converts a stream of `JsonStreamEvent` into formatted JSON string chunks.
- *
- * Similar to `jsonStringifyLines` but driven by events instead of a value tree.
- * Useful for streaming TOON decode directly to JSON output without building
- * the full data structure in memory.
- *
- * @param events - Async iterable of JSON stream events
- * @param indent - Number of spaces for indentation (0 = compact, >0 = pretty)
- * @returns Async iterable of JSON string chunks
- *
- * @example
- * ```ts
- * const lines = readLinesFromSource(input)
- * const events = decodeStream(lines)
- * for await (const chunk of jsonStreamFromEvents(events, 2)) {
- *   process.stdout.write(chunk)
- * }
- * ```
- */
+function* emitValuePrefix(
+  parent: JsonContext | undefined,
+  depth: number,
+  indent: number,
+): Generator<string> {
+  if (parent?.type === 'array') {
+    if (parent.needsComma) {
+      yield ','
+    }
+
+    if (indent > 0) {
+      yield '\n'
+      yield ' '.repeat(depth * indent)
+    }
+  }
+}
+
+function markValueComplete(parent: JsonContext | undefined): void {
+  if (parent?.type === 'object') {
+    parent.expectValue = false
+    parent.needsComma = true
+  }
+  else if (parent?.type === 'array') {
+    parent.needsComma = true
+  }
+}
+
 export async function* jsonStreamFromEvents(
   events: AsyncIterable<JsonStreamEvent>,
   indent: number = 2,
@@ -39,24 +43,7 @@ export async function* jsonStreamFromEvents(
 
     switch (event.type) {
       case 'startObject': {
-        // Emit comma if needed (inside array or after previous object field value)
-        if (parent) {
-          if (parent.type === 'array' && parent.needsComma) {
-            yield ','
-          }
-          else if (parent.type === 'object' && !parent.expectValue) {
-            // Object field value already emitted, this is a nested object after a key
-            // The comma is handled by the key event
-          }
-        }
-
-        // Emit newline and indent for pretty printing
-        if (indent > 0 && parent) {
-          if (parent.type === 'array') {
-            yield '\n'
-            yield ' '.repeat(depth * indent)
-          }
-        }
+        yield* emitValuePrefix(parent, depth, indent)
 
         yield '{'
         stack.push({ type: 'object', needsComma: false, expectValue: false })
@@ -72,7 +59,6 @@ export async function* jsonStreamFromEvents(
 
         depth--
 
-        // Emit newline and indent for closing brace (pretty print)
         if (indent > 0 && context.needsComma) {
           yield '\n'
           yield ' '.repeat(depth * indent)
@@ -80,35 +66,13 @@ export async function* jsonStreamFromEvents(
 
         yield '}'
 
-        // Mark parent as needing comma for next item
         const newParent = stack.length > 0 ? stack[stack.length - 1] : undefined
-        if (newParent) {
-          if (newParent.type === 'object') {
-            newParent.expectValue = false
-            newParent.needsComma = true
-          }
-          else if (newParent.type === 'array') {
-            newParent.needsComma = true
-          }
-        }
+        markValueComplete(newParent)
         break
       }
 
       case 'startArray': {
-        // Emit comma if needed
-        if (parent) {
-          if (parent.type === 'array' && parent.needsComma) {
-            yield ','
-          }
-        }
-
-        // Emit newline and indent for pretty printing
-        if (indent > 0 && parent) {
-          if (parent.type === 'array') {
-            yield '\n'
-            yield ' '.repeat(depth * indent)
-          }
-        }
+        yield* emitValuePrefix(parent, depth, indent)
 
         yield '['
         stack.push({
@@ -127,7 +91,6 @@ export async function* jsonStreamFromEvents(
 
         depth--
 
-        // Emit newline and indent for closing bracket (pretty print)
         if (indent > 0 && context.needsComma) {
           yield '\n'
           yield ' '.repeat(depth * indent)
@@ -135,17 +98,8 @@ export async function* jsonStreamFromEvents(
 
         yield ']'
 
-        // Mark parent as needing comma for next item
         const newParent = stack.length > 0 ? stack[stack.length - 1] : undefined
-        if (newParent) {
-          if (newParent.type === 'object') {
-            newParent.expectValue = false
-            newParent.needsComma = true
-          }
-          else if (newParent.type === 'array') {
-            newParent.needsComma = true
-          }
-        }
+        markValueComplete(newParent)
         break
       }
 
@@ -154,18 +108,15 @@ export async function* jsonStreamFromEvents(
           throw new Error('Key event outside of object context')
         }
 
-        // Emit comma before this field if needed
         if (parent.needsComma) {
           yield ','
         }
 
-        // Emit newline and indent (pretty print)
         if (indent > 0) {
           yield '\n'
           yield ' '.repeat(depth * indent)
         }
 
-        // Emit key
         yield JSON.stringify(event.key)
         yield indent > 0 ? ': ' : ':'
 
@@ -175,42 +126,20 @@ export async function* jsonStreamFromEvents(
       }
 
       case 'primitive': {
-        // Emit comma if needed
-        if (parent) {
-          if (parent.type === 'array' && parent.needsComma) {
-            yield ','
-          }
-          else if (parent.type === 'object' && !parent.expectValue) {
-            // This shouldn't happen in well-formed events
-            throw new Error('Primitive event in object without preceding key')
-          }
+        if (parent?.type === 'object' && !parent.expectValue) {
+          throw new Error('Primitive event without preceding key in object')
         }
 
-        // Emit newline and indent for array items (pretty print)
-        if (indent > 0 && parent && parent.type === 'array') {
-          yield '\n'
-          yield ' '.repeat(depth * indent)
-        }
+        yield* emitValuePrefix(parent, depth, indent)
 
-        // Emit primitive value
         yield JSON.stringify(event.value)
 
-        // Update parent context
-        if (parent) {
-          if (parent.type === 'object') {
-            parent.expectValue = false
-            // needsComma already true from key event
-          }
-          else if (parent.type === 'array') {
-            parent.needsComma = true
-          }
-        }
+        markValueComplete(parent)
         break
       }
     }
   }
 
-  // Ensure stack is empty
   if (stack.length !== 0) {
     throw new Error('Incomplete event stream: unclosed objects or arrays')
   }

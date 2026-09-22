@@ -14,17 +14,17 @@ export type JsonValue = JsonPrimitive | JsonObject | JsonArray
 export type { Delimiter, DelimiterKey }
 
 /**
- * A function that transforms or filters values during encoding.
+ * Transforms or filters values during encoding.
  *
  * Called for every value (root, object properties, array elements) during the encoding process.
  * Similar to `JSON.stringify`'s replacer, but with path tracking.
  *
- * @param key - The property key or array index (as string). Empty string (`''`) for root value.
- * @param value - The normalized `JsonValue` at this location.
- * @param path - Array representing the path from root to this value.
+ * @param key The property key or array index as a string, empty at the root
+ * @param value The normalized `JsonValue` at this location
+ * @param path Array representing the path from root to this value
  *
- * @returns The replacement value (will be normalized again), or `undefined` to omit.
- *          For root value, returning `undefined` means "no change" (don't omit root).
+ * @returns The replacement value (will be normalized again), or `undefined` to omit –
+ *          at the root, `undefined` means "no change" rather than an omission
  *
  * @example
  * ```ts
@@ -54,26 +54,16 @@ export interface EncodeOptions {
    * Number of spaces per indentation level.
    * @default 2
    */
+  indentSize?: number
+  /**
+   * @deprecated Use `indentSize` instead.
+   */
   indent?: number
   /**
    * Delimiter to use for tabular array rows and inline primitive arrays.
    * @default DELIMITERS.comma
    */
   delimiter?: Delimiter
-  /**
-   * Enable key folding to collapse single-key wrapper chains.
-   * When set to 'safe', nested objects with single keys are collapsed into dotted paths
-   * (e.g., data.metadata.items instead of nested indentation).
-   * @default 'off'
-   */
-  keyFolding?: 'off' | 'safe'
-  /**
-   * Maximum number of segments to fold when keyFolding is enabled.
-   * Controls how deep the folding can go in single-key chains.
-   * Values 0 or 1 have no practical effect (treated as effectively disabled).
-   * @default Infinity
-   */
-  flattenDepth?: number
   /**
    * A function to transform or filter values during encoding.
    * Called for the root value and every nested property/element.
@@ -83,7 +73,7 @@ export interface EncodeOptions {
   replacer?: EncodeReplacer
 }
 
-export type ResolvedEncodeOptions = Readonly<Required<Omit<EncodeOptions, 'replacer'>>> & Pick<EncodeOptions, 'replacer'>
+export type ResolvedEncodeOptions = Readonly<Required<Omit<EncodeOptions, 'replacer' | 'indent'>>> & Pick<EncodeOptions, 'replacer'>
 
 // #endregion
 
@@ -94,37 +84,21 @@ export interface DecodeOptions {
    * Number of spaces per indentation level.
    * @default 2
    */
+  indentSize?: number
+  /**
+   * @deprecated Use `indentSize` instead.
+   */
   indent?: number
   /**
    * When true, enforce strict validation of array lengths and tabular row counts.
    * @default true
    */
   strict?: boolean
-  /**
-   * Enable path expansion to reconstruct dotted keys into nested objects.
-   * When set to 'safe', keys containing dots are expanded into nested structures
-   * if all segments are valid identifiers (e.g., data.metadata.items becomes nested objects).
-   * Pairs with keyFolding='safe' for lossless round-trips.
-   * @default 'off'
-   */
-  expandPaths?: 'off' | 'safe'
 }
 
-export type ResolvedDecodeOptions = Readonly<Required<DecodeOptions>>
+export type ResolvedDecodeOptions = Readonly<Required<Omit<DecodeOptions, 'indent'>>>
 
-/**
- * Options for streaming decode operations.
- *
- * @remarks
- * Path expansion is not supported in streaming mode.
- */
-export interface DecodeStreamOptions extends Omit<DecodeOptions, 'expandPaths'> {
-  /**
-   * Path expansion is not supported in streaming decode.
-   * This option is explicitly omitted.
-   */
-  expandPaths?: never
-}
+export type DecodeStreamOptions = DecodeOptions
 
 // #endregion
 
@@ -135,8 +109,24 @@ export type JsonStreamEvent
     | { type: 'endObject' }
     | { type: 'startArray', length: number }
     | { type: 'endArray' }
-    | { type: 'key', key: string, wasQuoted?: boolean }
+    | { type: 'key', key: string }
     | { type: 'primitive', value: JsonPrimitive }
+
+// #endregion
+
+// #region Header field types
+
+/**
+ * One entry of a tabular header's field list.
+ *
+ * @remarks
+ * A leaf field (no children) maps to one row cell; a nested field group
+ * carries its subfields and materializes a nested object per row.
+ */
+export interface FieldNode {
+  name: string
+  children?: FieldNode[]
+}
 
 // #endregion
 
@@ -146,7 +136,9 @@ export interface ArrayHeaderInfo {
   key?: string
   length: number
   delimiter: Delimiter
-  fields?: string[]
+  fields?: FieldNode[]
+  /** Keyed tabular header `[N:<delim?>]` – N declares the entry count. */
+  keyed?: boolean
 }
 
 export interface ParsedLine {

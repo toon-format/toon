@@ -124,7 +124,6 @@ Both encoding and decoding operations use streaming output, writing incrementall
 - Uses the same event-based streaming decoder as the `decodeStream` API in `@toon-format/toon`.
 - Streams JSON tokens to output.
 - No full JSON string in memory.
-- When `--expandPaths safe` is enabled, falls back to non-streaming decode internally to apply deep-merge expansion before writing JSON.
 
 Process large files with minimal memory usage:
 
@@ -157,9 +156,6 @@ When using the `--stats` flag with encode, the CLI builds the full TOON string o
 | `--indent <number>` | Indentation size (default: `2`) |
 | `--stats` | Show token count estimates and savings (encode only) |
 | `--no-strict` | Skip decode validation (array counts, indentation, header delimiter); last-write-wins on duplicate keys |
-| `--keyFolding <mode>` | Key folding mode: `off`, `safe` (default: `off`) |
-| `--flattenDepth <number>` | Maximum segments to fold (default: `Infinity`) – requires `--keyFolding safe` |
-| `--expandPaths <mode>` | Path expansion mode: `off`, `safe` (default: `off`) |
 | `--verbose` | Show full stack traces and cause chains for errors (default: `false`) |
 
 ## Advanced Examples
@@ -171,8 +167,6 @@ Show token savings when encoding:
 ```bash
 toon data.json --stats -o output.toon
 ```
-
-This helps you estimate token cost savings before sending data to LLMs.
 
 Example output:
 
@@ -265,7 +259,7 @@ Decode errors are thrown as `ToonDecodeError` instances by the library. The CLI'
 
 ### Stdin Workflows
 
-The CLI integrates seamlessly with Unix pipes and other command-line tools:
+The CLI integrates with Unix pipes and other command-line tools:
 
 ```bash
 # Convert API response to TOON
@@ -276,80 +270,4 @@ cat large-dataset.json | toon --delimiter $'\t' > output.toon
 
 # Chain with jq
 jq '.results' data.json | toon > filtered.toon
-```
-
-### Key Folding
-
-Collapse nested wrapper chains to reduce tokens (since spec v1.5):
-
-::: code-group
-
-```bash [Basic key folding]
-toon input.json --keyFolding safe -o output.toon
-```
-
-```bash [Limit folding depth]
-toon input.json --keyFolding safe --flattenDepth 2 -o output.toon
-```
-
-:::
-
-**Example:**
-
-For data like:
-
-```json
-{
-  "data": {
-    "metadata": {
-      "items": ["a", "b"]
-    }
-  }
-}
-```
-
-With `--keyFolding safe`, output becomes:
-
-```yaml
-data.metadata.items[2]: a,b
-```
-
-Instead of:
-
-```yaml
-data:
-  metadata:
-    items[2]: a,b
-```
-
-### Path Expansion
-
-Reconstruct nested structure from folded keys when decoding:
-
-```bash
-toon data.toon --expandPaths safe -o output.json
-```
-
-This pairs with `--keyFolding safe` for lossless round-trips.
-
-### Round-Trip Workflow
-
-```bash
-# Encode with folding
-toon input.json --keyFolding safe -o compressed.toon
-
-# Decode with expansion (restores original structure)
-toon compressed.toon --expandPaths safe -o output.json
-
-# Verify round-trip
-diff input.json output.json
-```
-
-### Combined Options
-
-Combine multiple options for maximum efficiency:
-
-```bash
-# Key folding + tab delimiter + stats
-toon data.json --keyFolding safe --delimiter $'\t' --stats -o output.toon
 ```

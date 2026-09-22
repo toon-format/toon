@@ -3,13 +3,10 @@ import type { Question } from '../types.ts'
 import { QUESTION_LIMITS, QUESTION_THRESHOLDS } from '../constants.ts'
 import { QuestionBuilder, rotateQuestions, SAMPLE_STRIDES } from './utils.ts'
 
-/**
- * Generate GitHub repository questions
- */
 export function generateGithubQuestions(repos: Repository[], getId: () => string): Question[] {
   const questions: Question[] = []
 
-  // Field retrieval: repository metadata
+  // #region Field retrieval: repository metadata
   const repoFieldGenerators: Array<(repo: Repository, getId: () => string) => Question> = [
     (repo, getId) => new QuestionBuilder()
       .id(getId())
@@ -53,8 +50,9 @@ export function generateGithubQuestions(repos: Repository[], getId: () => string
     SAMPLE_STRIDES.REPO_FIELD,
     getId,
   ))
+  // #endregion
 
-  // Aggregation: basic statistics
+  // #region Aggregation: basic statistics
   const totalRepos = repos.length
   const totalStars = repos.reduce((sum, r) => sum + r.stars, 0)
   const totalForks = repos.reduce((sum, r) => sum + r.forks, 0)
@@ -94,8 +92,9 @@ export function generateGithubQuestions(repos: Repository[], getId: () => string
       .answerType('integer')
       .build(),
   )
+  // #endregion
 
-  // Aggregation: by default branch
+  // #region Aggregation: by default branch
   const branches = [...new Set(repos.map(r => r.defaultBranch))]
   for (const branch of branches.slice(0, QUESTION_LIMITS.github.aggregationBranches)) {
     const count = repos.filter(r => r.defaultBranch === branch).length
@@ -110,8 +109,9 @@ export function generateGithubQuestions(repos: Repository[], getId: () => string
         .build(),
     )
   }
+  // #endregion
 
-  // Aggregation: high star counts
+  // #region Aggregation: high star counts
   for (const threshold of QUESTION_THRESHOLDS.github.stars) {
     const count = repos.filter(r => r.stars > threshold).length
     questions.push(
@@ -125,8 +125,9 @@ export function generateGithubQuestions(repos: Repository[], getId: () => string
         .build(),
     )
   }
+  // #endregion
 
-  // Aggregation: high fork counts
+  // #region Aggregation: high fork counts
   for (const threshold of QUESTION_THRESHOLDS.github.forks) {
     const count = repos.filter(r => r.forks > threshold).length
     questions.push(
@@ -140,8 +141,9 @@ export function generateGithubQuestions(repos: Repository[], getId: () => string
         .build(),
     )
   }
+  // #endregion
 
-  // Aggregation: high watcher counts
+  // #region Aggregation: high watcher counts
   for (const threshold of QUESTION_THRESHOLDS.github.watchers) {
     const count = repos.filter(r => r.watchers > threshold).length
     questions.push(
@@ -155,8 +157,9 @@ export function generateGithubQuestions(repos: Repository[], getId: () => string
         .build(),
     )
   }
+  // #endregion
 
-  // Filtering: multi-condition (stars AND forks)
+  // #region Filtering: multi-condition (stars AND forks)
   for (const combo of QUESTION_THRESHOLDS.github.starForkCombinations.slice(0, QUESTION_LIMITS.github.filteringStarsAndForks)) {
     const count = repos.filter(
       r => r.stars > combo.stars && r.forks > combo.forks,
@@ -172,8 +175,9 @@ export function generateGithubQuestions(repos: Repository[], getId: () => string
         .build(),
     )
   }
+  // #endregion
 
-  // Filtering: stars AND watchers
+  // #region Filtering: stars AND watchers
   for (const combo of QUESTION_THRESHOLDS.github.starWatcherCombinations) {
     const count = repos.filter(
       r => r.stars > combo.stars && r.watchers > combo.watchers,
@@ -189,6 +193,7 @@ export function generateGithubQuestions(repos: Repository[], getId: () => string
         .build(),
     )
   }
+  // #endregion
 
   return questions
 }

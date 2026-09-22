@@ -5,12 +5,6 @@ import { createStorage } from 'unstorage'
 import fsDriver from 'unstorage/drivers/fs'
 import { BENCHMARKS_DIR } from './constants.ts'
 
-/**
- * Storage instance for model results
- *
- * @remarks
- * Stores results in: `benchmarks/results/accuracy/models/`
- */
 export const resultsStorage: Storage<StorageValue> = createStorage({
   driver: fsDriver({
     base: path.join(BENCHMARKS_DIR, 'results', 'accuracy', 'models'),

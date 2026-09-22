@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "lib": ["ESNext"],
     "moduleDetection": "force",
     "module": "ESNext",
     "moduleResolution": "Bundler",

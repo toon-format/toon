@@ -5,6 +5,10 @@ import antfu from '@antfu/eslint-config'
 const config: FlatConfigComposer<TypedFlatConfigItem, ConfigNames> = antfu({
   rules: {
     'no-cond-assign': 'off',
+    'jsdoc/multiline-blocks': ['error', {
+      noMultilineBlocks: true,
+      minimumLengthForMultiline: 100,
+    }],
   },
 }).append({
   files: ['**/README.md', 'SPEC.md', '**/benchmarks/**/*', '**/docs/**/*'],

@@ -4,21 +4,18 @@ import type { InputSource } from './types.ts'
 import * as fsp from 'node:fs/promises'
 import * as path from 'node:path'
 import process from 'node:process'
-import { consola } from 'consola'
 import { estimateTokenCount } from 'tokenx'
-import { decode, decodeStream, encode, encodeLines } from '../../toon/src/index.ts'
+import { CliError, log } from 'utilful/cli'
+import { decodeStream, encode, encodeLines } from '../../toon/src/index.ts'
 import { jsonStreamFromEvents } from './json-from-events.ts'
-import { jsonStringifyLines } from './json-stringify-stream.ts'
 import { formatInputLabel, readInput, readLinesFromSource } from './utils.ts'
 
 export async function encodeToToon(config: {
   input: InputSource
   output?: string
-  indent: NonNullable<EncodeOptions['indent']>
+  indentSize: NonNullable<EncodeOptions['indentSize']>
   delimiter: NonNullable<EncodeOptions['delimiter']>
-  keyFolding?: NonNullable<EncodeOptions['keyFolding']>
-  flattenDepth?: number
-  printStats: boolean
+  shouldPrintStats: boolean
 }): Promise<void> {
   const jsonContent = await readInput(config.input)
 
@@ -27,22 +24,20 @@ export async function encodeToToon(config: {
     data = JSON.parse(jsonContent)
   }
   catch (error) {
-    throw new Error(`Failed to parse JSON: ${error instanceof Error ? error.message : String(error)}`)
+    throw new CliError(`Failed to parse JSON: ${Error.isError(error) ? error.message : String(error)}`, { cause: error })
   }
 
   const encodeOptions: EncodeOptions = {
     delimiter: config.delimiter,
-    indent: config.indent,
-    keyFolding: config.keyFolding,
-    flattenDepth: config.flattenDepth,
+    indentSize: config.indentSize,
   }
 
-  // When printing stats, we need the full string for token counting
-  if (config.printStats) {
+  // When printing stats, we need the full string for token counting.
+  if (config.shouldPrintStats) {
     const toonOutput = encode(data, encodeOptions)
 
     if (config.output) {
-      await fsp.writeFile(config.output, toonOutput, 'utf-8')
+      await fsp.writeFile(config.output, `${toonOutput}\n`, 'utf-8')
     }
     else {
       console.log(toonOutput)
@@ -56,20 +51,19 @@ export async function encodeToToon(config: {
     if (config.output) {
       const relativeInputPath = formatInputLabel(config.input)
       const relativeOutputPath = path.relative(process.cwd(), config.output)
-      consola.success(`Encoded \`${relativeInputPath}\` → \`${relativeOutputPath}\``)
+      log.success(`Encoded \`${relativeInputPath}\` → \`${relativeOutputPath}\``)
     }
 
-    console.log()
-    consola.info(`Token estimates: ~${jsonTokens} (JSON) → ~${toonTokens} (TOON)`)
-    consola.success(`Saved ~${diff} tokens (-${percent}%)`)
+    log.info(`Token estimates: ~${jsonTokens} (JSON) → ~${toonTokens} (TOON)`)
+    log.success(`Saved ~${diff} tokens (-${percent}%)`)
   }
   else {
-    await writeStreamingToon(encodeLines(data, encodeOptions), config.output)
+    await writeStream(encodeLines(data, encodeOptions), { outputPath: config.output, separator: '\n' })
 
     if (config.output) {
       const relativeInputPath = formatInputLabel(config.input)
       const relativeOutputPath = path.relative(process.cwd(), config.output)
-      consola.success(`Encoded \`${relativeInputPath}\` → \`${relativeOutputPath}\``)
+      log.success(`Encoded \`${relativeInputPath}\` → \`${relativeOutputPath}\``)
     }
   }
 }
@@ -77,118 +71,56 @@ export async function encodeToToon(config: {
 export async function decodeToJson(config: {
   input: InputSource
   output?: string
-  indent: NonNullable<DecodeOptions['indent']>
+  indentSize: NonNullable<DecodeOptions['indentSize']>
   strict: NonNullable<DecodeOptions['strict']>
-  expandPaths?: NonNullable<DecodeOptions['expandPaths']>
 }): Promise<void> {
-  // Path expansion requires full value in memory, so use non-streaming path
-  if (config.expandPaths === 'safe') {
-    const toonContent = await readInput(config.input)
+  const lineSource = readLinesFromSource(config.input, config.strict)
 
-    const decodeOptions: DecodeOptions = {
-      indent: config.indent,
-      strict: config.strict,
-      expandPaths: config.expandPaths,
-    }
-    const data = decode(toonContent, decodeOptions)
-
-    await writeStreamingJson(jsonStringifyLines(data, config.indent), config.output)
+  const decodeStreamOptions: DecodeStreamOptions = {
+    indentSize: config.indentSize,
+    strict: config.strict,
   }
-  else {
-    const lineSource = readLinesFromSource(config.input)
 
-    const decodeStreamOptions: DecodeStreamOptions = {
-      indent: config.indent,
-      strict: config.strict,
-    }
+  const events = decodeStream(lineSource, decodeStreamOptions)
+  const jsonChunks = jsonStreamFromEvents(events, config.indentSize)
 
-    const events = decodeStream(lineSource, decodeStreamOptions)
-    const jsonChunks = jsonStreamFromEvents(events, config.indent)
-
-    await writeStreamingJson(jsonChunks, config.output)
-  }
+  await writeStream(jsonChunks, { outputPath: config.output, separator: '' })
 
   if (config.output) {
     const relativeInputPath = formatInputLabel(config.input)
     const relativeOutputPath = path.relative(process.cwd(), config.output)
-    consola.success(`Decoded \`${relativeInputPath}\` → \`${relativeOutputPath}\``)
+    log.success(`Decoded \`${relativeInputPath}\` → \`${relativeOutputPath}\``)
   }
 }
 
-/**
- * Writes JSON chunks to a file or stdout using streaming approach.
- * Chunks are written one at a time without building the full string in memory.
- */
-async function writeStreamingJson(
-  chunks: AsyncIterable<string> | Iterable<string>,
-  outputPath?: string,
+async function writeStream(
+  pieces: AsyncIterable<string> | Iterable<string>,
+  options: { outputPath?: string, separator: string },
 ): Promise<void> {
-  // Stream to file using fs/promises API
-  if (outputPath) {
-    let fileHandle: FileHandle | undefined
+  const { outputPath, separator } = options
+  let fileHandle: FileHandle | undefined
 
-    try {
+  try {
+    if (outputPath)
       fileHandle = await fsp.open(outputPath, 'w')
 
-      for await (const chunk of chunks) {
-        await fileHandle.write(chunk)
-      }
-    }
-    finally {
-      await fileHandle?.close()
-    }
-  }
-  // Stream to stdout
-  else {
-    for await (const chunk of chunks) {
-      process.stdout.write(chunk)
-    }
+    const handle = fileHandle
+    const write = handle
+      ? (text: string) => handle.write(text)
+      : (text: string) => { process.stdout.write(text) }
 
-    // Add final newline for stdout
-    process.stdout.write('\n')
-  }
-}
+    let isFirst = true
+    for await (const piece of pieces) {
+      if (!isFirst && separator)
+        await write(separator)
 
-/**
- * Writes TOON lines to a file or stdout using streaming approach.
- * Lines are written one at a time without building the full string in memory.
- */
-async function writeStreamingToon(
-  lines: Iterable<string>,
-  outputPath?: string,
-): Promise<void> {
-  let isFirst = true
-
-  // Stream to file using fs/promises API
-  if (outputPath) {
-    let fileHandle: FileHandle | undefined
-
-    try {
-      fileHandle = await fsp.open(outputPath, 'w')
-
-      for (const line of lines) {
-        if (!isFirst)
-          await fileHandle.write('\n')
-
-        await fileHandle.write(line)
-        isFirst = false
-      }
-    }
-    finally {
-      await fileHandle?.close()
-    }
-  }
-  // Stream to stdout
-  else {
-    for (const line of lines) {
-      if (!isFirst)
-        process.stdout.write('\n')
-
-      process.stdout.write(line)
+      await write(piece)
       isFirst = false
     }
 
-    // Add final newline for stdout
-    process.stdout.write('\n')
+    await write('\n')
+  }
+  finally {
+    await fileHandle?.close()
   }
 }

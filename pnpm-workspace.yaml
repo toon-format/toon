@@ -1,11 +1,6 @@
 minimumReleaseAgeExclude:
-  - '@ai-sdk/gateway@3.0.151'
-  - '@ai-sdk/google@3.0.94'
-  - '@ai-sdk/openai-compatible@2.0.61'
-  - '@ai-sdk/xai@3.0.108'
-  - ai@6.0.228
-  - tsdown@0.22.8
-  - '@toon-format/spec@3.3.2'
+  - '@toon-format/spec@4.1.1'
+  - utilful@3.3.0
 
 shellEmulator: true
 trustPolicy: no-downgrade

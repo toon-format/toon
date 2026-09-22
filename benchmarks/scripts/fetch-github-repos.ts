@@ -10,7 +10,6 @@ import { ensureDir } from '../src/utils.ts'
 prompts.intro('GitHub Repositories Fetcher')
 
 try {
-  // Fetch top 100 repos from GitHub
   const repoList = await searchTop100Repos()
   const repos = await fetchRepoDetails(repoList)
 
@@ -19,7 +18,6 @@ try {
     process.exit(1)
   }
 
-  // Sort by stars descending
   repos.sort((a, b) => b.stars - a.stars)
 
   await saveRepos(repos)

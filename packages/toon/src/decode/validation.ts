@@ -5,9 +5,6 @@ import { ToonDecodeError } from './errors.ts'
 
 // #region Count and structure validation
 
-/**
- * Asserts that the actual count matches the expected count in strict mode.
- */
 export function assertExpectedCount(
   actual: number,
   expected: number,
@@ -23,9 +20,6 @@ export function assertExpectedCount(
   }
 }
 
-/**
- * Validates that there are no extra list items beyond the expected count.
- */
 export function validateNoExtraListItems(
   nextLine: ParsedLine | undefined,
   itemDepth: Depth,
@@ -33,15 +27,12 @@ export function validateNoExtraListItems(
 ): void {
   if (nextLine?.depth === itemDepth && nextLine.content.startsWith(LIST_ITEM_PREFIX)) {
     throw new ToonDecodeError(
-      `Expected ${expectedCount} list array items, but found more`,
+      `Expected ${expectedCount} list-form items, but found more`,
       { line: nextLine.lineNumber, source: nextLine.raw },
     )
   }
 }
 
-/**
- * Validates that there are no extra tabular rows beyond the expected count.
- */
 export function validateNoExtraTabularRows(
   nextLine: ParsedLine | undefined,
   rowDepth: Depth,
@@ -59,9 +50,6 @@ export function validateNoExtraTabularRows(
   }
 }
 
-/**
- * Validates that there are no blank lines within a specific line range in strict mode.
- */
 export function validateNoBlankLinesInRange(
   startLine: number,
   endLine: number,
@@ -72,7 +60,6 @@ export function validateNoBlankLinesInRange(
   if (!strict)
     return
 
-  // Find blank lines within the range
   const firstBlank = blankLines.find(
     blank => blank.lineNumber > startLine && blank.lineNumber < endLine,
   )
@@ -89,24 +76,19 @@ export function validateNoBlankLinesInRange(
 
 // #region Row classification helpers
 
-/**
- * Checks if a line is a data row (vs a key-value pair) in a tabular array.
- */
+/** Checks if a line is a data row (vs a key-value pair) in a tabular array. */
 export function isDataRow(content: string, delimiter: Delimiter): boolean {
   const colonPos = findUnquotedChar(content, COLON)
   const delimiterPos = findUnquotedChar(content, delimiter)
 
-  // No colon = definitely a data row
   if (colonPos === -1) {
     return true
   }
 
-  // Has delimiter and it comes before colon = data row
   if (delimiterPos !== -1 && delimiterPos < colonPos) {
     return true
   }
 
-  // Colon before delimiter or no delimiter = key-value pair
   return false
 }
 

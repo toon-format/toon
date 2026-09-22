@@ -1,11 +1,10 @@
 import type { JsonObject, JsonStreamEvent, JsonValue } from '../types.ts'
 import { setOwnProperty } from '../shared/object-utils.ts'
-import { QUOTED_KEY_MARKER } from './expand.ts'
 
 // #region Build context types
 
 type BuildContext
-  = | { type: 'object', obj: JsonObject, currentKey?: string, quotedKeys: Set<string> }
+  = | { type: 'object', obj: JsonObject, currentKey?: string }
     | { type: 'array', arr: JsonValue[] }
 
 interface BuildState {
@@ -51,11 +50,9 @@ function applyEvent(state: BuildState, event: JsonStreamEvent): void {
   switch (event.type) {
     case 'startObject': {
       const obj: JsonObject = {}
-      const quotedKeys = new Set<string>()
 
       if (stack.length === 0) {
-        // Root object
-        stack.push({ type: 'object', obj, quotedKeys })
+        stack.push({ type: 'object', obj })
       }
       else {
         const parent = stack[stack.length - 1]!
@@ -71,7 +68,7 @@ function applyEvent(state: BuildState, event: JsonStreamEvent): void {
           parent.arr.push(obj)
         }
 
-        stack.push({ type: 'object', obj, quotedKeys })
+        stack.push({ type: 'object', obj })
       }
 
       break
@@ -87,16 +84,6 @@ function applyEvent(state: BuildState, event: JsonStreamEvent): void {
         throw new Error('Mismatched endObject event')
       }
 
-      // Attach quoted keys metadata if any keys were quoted
-      if (context.quotedKeys.size > 0) {
-        Object.defineProperty(context.obj, QUOTED_KEY_MARKER, {
-          value: context.quotedKeys,
-          enumerable: false,
-          writable: false,
-          configurable: false,
-        })
-      }
-
       if (stack.length === 0) {
         state.root = context.obj
       }
@@ -108,7 +95,6 @@ function applyEvent(state: BuildState, event: JsonStreamEvent): void {
       const arr: JsonValue[] = []
 
       if (stack.length === 0) {
-        // Root array
         stack.push({ type: 'array', arr })
       }
       else {
@@ -154,22 +140,16 @@ function applyEvent(state: BuildState, event: JsonStreamEvent): void {
 
       const parent = stack[stack.length - 1]!
       if (parent.type !== 'object') {
-        throw new Error('Key event in non-object context')
+        throw new Error('Key event outside of object context')
       }
 
       parent.currentKey = event.key
-
-      // Track quoted keys for path expansion
-      if (event.wasQuoted) {
-        parent.quotedKeys.add(event.key)
-      }
 
       break
     }
 
     case 'primitive': {
       if (stack.length === 0) {
-        // Root primitive
         state.root = event.value
       }
       else {
@@ -193,7 +173,7 @@ function applyEvent(state: BuildState, event: JsonStreamEvent): void {
 
 function finalizeState(state: BuildState): JsonValue {
   if (state.stack.length !== 0) {
-    throw new Error('Incomplete event stream: stack not empty at end')
+    throw new Error('Incomplete event stream: unclosed objects or arrays')
   }
 
   if (state.root === undefined) {

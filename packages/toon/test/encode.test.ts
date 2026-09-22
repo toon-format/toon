@@ -1,28 +1,22 @@
 import type { ResolvedEncodeOptions } from '../src/types'
-import type { Fixtures, TestCase } from './types'
-import arraysNested from '@toon-format/spec/tests/fixtures/encode/arrays-nested.json'
-import arraysObjects from '@toon-format/spec/tests/fixtures/encode/arrays-objects.json'
-import arraysPrimitive from '@toon-format/spec/tests/fixtures/encode/arrays-primitive.json'
-import arraysTabular from '@toon-format/spec/tests/fixtures/encode/arrays-tabular.json'
-import delimiters from '@toon-format/spec/tests/fixtures/encode/delimiters.json'
-import keyFolding from '@toon-format/spec/tests/fixtures/encode/key-folding.json'
-import objects from '@toon-format/spec/tests/fixtures/encode/objects.json'
-import primitives from '@toon-format/spec/tests/fixtures/encode/primitives.json'
-import whitespace from '@toon-format/spec/tests/fixtures/encode/whitespace.json'
+import type { TestCase } from './types'
 import { describe, expect, it } from 'vitest'
 import { DEFAULT_DELIMITER, encode } from '../src/index'
+import { loadFixtures } from './utils'
 
-const fixtureFiles = [
-  primitives,
-  objects,
-  arraysPrimitive,
-  arraysTabular,
-  arraysNested,
-  arraysObjects,
-  keyFolding,
-  delimiters,
-  whitespace,
-] as Fixtures[]
+// Loaded via `JSON.parse`: a Vite JSON-to-literal transform would turn the
+// prototype-safety fixtures' `__proto__` keys into prototype assignments.
+const fixtureFiles = loadFixtures('encode', [
+  'primitives',
+  'objects',
+  'objects-keyed',
+  'arrays-primitive',
+  'arrays-tabular',
+  'arrays-nested',
+  'arrays-objects',
+  'delimiters',
+  'whitespace',
+])
 
 for (const fixtures of fixtureFiles) {
   describe(fixtures.description, () => {
@@ -45,9 +39,7 @@ for (const fixtures of fixtureFiles) {
 
 function resolveEncodeOptions(options?: TestCase['options']): ResolvedEncodeOptions {
   return {
-    indent: options?.indent ?? 2,
+    indentSize: options?.indentSize ?? 2,
     delimiter: options?.delimiter ?? DEFAULT_DELIMITER,
-    keyFolding: options?.keyFolding ?? 'off',
-    flattenDepth: options?.flattenDepth ?? Number.POSITIVE_INFINITY,
   }
 }

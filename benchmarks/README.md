@@ -1,6 +1,6 @@
 # TOON Benchmarks
 
-Benchmarks measuring TOON's **token efficiency**, **retrieval accuracy**, and **structured-output generation** compared to JSON, XML, YAML, and CSV.
+Benchmarks measuring TOON's **token efficiency**, **retrieval accuracy**, and **structured generation** compared to JSON, XML, YAML, and CSV.
 
 > [!NOTE]
 > Token-efficiency and retrieval-accuracy results are automatically embedded in the [main README](https://github.com/toon-format/toon/#benchmarks). This guide focuses on running the benchmarks locally.
@@ -13,9 +13,6 @@ pnpm benchmark:tokens
 
 # Run retrieval accuracy benchmark (requires API keys)
 pnpm benchmark:accuracy
-
-# Run structured generation benchmark (requires a Nebius API key)
-pnpm benchmark:generation
 ```
 
 ## Token Efficiency Benchmark
@@ -37,21 +34,66 @@ Results are saved to `results/token-efficiency.md`.
 
 Tests how well LLMs can answer questions about data in different formats (TOON, JSON, JSON compact, XML, YAML, CSV):
 
-1. Generate 209 questions across 11 datasets (6 primary + 5 structural validation; CSV only included for datasets with flat/tabular structure)
+1. Generate 244 questions across 13 datasets (8 primary + 5 structural validation; CSV only included for flat, tabular-eligible datasets)
 2. Convert each dataset to all supported formats
 3. Query each LLM with formatted data + question
 4. Validate answers deterministically using type-aware comparison (no LLM judge needed)
 5. Aggregate metrics and generate report
 
+This measures **comprehension**: each model reads formatted data and answers questions about it. It does not test a model's ability to *generate* TOON.
+
+### What the Datasets Cover
+
+Live row counts and per-dataset scores are in the generated [dataset catalog](./results/retrieval-accuracy.md); this is what each one is for.
+
+**Primary datasets** – eight shapes, chosen so the tabular-eligibility axis is covered end to end:
+
+| Dataset | Exercises |
+| ------- | --------- |
+| Employee records | Uniform objects with identical fields – the best case for tabular form |
+| E-commerce orders | Nested customer objects and item arrays |
+| Time-series analytics | Dates and numeric values |
+| GitHub repositories | Real-world data, long string values |
+| Event logs | Semi-uniform data, roughly half flat and half with nested error objects |
+| Nested config | Deep nesting with almost no tabular eligibility – TOON's worst case |
+| Feature flags | A map of uniform objects – exercises [keyed tabular form](https://github.com/toon-format/spec/blob/main/SPEC.md#95-objects-of-uniform-objects--keyed-tabular-form) (`key[N:]{fields}:`) |
+| Contacts | Uniform records with nested address and plan objects – exercises [nested field groups](https://github.com/toon-format/spec/blob/main/SPEC.md#93-arrays-of-objects--tabular-form) |
+
+**Structural validation datasets** – five variants of one valid 20-row dataset. The corruption is applied to the *encoded text* after it is emitted, so TOON's `[N]` length and field-list width still declare the original shape while the other formats render the lossy-pipeline outcome:
+
+| Variant | What changes | Why it matters |
+| ------- | ------------ | -------------- |
+| Control | Nothing – text passed through untouched | Baseline |
+| Truncated | Last 3 row lines removed | TOON still declares `[20]`, so the shortfall is detectable; formats without length metadata stay valid and undetectable in principle |
+| Extra rows | 3 rows appended past the declared `[20]` | Detectable in TOON, valid and undetectable elsewhere |
+| Width mismatch | One cell dropped from row 10 | TOON's row is narrower than its field list (CSV narrower than its column row); JSON/YAML/XML merely drop the property, a schema-level signal |
+| Missing fields | Email value removed from every 5th record | Surfaces the same way as width mismatch |
+
+That contrast is the point of the structural-validation track: two of these corruptions cannot be detected in JSON, YAML, XML, or CSV at all, because those formats carry no declared length.
+
+### How Questions Are Generated
+
+244 questions across five categories, generated from the datasets rather than hand-written (see [`src/questions/`](./src/questions/)):
+
+- **Field retrieval** – direct value lookups, including booleans and simple counts such as array lengths. *"What is Ada's salary?"* → `75000`
+- **Aggregation** – dataset-level totals and averages plus single-condition filters. *"How many employees work in Engineering?"* → `17`
+- **Filtering** – multi-condition queries requiring compound logic. *"How many employees in Sales have salary > 80000?"* → `5`
+- **Structure awareness** – format-native structural affordances: TOON's `[N]` count and field list, CSV's header row. *"List the field names for employees"*
+- **Structural validation** – detecting truncated or corrupted data from the encoded text alone. *"Is this data complete and valid?"* → `YES` / `NO`
+
+> With reasoning disabled, multi-row arithmetic is hard in every format – aggregation and filtering scores mostly measure computation under format friction and sit near the floor for all formats. The per-question-type table in the generated report makes this visible.
+
+Answers are validated deterministically with type-aware comparison (`50000` = `$50,000`, `Engineering` = `engineering`, `2025-01-01` = `January 1, 2025`), so no LLM judge is involved.
+
 ### Setup
 
-1. Edit [`src/evaluate.ts`](./src/evaluate.ts) and add models to the exported `models` array:
+1. Edit [`src/evaluate.ts`](./src/evaluate.ts) and add models to the exported `MODELS` array:
    ```ts
-   export const models: LanguageModelV3[] = [
-     openai('gpt-5-nano'),
-     anthropic('claude-haiku-4-5-20251001'),
-     google('gemini-3-flash-preview'),
-     xai('grok-4-1-fast-non-reasoning'),
+   export const MODELS: ModelDescriptor[] = [
+     { id: 'gpt-5.4-nano', rpm: 50, create: () => openai('gpt-5.4-nano') },
+     { id: 'claude-haiku-4-5-20251001', rpm: 50, create: () => anthropic('claude-haiku-4-5-20251001') },
+     { id: 'gemini-3.6-flash', rpm: 25, create: () => google('gemini-3.6-flash') },
+     { id: 'grok-4.5', rpm: 25, reasoning: 'low', create: () => xai('grok-4.5') },
      // Add your models here
    ]
    ```
@@ -82,94 +124,122 @@ Running the script will:
 
 Edit [`src/constants.ts`](./src/constants.ts) to adjust:
 
-- `MODEL_RPM_LIMITS` – Rate limits per model
 - `DEFAULT_CONCURRENCY` – Parallel tasks (default: 10)
 - `DRY_RUN_LIMITS` – Questions per dry run (default: 10)
 
+Rate limits now live on each [`src/evaluate.ts`](./src/evaluate.ts) `MODELS` entry via its `rpm` field.
+
 ## Structured Generation Benchmark
 
-Compares three ways to generate the same four typed payloads:
+Compares plain JSON, JSON object mode (`response_format: { type: "json_object" }`), and TOON decoded by the local TypeScript implementation. JSON object mode is not schema-constrained decoding: all three tracks are checked locally against the case rules and gold data.
 
-1. Plain JSON text
-2. JSON object mode (`response_format: { type: "json_object" }`)
-3. TOON text decoded with the local TypeScript implementation
+The four cases are users, order, invoice, and company. Each track records first-attempt accuracy, final accuracy after up to two repairs, and total prompt/completion tokens across the attempts. Repairs retain the original task and previous output. API failures stop the run rather than count as format failures.
 
-Each response is validated with strict, case-specific rules, canonicalized, and compared with gold data. Invalid responses receive up to two repair attempts. The benchmark records one-shot accuracy, final accuracy, attempts, and prompt/completion token usage.
+This ports the [original Python benchmark](https://github.com/vetertann/TOON-generation-benchmark). The TypeScript harness uses the current TOON implementation, strict validation, and the current AI SDK. Its repair prompts now retain the original target values, so new runs should not be treated as exact reproductions of the historical experiment.
 
-This TypeScript implementation ports the methodology from [`vetertann/TOON-generation-benchmark`](https://github.com/vetertann/TOON-generation-benchmark), while using the monorepo's local TOON encoder and decoder instead of Python and CLI subprocesses.
+### Run Locally
 
-### Setup
-
-1. Add a [Nebius Token Factory](https://tokenfactory.nebius.com/) key to `.env`:
-   ```bash
-   NEBIUS_API_KEY=your_key
-   ```
-2. Optionally choose models and the number of runs:
-   ```bash
-   GENERATION_MODELS=openai/gpt-oss-120b GENERATION_RUNS=1 pnpm benchmark:generation
-   ```
-3. Run the full default matrix (21 models, 10 runs each):
-   ```bash
-   pnpm benchmark:generation
-   ```
-
-For a one-model, one-run smoke test, set `DRY_RUN=true`. Results are checkpointed after every completed run in `results/generation/` as raw, per-case, and per-model CSV files.
-
-Gold JSON and TOON fixtures are committed in `data/generation/`. Regenerate them after changing a case:
+The following commands run from the repository root with Node.js 24 and the pinned pnpm version:
 
 ```bash
-pnpm generate:generation-fixtures
+pnpm install --frozen-lockfile
+
+# Recreate the published historical table without model requests or API keys
+pnpm -C benchmarks report:generation
+
+# Regenerate the gold fixtures with the current local TOON encoder
+pnpm -C benchmarks generate:generation-fixtures
+
+# Smoke test: one selected model, one run, four cases, three formats
+# Requires NEBIUS_API_KEY in the environment or benchmarks/.env
+DRY_RUN=true GENERATION_MODELS=openai/gpt-oss-120b pnpm -C benchmarks benchmark:generation
+
+# Select a model matrix and repeat count
+GENERATION_MODELS=openai/gpt-oss-120b GENERATION_RUNS=10 pnpm -C benchmarks benchmark:generation
 ```
 
-### Published Results
+`DRY_RUN=true` makes real API calls; it reduces the matrix rather than simulating responses. Without overrides, the runner uses the original 21 model IDs and ten runs each. Model availability and aliases can change; select models currently available to your Nebius account.
 
-The committed baseline contains 10 runs for each of 21 models. Accuracy is reported for the first attempt (1-S) and after up to two repairs (Fin); Tok is the average prompt plus completion token count.
+Each invocation creates a separate directory under `results/generation/runs/`, leaving the committed historical CSVs untouched. Completed model-runs are checkpointed to raw and aggregate CSVs. `metadata.json` records the requested model IDs, settings, Node version, Git revision, source hashes, and completion status; `report.md` contains the generated table. A failed invocation keeps previously completed model-runs, but does not automatically resume. These local run directories are gitignored.
+
+To recreate a new run's report without API calls:
+
+```bash
+pnpm -C benchmarks report:generation /absolute/path/to/run-directory
+```
+
+Provider aliases are not immutable model snapshots, and repeated requests are not guaranteed to produce identical outputs. The historical CSVs contain per-run metrics rather than raw model responses or exact provider-version metadata. They are retained as historical evidence, not advertised as current TOON v4 results.
+
+### Published Historical Results
+
+<!-- automd:file src="./results/generation/historical-report.md" -->
+
+### Historical Generation Baseline
+
+These are the original Python benchmark results, preserved for reference. They are not a rerun with the current TypeScript harness or TOON v4.
+
+21 models; 210 model-runs; 10 runs per model; four cases and three formats per run.
+
+JSON-object means JSON object mode, not schema-constrained decoding. 1-S is first-attempt accuracy; Fin includes up to two repairs; Tok is mean prompt plus completion tokens across all attempts for a case.
 
 | Case | JSON 1-S | JSON Fin | JSON Tok | JSON-object 1-S | JSON-object Fin | JSON-object Tok | TOON 1-S | TOON Fin | TOON Tok |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| users | 94.8% | 94.8% | 1,078 | 92.9% | 100% | 556 | 90.5% | 90.5% | 840 |
+| users | 94.8% | 94.8% | 1,078 | 92.9% | 100.0% | 556 | 90.5% | 90.5% | 840 |
 | order | 81.9% | 81.9% | 1,746 | 78.6% | 83.3% | 1,255 | 74.3% | 78.6% | 1,585 |
-| company | 18.6% | 43.8% | 3,575 | 21.9% | 48.1% | 2,592 | 0% | 48.6% | 2,567 |
-| invoice | 90.0% | 90.0% | 1,723 | 87.6% | 95.2% | 1,349 | 0% | 52.4% | 3,626 |
+| company | 18.6% | 43.8% | 3,575 | 21.9% | 48.1% | 2,592 | 0.0% | 48.6% | 2,567 |
+| invoice | 90.0% | 90.0% | 1,723 | 87.6% | 95.2% | 1,349 | 0.0% | 52.4% | 3,626 |
 
-See the [raw runs](./results/generation/eval-runs.csv), [per-case aggregates](./results/generation/eval-results-by-case.csv), and [per-model aggregates](./results/generation/eval-results-by-model.csv).
+The users, order, and invoice cases cover tabular or mixed structures; company covers nested arrays. Scores are specific to these prompts and model versions, not a general ranking of formats.
+
+Historical run numbers restart within the DeepSeek-R1 batches. All 210 distinct measurement rows are retained; model/run is not a unique key. The archived CSVs contain per-run metrics, not raw model responses or immutable provider version metadata.
+
+Regenerate this table locally with `pnpm -C benchmarks report:generation`. The source is `benchmarks/results/generation/eval-runs.csv`; no API key is required.
+
+<!-- /automd -->
 
 ## Project Structure
 
 ```
 scripts/
 ├── accuracy-benchmark.ts         # Retrieval accuracy benchmark
-├── generation-benchmark.ts       # Structured output generation benchmark
-├── generate-generation-fixtures.ts # Regenerate generation gold data
+├── generation-benchmark.ts       # Structured generation benchmark
+├── generation-report.ts          # Regenerate reports from saved CSVs
+├── generate-generation-fixtures.ts # Regenerate gold fixtures
 ├── token-efficiency-benchmark.ts # Token counting benchmark
-└── fetch-github-repos.ts         # Update GitHub dataset
+├── fetch-github-repos.ts         # Update GitHub dataset
+├── verify-feature-datasets.ts    # Keyed/nested-group dataset guards
+├── verify-structural-corruption.ts # Corruption invariant guards
+└── verify-utils.ts               # Shared verify script plumbing
 src/
 ├── constants.ts                  # Configuration
 ├── datasets.ts                   # Test data generators
 ├── evaluate.ts                   # LLM evaluation
-├── formatters.ts                 # Format converters
+├── formats.ts                    # Format registry (converters, primers, fences, labels)
 ├── normalize.ts                  # Answer normalization
 ├── report.ts                     # Markdown reports
 ├── storage.ts                    # Result caching
+├── structural-corruption.ts      # Post-encode text corruption
 ├── types.ts                      # Type definitions
 ├── utils.ts                      # Helpers
-├── generation/                   # Generation cases, evaluation, and reports
+├── generation/                   # Generation cases, scoring, reporting, storage
 └── questions/                    # Question generators
     ├── analytics.ts
     ├── event-logs.ts
     ├── github.ts
     ├── index.ts
+    ├── keyed.ts
     ├── nested-config.ts
+    ├── nested-group.ts
     ├── nested.ts
     ├── structural-validation.ts
     ├── structure.ts
     ├── tabular.ts
     └── utils.ts
 data/
-├── generation/                   # Gold JSON and TOON generation fixtures
+├── generation/                   # Gold generation JSON and TOON fixtures
 └── github-repos.json             # Top 100 GitHub repos
 results/
-├── generation/                   # Generation run and aggregate CSV files
+├── generation/                   # Historical results and isolated local runs
 ├── token-efficiency.md           # Token savings report
 ├── retrieval-accuracy.md         # Accuracy report
 └── accuracy/models/              # Per-model results (JSON)

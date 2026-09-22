@@ -16,7 +16,6 @@ export function isNumericLiteral(token: string): boolean {
   if (!token)
     return false
 
-  // Enforce JSON-like grammar with no forbidden leading zeros
   if (!NUMERIC_LITERAL_PATTERN.test(token))
     return false
 

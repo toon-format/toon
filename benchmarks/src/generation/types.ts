@@ -1,4 +1,4 @@
-import type { JSONSchema7, LanguageModelV3 } from '@ai-sdk/provider'
+import type { JSONSchema7, LanguageModelV4 } from '@ai-sdk/provider'
 
 export const GENERATION_CASE_IDS = ['users', 'order', 'company', 'invoice'] as const
 export const GENERATION_TRACK_IDS = ['json-object', 'json-plain', 'toon'] as const
@@ -39,6 +39,6 @@ export interface GenerationRunResult {
 
 export interface EvaluateGenerationTrackOptions {
   benchmarkCase: GenerationCase
-  model: LanguageModelV3
+  model: LanguageModelV4
   track: GenerationTrackId
 }

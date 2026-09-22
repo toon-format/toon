@@ -4,11 +4,10 @@ import { RuleConfigSeverity } from '@commitlint/types'
 // #region Rules
 
 /**
- * Rule to ensure the first letter of the commit subject is lowercase.
+ * Rejects a commit subject whose first letter is uppercase.
  *
- * @param parsed - Parsed commit object containing commit message parts.
- * @returns A tuple where the first element is a boolean indicating
- * if the rule passed, and the second is an optional error message.
+ * @param parsed Parsed commit object containing commit message parts
+ * @returns Whether the rule passed, paired with an optional error message
  */
 const subjectLowercaseFirst: Rule = async (parsed) => {
   const firstChar = parsed.subject!.match(/[a-z]/i)?.[0]

@@ -322,7 +322,7 @@ function unwrapCase(input: unknown, caseId: GenerationCaseId): unknown {
     return input
 
   const wrapped = input[caseId]
-  return isRecord(wrapped) ? wrapped : input
+  return Object.keys(input).length === 1 && isRecord(wrapped) ? wrapped : input
 }
 
 function validateCase(caseId: GenerationCaseId, input: unknown): void {

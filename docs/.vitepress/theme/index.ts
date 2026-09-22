@@ -12,7 +12,8 @@ const config: Theme = {
   extends: DefaultTheme,
   enhanceApp({ app }) {
     app.config.globalProperties.$spec = {
-      version: '3.3',
+      version: '4.1',
+      date: '2026-07-25',
     }
     app.component('CopyOrDownloadAsMarkdownButtons', CopyOrDownloadAsMarkdownButtons)
     app.component('PlaygroundLayout', PlaygroundLayout)

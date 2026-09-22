@@ -3,13 +3,10 @@ import type { Question } from '../types.ts'
 import { QUESTION_LIMITS, QUESTION_THRESHOLDS } from '../constants.ts'
 import { QuestionBuilder, rotateQuestions, SAMPLE_STRIDES } from './utils.ts'
 
-/**
- * Generate analytics (website metrics) questions
- */
 export function generateAnalyticsQuestions(metrics: AnalyticsMetric[], getId: () => string): Question[] {
   const questions: Question[] = []
 
-  // Field retrieval: date-based metrics
+  // #region Field retrieval: date-based metrics
   const metricFieldGenerators: Array<(metric: AnalyticsMetric, getId: () => string) => Question> = [
     (metric, getId) => new QuestionBuilder()
       .id(getId())
@@ -54,8 +51,9 @@ export function generateAnalyticsQuestions(metrics: AnalyticsMetric[], getId: ()
     SAMPLE_STRIDES.ANALYTICS_FIELD,
     getId,
   ))
+  // #endregion
 
-  // Aggregation: basic statistics
+  // #region Aggregation: basic statistics
   const totalDays = metrics.length
   const totalViews = metrics.reduce((sum, m) => sum + m.views, 0)
   const totalConversions = metrics.reduce((sum, m) => sum + m.conversions, 0)
@@ -106,8 +104,9 @@ export function generateAnalyticsQuestions(metrics: AnalyticsMetric[], getId: ()
       .normalize({ decimalPlaces: 2 })
       .build(),
   )
+  // #endregion
 
-  // Aggregation: high views/conversions
+  // #region Aggregation: high views/conversions
   for (const threshold of QUESTION_THRESHOLDS.analytics.views) {
     const count = metrics.filter(m => m.views > threshold).length
     questions.push(
@@ -135,8 +134,9 @@ export function generateAnalyticsQuestions(metrics: AnalyticsMetric[], getId: ()
         .build(),
     )
   }
+  // #endregion
 
-  // Filtering: multi-condition (views AND revenue)
+  // #region Filtering: multi-condition (views AND revenue)
   for (const threshold of QUESTION_THRESHOLDS.analytics.viewsForFiltering) {
     const count = metrics.filter(
       m => m.views > threshold && m.conversions > QUESTION_THRESHOLDS.analytics.conversionsForFiltering,
@@ -152,8 +152,9 @@ export function generateAnalyticsQuestions(metrics: AnalyticsMetric[], getId: ()
         .build(),
     )
   }
+  // #endregion
 
-  // Filtering: revenue thresholds
+  // #region Filtering: revenue thresholds
   for (const threshold of QUESTION_THRESHOLDS.analytics.revenueThresholds) {
     const count = metrics.filter(
       m => m.revenue > threshold && m.views > QUESTION_THRESHOLDS.analytics.viewsThresholdForRevenue,
@@ -169,8 +170,9 @@ export function generateAnalyticsQuestions(metrics: AnalyticsMetric[], getId: ()
         .build(),
     )
   }
+  // #endregion
 
-  // Filtering: clicks and conversions
+  // #region Filtering: clicks and conversions
   for (const threshold of QUESTION_THRESHOLDS.analytics.clicksForFiltering) {
     const count = metrics.filter(
       m => m.clicks > threshold && m.conversions > QUESTION_THRESHOLDS.analytics.conversionsForClickFiltering,
@@ -186,8 +188,9 @@ export function generateAnalyticsQuestions(metrics: AnalyticsMetric[], getId: ()
         .build(),
     )
   }
+  // #endregion
 
-  // Filtering: revenue and bounce rate
+  // #region Filtering: revenue and bounce rate
   for (const threshold of QUESTION_THRESHOLDS.analytics.revenueForBounceRate) {
     const count = metrics.filter(
       m => m.revenue > threshold && m.bounceRate < QUESTION_THRESHOLDS.analytics.bounceRateThreshold,
@@ -203,6 +206,7 @@ export function generateAnalyticsQuestions(metrics: AnalyticsMetric[], getId: ()
         .build(),
     )
   }
+  // #endregion
 
   return questions
 }

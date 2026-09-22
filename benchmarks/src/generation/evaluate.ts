@@ -1,14 +1,20 @@
-import type { LanguageModelV3 } from '@ai-sdk/provider'
+import type { LanguageModelV4 } from '@ai-sdk/provider'
 import type { EvaluateGenerationTrackOptions, GenerationCompletion, GenerationTokenUsage, GenerationTrackId, GenerationTrackResult } from './types.ts'
 import { isDeepStrictEqual } from 'node:util'
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible'
-import { generateText, Output } from 'ai'
+import { generateText, NoObjectGeneratedError, Output } from 'ai'
 import { decode } from '../../../packages/toon/src/index.ts'
 import { canonicalizeGenerationValue } from './cases.ts'
 
-const MAX_ATTEMPTS = 3
-const MAX_OUTPUT_TOKENS = 5_000
-const REQUEST_TIMEOUT_MS = 120_000
+export const GENERATION_SETTINGS = {
+  maxAttempts: 3,
+  maxOutputTokens: 5_000,
+  maxRetries: 5,
+  temperature: 0,
+  topP: 1,
+  topK: 50,
+  requestTimeoutMs: 120_000,
+} as const
 
 export const GENERATION_SYSTEM_PROMPT: string = [
   'You are a data-formatting model.',
@@ -30,19 +36,21 @@ export async function evaluateGenerationTrack({
   model,
   track,
 }: EvaluateGenerationTrackOptions): Promise<GenerationTrackResult> {
-  let prompt = track === 'toon'
+  const originalPrompt = track === 'toon'
     ? benchmarkCase.toonPrompt
     : withJsonSchema(benchmarkCase.jsonPrompt, benchmarkCase.schema)
+  let prompt = originalPrompt
   let previousOutput = ''
   let errorMessage = ''
   let inputTokens = 0
   let outputTokens = 0
 
-  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+  for (let attempt = 1; attempt <= GENERATION_SETTINGS.maxAttempts; attempt++) {
     if (attempt > 1) {
-      prompt = track === 'toon'
+      const repairPrompt = track === 'toon'
         ? makeToonRepairPrompt(previousOutput, errorMessage)
         : makeJsonRepairPrompt(previousOutput, errorMessage, benchmarkCase.schema)
+      prompt = `${originalPrompt}\n\n${repairPrompt}`
     }
 
     const completion = track === 'json-object'
@@ -75,7 +83,7 @@ export async function evaluateGenerationTrack({
   }
 
   return {
-    attemptsUsed: MAX_ATTEMPTS,
+    attemptsUsed: GENERATION_SETTINGS.maxAttempts,
     finalOk: false,
     inputTokens,
     oneShotOk: false,
@@ -97,22 +105,33 @@ export function stripJsonFence(input: string): string {
   return (match?.[1] ?? input).trim()
 }
 
-async function callJsonObject(model: LanguageModelV3, prompt: string): Promise<GenerationCompletion> {
-  const result = await generateText({
-    model,
-    system: GENERATION_SYSTEM_PROMPT,
-    prompt,
-    output: Output.json(),
-    ...generationSettings(),
-  })
+async function callJsonObject(model: LanguageModelV4, prompt: string): Promise<GenerationCompletion> {
+  try {
+    const result = await generateText({
+      model,
+      system: GENERATION_SYSTEM_PROMPT,
+      prompt,
+      output: Output.json(),
+      ...generationSettings(),
+    })
 
-  return {
-    text: stripJsonFence(stripModelReasoning(result.text)),
-    ...tokenUsage(result.usage),
+    return {
+      text: stripJsonFence(stripModelReasoning(result.text)),
+      ...tokenUsage(result.usage),
+    }
+  }
+  catch (error) {
+    // Invalid model output belongs in the measured repair loop. API failures do not.
+    if (!NoObjectGeneratedError.isInstance(error))
+      throw error
+    return {
+      text: stripJsonFence(stripModelReasoning(error.text ?? '')),
+      ...tokenUsage(error.usage),
+    }
   }
 }
 
-async function callPlain(model: LanguageModelV3, prompt: string, track: GenerationTrackId): Promise<GenerationCompletion> {
+async function callPlain(model: LanguageModelV4, prompt: string, track: GenerationTrackId): Promise<GenerationCompletion> {
   const result = await generateText({
     model,
     system: GENERATION_SYSTEM_PROMPT,
@@ -137,12 +156,12 @@ function generationSettings(): {
   topP: number
 } {
   return {
-    maxOutputTokens: MAX_OUTPUT_TOKENS,
-    maxRetries: 5,
-    providerOptions: { nebius: { top_k: 50 } },
-    temperature: 0,
-    timeout: { totalMs: REQUEST_TIMEOUT_MS },
-    topP: 1,
+    maxOutputTokens: GENERATION_SETTINGS.maxOutputTokens,
+    maxRetries: GENERATION_SETTINGS.maxRetries,
+    providerOptions: { nebius: { top_k: GENERATION_SETTINGS.topK } },
+    temperature: GENERATION_SETTINGS.temperature,
+    timeout: { totalMs: GENERATION_SETTINGS.requestTimeoutMs },
+    topP: GENERATION_SETTINGS.topP,
   }
 }
 

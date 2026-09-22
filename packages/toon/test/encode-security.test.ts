@@ -40,20 +40,11 @@ describe('encode security hardening', () => {
     }
   })
 
-  it('preserves own __proto__ properties through key folding and expansion', () => {
-    const input = JSON.parse('{"__proto__":{"inner":{"folded":true}}}')
-    const encoded = encode(input, { keyFolding: 'safe' })
-    const decoded = decode(encoded, { expandPaths: 'safe' }) as Record<string, any>
-
-    expect(Object.hasOwn(decoded, prototypeKey)).toBe(true)
-    expect(decoded[prototypeKey].inner.folded).toBe(true)
-  })
-
   it('does not use inherited properties to classify tabular rows', () => {
     const inheritedKey = '__toonInheritedTabularField'
     const input = [{ [inheritedKey]: 'user' }, { other: 'kept' }]
 
-    // eslint-disable-next-line no-extend-native -- Simulate a pre-polluted environment
+    // eslint-disable-next-line no-extend-native -- Simulates a pre-polluted environment.
     Object.defineProperty(Object.prototype, inheritedKey, {
       value: 'admin',
       enumerable: true,
