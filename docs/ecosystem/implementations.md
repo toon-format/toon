@@ -52,6 +52,7 @@ Community members have created implementations in additional languages:
 | **Python** (Rust backend) | [toons](https://github.com/alesanfra/toons) | [@alesanfra](https://github.com/alesanfra) |
 | **R** | [toon](https://github.com/laresbernardo/toon) | [@laresbernardo](https://github.com/laresbernardo) |
 | **Ruby** | [toon-ruby](https://github.com/andrepcg/toon-ruby) | [@andrepcg](https://github.com/andrepcg) |
+| **Ruby** | [toon-fu](https://github.com/hoblin/toon-fu) | [@hoblin](https://github.com/hoblin) |
 | **Scala** | [toon4s](https://github.com/vim89/toon4s) | [@vim89](https://github.com/vim89) |
 | **Zig** | [toon-zig](https://github.com/LatentEvals/toon-zig) | [@montanaflynn](https://github.com/montanaflynn) |
 
