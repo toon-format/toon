@@ -8,7 +8,7 @@ on:
       - docs/**
       - automd.config.ts
       - package.json
-      - eslint.config.mjs
+      - eslint.config.ts
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
