@@ -29,6 +29,9 @@
     "bin",
     "dist"
   ],
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "dev": "node ./src/entry.ts --help",
     "build": "tsdown",
