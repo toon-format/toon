@@ -31,8 +31,8 @@ Community members have created implementations in additional languages:
 | **Apex** | [ApexToon](https://github.com/Eacaw/ApexToon) | [@Eacaw](https://github.com/Eacaw) |
 | **C** | [TOONc](https://github.com/UsboKirishima/TOONc) | [@UsboKirishima](https://github.com/UsboKirishima) |
 | **C++** | [ctoon](https://github.com/mohammadraziei/ctoon) | [@mohammadraziei](https://github.com/mohammadraziei) |
-| **C#** | [ToonEncoder](https://github.com/Cysharp/ToonEncoder) | [@Cysharp](https://github.com/Cysharp/ToonEncoder) |
-| **C#** | [Corvus.JsonSchema](https://github.com/corvus-dotnet/Corvus.JsonSchema/blob/main/docs/Toon.md) | [@mwadams](https://github.com/corvus-dotnet/Corvus.JsonSchema/) |
+| **C#** | [ToonEncoder](https://github.com/Cysharp/ToonEncoder) | [@Cysharp](https://github.com/Cysharp) |
+| **C#** | [Corvus.JsonSchema](https://github.com/corvus-dotnet/Corvus.JsonSchema/blob/main/docs/Toon.md) | [@mwadams](https://github.com/mwadams) |
 | **Clojure** | [toon](https://github.com/vadelabs/toon) | [@vadelabs](https://github.com/vadelabs) |
 | **Crystal** | [toon-crystal](https://github.com/mamantoha/toon-crystal) | [@mamantoha](https://github.com/mamantoha) |
 | **Delphi** | [delphi-toon](https://github.com/ernestoalconada/delphi-toon) | [@ernestoalconada](https://github.com/ernestoalconada) |
@@ -52,7 +52,7 @@ Community members have created implementations in additional languages:
 | **Python** (Rust backend) | [toons](https://github.com/alesanfra/toons) | [@alesanfra](https://github.com/alesanfra) |
 | **R** | [toon](https://github.com/laresbernardo/toon) | [@laresbernardo](https://github.com/laresbernardo) |
 | **Ruby** | [toon-ruby](https://github.com/andrepcg/toon-ruby) | [@andrepcg](https://github.com/andrepcg) |
-| **Scala** | [toon4s](https://github.com/vim89/toon4s) | [@vim89](https://github.com/vim89) |
+| **Scala** | [toon4s](https://github.com/com-vitthalmirji/toon4s) | [@vim89](https://github.com/vim89) |
 | **Zig** | [toon-zig](https://github.com/LatentEvals/toon-zig) | [@montanaflynn](https://github.com/montanaflynn) |
 
 ## Contributing an Implementation
