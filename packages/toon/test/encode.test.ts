@@ -4,19 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { DEFAULT_DELIMITER, encode } from '../src/index'
 import { loadFixtures } from './utils'
 
-// Loaded via `JSON.parse`: a Vite JSON-to-literal transform would turn the
-// prototype-safety fixtures' `__proto__` keys into prototype assignments.
-const fixtureFiles = loadFixtures('encode', [
-  'primitives',
-  'objects',
-  'objects-keyed',
-  'arrays-primitive',
-  'arrays-tabular',
-  'arrays-nested',
-  'arrays-objects',
-  'delimiters',
-  'whitespace',
-])
+const fixtureFiles = loadFixtures('encode')
 
 for (const fixtures of fixtureFiles) {
   describe(fixtures.description, () => {
