@@ -4,18 +4,7 @@
 
 ## Why this is out of scope
 
-ESM-only is a deliberate choice, not an oversight:
-
-> The packages is intentionally ESM-only to bring the JS ecosystem forward.
-> – [toon#279](https://github.com/toon-format/toon/issues/279#issuecomment-3903810256)
-
-From CommonJS, load the package with a dynamic import:
-
-```js
-const { encode } = await import('@toon-format/toon')
-```
-
-If your setup needs a CJS file, bundle one in your project ([toon#271](https://github.com/toon-format/toon/pull/271#issuecomment-3813078863)).
+ESM-only is deliberate, to move the JS ecosystem forward ([toon#279](https://github.com/toon-format/toon/issues/279#issuecomment-3903810256), [toon#271](https://github.com/toon-format/toon/pull/271#issuecomment-3813078863)). From CommonJS, `require()` the package where Node supports `require(esm)`, or load it with `await import('@toon-format/toon')`. If your setup needs a CJS file, bundle one in your project.
 
 ## Prior requests
 
