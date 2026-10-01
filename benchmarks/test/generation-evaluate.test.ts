@@ -55,6 +55,26 @@ describe('generation requests and repairs', () => {
     expect(result).toEqual({ attemptsUsed: 3, finalOk: false, oneShotOk: false, inputTokens: 30, outputTokens: 15 })
   })
 
+  describe.each(GENERATION_CASES)('schema parity for $id', (schemaCase) => {
+    it.each(['json-object', 'json-plain', 'toon'] as const)('provides the same complete schema on the first attempt and repair for %s', async (track) => {
+      const output = track === 'toon' ? encode(schemaCase.gold) : JSON.stringify(schemaCase.gold)
+      const fetch = mockCompletions(['invalid output', output])
+      const result = await evaluateGenerationTrack({ benchmarkCase: schemaCase, model: createNebiusProvider('test-key')('test-model'), track })
+      expect(result.finalOk).toBe(true)
+      expect(fetch).toHaveBeenCalledTimes(2)
+      const schema = JSON.stringify(schemaCase.schema, undefined, 2)
+      for (const call of fetch.mock.calls) {
+        const body = JSON.parse(call[1].body as string)
+        const prompt = body.messages.find((message: { role: string }) => message.role === 'user').content as string
+        expect(prompt).toContain(track === 'toon' ? schemaCase.toonPrompt : schemaCase.jsonPrompt)
+        // Exactly the same schema, once per request, including nested field names.
+        expect(prompt.split(schema)).toHaveLength(2)
+        if (track === 'toon')
+          expect(prompt).toContain('Return TOON whose decoded value matches this JSON Schema.')
+      }
+    })
+  })
+
   it('propagates authentication failures instead of recording inaccurate format scores', async () => {
     const fetch = vi.fn(async () => Response.json({ error: { message: 'Invalid API key' } }, { status: 401 }))
     vi.stubGlobal('fetch', fetch)

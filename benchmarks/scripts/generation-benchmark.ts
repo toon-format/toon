@@ -15,31 +15,7 @@ import { aggregateGenerationRunsByCase, aggregateGenerationRunsByModel, flattenG
 import { createGenerationRunDirectory, writeGenerationCheckpoint } from '../src/generation/storage.ts'
 import { GENERATION_TRACK_IDS } from '../src/generation/types.ts'
 
-const DEFAULT_MODELS = [
-  'deepseek-ai/DeepSeek-V3-0324-fast',
-  'openai/gpt-oss-120b',
-  'moonshotai/Kimi-K2-Instruct',
-  'Qwen/Qwen3-Coder-480B-A35B-Instruct',
-  'NousResearch/Hermes-4-405B',
-  'NousResearch/Hermes-4-70B',
-  'openai/gpt-oss-20b',
-  'zai-org/GLM-4.5',
-  'deepseek-ai/DeepSeek-R1-0528',
-  'PrimeIntellect/INTELLECT-3',
-  'Qwen/Qwen3-235B-A22B-Thinking-2507',
-  'Qwen/Qwen3-235B-A22B-Instruct-2507',
-  'Qwen/Qwen3-30B-A3B-Instruct-2507',
-  'Qwen/Qwen3-Coder-30B-A3B-Instruct',
-  'Qwen/Qwen3-32B',
-  'nvidia/Llama-3_1-Nemotron-Ultra-253B-v1',
-  'meta-llama/Llama-3.3-70B-Instruct',
-  'meta-llama/Meta-Llama-3.1-8B-Instruct',
-  'Qwen/Qwen2.5-Coder-7B-fast',
-  'google/gemma-2-2b-it',
-  'google/gemma-2-9b-it-fast',
-] as const
-
-const apiKey = process.env.NEBIUS_API_KEY ?? process.env.LLM_API_KEY
+const apiKey = process.env.NEBIUS_API_KEY?.trim()
 if (!apiKey)
   throw new Error('Missing NEBIUS_API_KEY environment variable')
 
@@ -47,9 +23,11 @@ const configuredModels = process.env.GENERATION_MODELS
   ?.split(',')
   .map(model => model.trim())
   .filter(Boolean)
+if (!configuredModels?.length)
+  throw new Error('Missing GENERATION_MODELS: set a comma-separated list of model IDs available to your Nebius account')
 const models = DRY_RUN
-  ? [(configuredModels?.[0] ?? DEFAULT_MODELS[0])]
-  : [...new Set(configuredModels?.length ? configuredModels : DEFAULT_MODELS)]
+  ? [configuredModels[0]!]
+  : [...new Set(configuredModels)]
 const runsPerModel = DRY_RUN ? 1 : positiveInteger(process.env.GENERATION_RUNS, 10)
 const nebius = createNebiusProvider(apiKey)
 const results: GenerationRunResult[] = []

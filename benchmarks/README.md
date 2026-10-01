@@ -133,32 +133,28 @@ Rate limits now live on each [`src/evaluate.ts`](./src/evaluate.ts) `MODELS` ent
 
 Compares plain JSON, JSON object mode (`response_format: { type: "json_object" }`), and TOON decoded by the local TypeScript implementation. JSON object mode is not schema-constrained decoding: all three tracks are checked locally against the case rules and gold data.
 
-The four cases are users, order, invoice, and company. Each track records first-attempt accuracy, final accuracy after up to two repairs, and total prompt/completion tokens across the attempts. Repairs retain the original task and previous output. API failures stop the run rather than count as format failures.
+The four cases are users, order, invoice, and company. Each track records first-attempt accuracy, final accuracy after up to two repairs, and total prompt/completion tokens across the attempts. All three tracks receive the same JSON Schema, including nested field names and types. TOON must decode to data matching that schema. Repairs retain the original task, schema, and previous output. API failures stop the run rather than count as format failures.
 
-This ports the [original Python benchmark](https://github.com/vetertann/TOON-generation-benchmark). The TypeScript harness uses the current TOON implementation, strict validation, and the current AI SDK. Its repair prompts now retain the original target values, so new runs should not be treated as exact reproductions of the historical experiment.
+This ports the [original Python benchmark](https://github.com/vetertann/TOON-generation-benchmark). The TypeScript harness uses the current TOON implementation, strict validation, and the current AI SDK. Unlike the historical experiment, TOON receives the schema and all repair prompts retain the original target values. New runs are not directly comparable to the historical results.
 
 ### Run Locally
 
-The following commands run from the repository root with Node.js 24 and the pinned pnpm version:
+The following commands run from the repository root with Node.js 24 and the pinned pnpm version. Copy `benchmarks/.env.example` to `benchmarks/.env`, then set `NEBIUS_API_KEY` and the required `GENERATION_MODELS` list to model IDs available to your Nebius account:
 
 ```bash
 pnpm install --frozen-lockfile
-
-# Recreate the published historical table without model requests or API keys
-pnpm -C benchmarks report:generation
 
 # Regenerate the gold fixtures with the current local TOON encoder
 pnpm -C benchmarks generate:generation-fixtures
 
 # Smoke test: one selected model, one run, four cases, three formats
-# Requires NEBIUS_API_KEY in the environment or benchmarks/.env
-DRY_RUN=true GENERATION_MODELS=openai/gpt-oss-120b pnpm -C benchmarks benchmark:generation
+DRY_RUN=true pnpm -C benchmarks benchmark:generation
 
-# Select a model matrix and repeat count
-GENERATION_MODELS=openai/gpt-oss-120b GENERATION_RUNS=10 pnpm -C benchmarks benchmark:generation
+# Run the configured model matrix with ten repetitions per model
+GENERATION_RUNS=10 pnpm -C benchmarks benchmark:generation
 ```
 
-`DRY_RUN=true` makes real API calls; it reduces the matrix rather than simulating responses. Without overrides, the runner uses the original 21 model IDs and ten runs each. Model availability and aliases can change; select models currently available to your Nebius account.
+`DRY_RUN=true` makes real API calls using the first configured model and one repetition. `GENERATION_MODELS` is required even for a smoke test; there is no default model list. Normal runs default to ten repetitions per model. Model availability and aliases can change, so the caller selects the matrix explicitly.
 
 Each invocation creates a separate directory under `results/generation/runs/`, leaving the committed historical CSVs untouched. Completed model-runs are checkpointed to raw and aggregate CSVs. `metadata.json` records the requested model IDs, settings, Node version, Git revision, source hashes, and completion status; `report.md` contains the generated table. A failed invocation keeps previously completed model-runs, but does not automatically resume. These local run directories are gitignored.
 
@@ -170,32 +166,17 @@ pnpm -C benchmarks report:generation /absolute/path/to/run-directory
 
 Provider aliases are not immutable model snapshots, and repeated requests are not guaranteed to produce identical outputs. The historical CSVs contain per-run metrics rather than raw model responses or exact provider-version metadata. They are retained as historical evidence, not advertised as current TOON v4 results.
 
-### Published Historical Results
+### Publish Results
 
-<!-- automd:file src="./results/generation/historical-report.md" -->
+Publish only measurements from a completed run of this TypeScript harness. A small, explicitly named model matrix is sufficient; a smoke test checks connectivity but is not a substitute for repeated measurements.
 
-### Historical Generation Baseline
+After the run completes, check that `metadata.json` has `completed: true` and the intended models and repeat count. Copy the entire run directory to a tracked directory under `results/generation/published/`, including its raw CSV, aggregate CSVs, metadata, and generated report. Embed that report in this README and `docs/guide/benchmarks.md`, and link to the saved metadata and CSVs so readers can reproduce the table.
 
-These are the original Python benchmark results, preserved for reference. They are not a rerun with the current TypeScript harness or TOON v4.
+No current-harness result table is published yet. The archived Python CSVs remain in `results/generation/`; their TOON prompts omitted the schema field information and they are not evidence for the corrected harness. To inspect the archived report without making model requests:
 
-21 models; 210 model-runs; 10 runs per model; four cases and three formats per run.
-
-JSON-object means JSON object mode, not schema-constrained decoding. 1-S is first-attempt accuracy; Fin includes up to two repairs; Tok is mean prompt plus completion tokens across all attempts for a case.
-
-| Case | JSON 1-S | JSON Fin | JSON Tok | JSON-object 1-S | JSON-object Fin | JSON-object Tok | TOON 1-S | TOON Fin | TOON Tok |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| users | 94.8% | 94.8% | 1,078 | 92.9% | 100.0% | 556 | 90.5% | 90.5% | 840 |
-| order | 81.9% | 81.9% | 1,746 | 78.6% | 83.3% | 1,255 | 74.3% | 78.6% | 1,585 |
-| company | 18.6% | 43.8% | 3,575 | 21.9% | 48.1% | 2,592 | 0.0% | 48.6% | 2,567 |
-| invoice | 90.0% | 90.0% | 1,723 | 87.6% | 95.2% | 1,349 | 0.0% | 52.4% | 3,626 |
-
-The users, order, and invoice cases cover tabular or mixed structures; company covers nested arrays. Scores are specific to these prompts and model versions, not a general ranking of formats.
-
-Historical run numbers restart within the DeepSeek-R1 batches. All 210 distinct measurement rows are retained; model/run is not a unique key. The archived CSVs contain per-run metrics, not raw model responses or immutable provider version metadata.
-
-Regenerate this table locally with `pnpm -C benchmarks report:generation`. The source is `benchmarks/results/generation/eval-runs.csv`; no API key is required.
-
-<!-- /automd -->
+```bash
+pnpm -C benchmarks report:generation --historical
+```
 
 ## Project Structure
 

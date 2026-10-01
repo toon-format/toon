@@ -1,6 +1,6 @@
 ### Historical Generation Baseline
 
-These are the original Python benchmark results, preserved for reference. They are not a rerun with the current TypeScript harness or TOON v4.
+These are the original Python benchmark results, preserved for reference. They are not a rerun with the current TypeScript harness or TOON v4. The historical TOON prompts omitted schema field information, so these scores are not comparable to the corrected harness.
 
 21 models; 210 model-runs; 10 runs per model; four cases and three formats per run.
 
@@ -17,4 +17,4 @@ The users, order, and invoice cases cover tabular or mixed structures; company c
 
 Historical run numbers restart within the DeepSeek-R1 batches. All 210 distinct measurement rows are retained; model/run is not a unique key. The archived CSVs contain per-run metrics, not raw model responses or immutable provider version metadata.
 
-Regenerate this table locally with `pnpm -C benchmarks report:generation`. The source is `benchmarks/results/generation/eval-runs.csv`; no API key is required.
+Regenerate this table locally with `pnpm -C benchmarks report:generation --historical`. The source is `benchmarks/results/generation/eval-runs.csv`; no API key is required.

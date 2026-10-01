@@ -36,9 +36,11 @@ export async function evaluateGenerationTrack({
   model,
   track,
 }: EvaluateGenerationTrackOptions): Promise<GenerationTrackResult> {
-  const originalPrompt = track === 'toon'
-    ? benchmarkCase.toonPrompt
-    : withJsonSchema(benchmarkCase.jsonPrompt, benchmarkCase.schema)
+  const originalPrompt = withJsonSchema(
+    track === 'toon' ? benchmarkCase.toonPrompt : benchmarkCase.jsonPrompt,
+    benchmarkCase.schema,
+    track,
+  )
   let prompt = originalPrompt
   let previousOutput = ''
   let errorMessage = ''
@@ -49,7 +51,7 @@ export async function evaluateGenerationTrack({
     if (attempt > 1) {
       const repairPrompt = track === 'toon'
         ? makeToonRepairPrompt(previousOutput, errorMessage)
-        : makeJsonRepairPrompt(previousOutput, errorMessage, benchmarkCase.schema)
+        : makeJsonRepairPrompt(previousOutput, errorMessage)
       prompt = `${originalPrompt}\n\n${repairPrompt}`
     }
 
@@ -179,24 +181,25 @@ function parseCompletion(completion: GenerationCompletion, track: GenerationTrac
   return decode(extractToonPayload(completion.text))
 }
 
-function withJsonSchema(prompt: string, schema: object): string {
-  return `${prompt}\n\nReturn valid JSON matching this schema:\n${JSON.stringify(schema, undefined, 2)}`
+function withJsonSchema(prompt: string, schema: object, track: GenerationTrackId): string {
+  const instruction = track === 'toon'
+    ? 'Return TOON whose decoded value matches this JSON Schema. Use the exact property names and nesting shown; the schema describes the data, not the output format.'
+    : 'Return valid JSON matching this JSON Schema.'
+  return `${prompt}\n\n${instruction}\n${JSON.stringify(schema, undefined, 2)}`
 }
 
-function makeJsonRepairPrompt(previousOutput: string, errorMessage: string, schema: object): string {
+function makeJsonRepairPrompt(previousOutput: string, errorMessage: string): string {
   return `Your previous JSON did not validate against the schema. Return ONLY valid JSON (no prose, no fences) that matches the schema and the target values.
 Validation error:
 ${errorMessage}
 
 Previous output:
-${previousOutput}
-
-JSON Schema:
-${JSON.stringify(schema, undefined, 2)}`
+${previousOutput}`
 }
 
 function makeToonRepairPrompt(previousOutput: string, errorMessage: string): string {
   return `Your previous TOON was invalid. Return ONLY a \`\`\`toon fenced block.
+- Match the property names, nesting, and types in the JSON Schema above and retain the target values.
 - Use 2-space indentation; no trailing spaces.
 - Ensure headers/fieldsets and [N] match row counts.
 Validation/decoding error:
