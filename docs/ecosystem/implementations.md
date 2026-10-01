@@ -58,6 +58,6 @@ Community members have created implementations in additional languages:
 Building a TOON implementation for a new language? Here are the steps:
 
 1. **Follow the spec**: Implement the [latest specification](https://github.com/toon-format/spec/blob/main/SPEC.md).
-2. **Add tests**: Run the [reference test suite](https://github.com/toon-format/spec/tree/main/tests) – its language-agnostic fixtures validate compatibility across implementations.
+2. **Add tests**: Run the [reference test suite](https://github.com/toon-format/spec/tree/main/tests) from a spec release tag in CI – its language-agnostic fixtures validate compatibility across implementations.
 3. **Document usage**: Provide a clear README with installation and usage examples.
 4. **Share it**: Open a PR to add your implementation to the README at [github.com/toon-format/toon](https://github.com/toon-format/toon).
