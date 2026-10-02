@@ -31,10 +31,6 @@ export type {
 /**
  * Encodes a JavaScript value into TOON format string.
  *
- * @param input Any JavaScript value (objects, arrays, primitives)
- * @param options Optional encoding configuration
- * @returns TOON formatted string
- *
  * @example
  * ```ts
  * encode({ name: 'Ada', age: 30 })
@@ -58,10 +54,6 @@ export function encode(input: unknown, options?: EncodeOptions): string {
 
 /**
  * Decodes a TOON format string into a JavaScript value.
- *
- * @param input TOON formatted string
- * @param options Optional decoding configuration
- * @returns Parsed JavaScript value (object, array, or primitive)
  *
  * @example
  * ```ts
@@ -87,10 +79,6 @@ export function decode(input: string, options?: DecodeOptions): JsonValue {
  *
  * This function yields TOON lines one at a time without building the full string,
  * making it suitable for streaming large outputs to files, HTTP responses, or process stdout.
- *
- * @param input Any JavaScript value (objects, arrays, primitives)
- * @param options Optional encoding configuration
- * @returns Iterable of TOON lines (without trailing newlines)
  *
  * @example
  * ```ts
@@ -123,10 +111,6 @@ export function encodeLines(input: unknown, options?: EncodeOptions): Iterable<s
  * Convenience wrapper around the streaming decoder that builds the full
  * value in memory.
  *
- * @param lines Iterable of TOON lines (without newlines)
- * @param options Optional decoding configuration
- * @returns Parsed JavaScript value (object, array, or primitive)
- *
  * @example
  * ```ts
  * const lines = ['name: Ada', 'age: 30']
@@ -145,10 +129,6 @@ export function decodeFromLines(lines: Iterable<string>, options?: DecodeOptions
  *
  * Yields structured events (startObject, endObject, startArray, endArray, key,
  * primitive) that represent the JSON data model without building the full value tree.
- *
- * @param lines Iterable of TOON lines (without newlines)
- * @param options Optional decoding configuration
- * @returns Iterable of JSON stream events
  *
  * @example
  * ```ts
@@ -172,10 +152,6 @@ export function decodeStreamSync(lines: Iterable<string>, options?: DecodeStream
  * Yields structured events (startObject, endObject, startArray, endArray, key,
  * primitive) that represent the JSON data model without building the full value tree.
  * Supports both sync and async iterables.
- *
- * @param source Async or sync iterable of TOON lines (without newlines)
- * @param options Optional decoding configuration
- * @returns Async iterable of JSON stream events
  *
  * @example
  * ```ts
