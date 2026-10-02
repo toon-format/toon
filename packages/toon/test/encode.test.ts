@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { DEFAULT_DELIMITER, encode } from '../src/index'
 import { loadFixtures } from './utils'
 
-const fixtureFiles = loadFixtures('encode')
+const fixtureFiles = await loadFixtures('encode')
 
 for (const fixtures of fixtureFiles) {
   describe(fixtures.description, () => {
