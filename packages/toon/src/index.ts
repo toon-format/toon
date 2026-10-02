@@ -1,4 +1,4 @@
-import type { DecodeOptions, DecodeStreamOptions, EncodeOptions, JsonStreamEvent, JsonValue, ResolvedDecodeOptions, ResolvedEncodeOptions } from './types.ts'
+import type { DecodeOptions, DecodeStreamOptions, EncodeOptions, JsonStreamEvent, JsonValue, ResolvedEncodeOptions } from './types.ts'
 import { DEFAULT_DELIMITER } from './constants.ts'
 import { decodeStream as decodeStreamCore, decodeStreamSync as decodeStreamSyncCore } from './decode/decoders.ts'
 import { buildValueFromEvents } from './decode/event-builder.ts'
@@ -119,8 +119,7 @@ export function encodeLines(input: unknown, options?: EncodeOptions): Iterable<s
  * ```
  */
 export function decodeFromLines(lines: Iterable<string>, options?: DecodeOptions): JsonValue {
-  const resolvedOptions = resolveDecodeOptions(options)
-  const events = decodeStreamSyncCore(lines, resolvedOptions)
+  const events = decodeStreamSyncCore(lines, options)
   return buildValueFromEvents(events)
 }
 
@@ -182,12 +181,5 @@ function resolveOptions(options?: EncodeOptions): ResolvedEncodeOptions {
     indentSize: options?.indentSize ?? options?.indent ?? 2,
     delimiter,
     replacer: options?.replacer,
-  }
-}
-
-function resolveDecodeOptions(options?: DecodeOptions): ResolvedDecodeOptions {
-  return {
-    indentSize: options?.indentSize ?? options?.indent ?? 2,
-    strict: options?.strict ?? true,
   }
 }
