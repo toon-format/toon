@@ -29,7 +29,6 @@ Think of it as a translation layer: use JSON programmatically, and encode it as 
 - [Ecosystem](#ecosystem)
 - [Documentation](#documentation)
 - [Media Type & File Extension](#media-type--file-extension)
-- [Other Implementations](#other-implementations)
 - [📋 Full Specification](https://github.com/toon-format/spec/blob/main/SPEC.md)
 
 ## Why TOON?
@@ -791,34 +790,11 @@ Follow the detailed [LLM integration guide](https://toonformat.dev/guide/llm-pro
 
 ## Documentation
 
-### Getting Started
-
-- [Introduction & Installation](https://toonformat.dev/guide/getting-started) – What TOON is, when to use it, first steps
-- [Format Overview](https://toonformat.dev/guide/format-overview) – Complete syntax with examples
-- [Benchmarks](https://toonformat.dev/guide/benchmarks) – Accuracy & token efficiency results
-
-### Tools & Integration
-
-- [CLI](https://toonformat.dev/cli/) – Command-line tool for JSON↔TOON conversions
-- [Playgrounds](https://toonformat.dev/ecosystem/tools-and-playgrounds) – Interactive tools
-- [Using TOON with LLMs](https://toonformat.dev/guide/llm-prompts) – Prompting strategies & validation
-
-### References
-
-- [API Reference](https://toonformat.dev/reference/api) – TypeScript/JavaScript encode/decode API
-- [Syntax Cheatsheet](https://toonformat.dev/reference/syntax-cheatsheet) – Quick format lookup
-- [Specification](https://github.com/toon-format/spec/blob/main/SPEC.md) – Normative rules for implementers
-- [Glossary](https://github.com/toon-format/spec/blob/main/CONTEXT.md) – One name per concept, for contributors and tooling
+Guides and the API and CLI references live at [toonformat.dev](https://toonformat.dev); ports to other languages are listed under [Implementations](https://toonformat.dev/ecosystem/implementations).
 
 ## Media Type & File Extension
 
 TOON files use the `.toon` extension and the provisional media type `text/toon`. Documents are always UTF-8; the `charset=utf-8` parameter may be given but is assumed when absent. See [SPEC.md §17](https://github.com/toon-format/spec/blob/main/SPEC.md#17-iana-considerations) for normative details.
-
-## Other Implementations
-
-TOON has official and community implementations across multiple languages including Python, Rust, Go, Java, Swift, .NET, and many more.
-
-See the full list of implementations in the [documentation](https://toonformat.dev/ecosystem/implementations).
 
 ## Credits
 
