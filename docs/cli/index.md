@@ -214,7 +214,7 @@ items[2]{id,name,qty,price}:
 :::
 
 ::: tip
-Tab delimiters often tokenize more efficiently than commas and reduce the need for quote-escaping. Use `--delimiter $'\t'` (bash/zsh) for maximum token savings on large tabular data. See [Delimiter Strategies](/reference/api#delimiter-strategies) for full guidance.
+Tab delimiters often tokenize more efficiently than commas and reduce the need for quote-escaping. Use `--delimiter $'\t'` (bash/zsh) for maximum token savings on large tabular data. See [Delimiter Options](/guide/format-overview#delimiter-options) for full guidance.
 :::
 
 ### Lenient Decoding

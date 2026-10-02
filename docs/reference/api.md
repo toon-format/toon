@@ -600,7 +600,7 @@ encode(data, { delimiter: '|' })
 
 :::
 
-See [Delimiter Strategies](#delimiter-strategies) for guidance on choosing delimiters.
+See [Delimiter Options](/guide/format-overview#delimiter-options) for guidance on choosing delimiters.
 
 ### `DecodeOptions`
 
@@ -685,50 +685,3 @@ DELIMITERS // { comma: ',', tab: '\t', pipe: '|' }
 | `EncodeReplacer` | Signature of the [replacer function](#replacer-function) |
 | `ResolvedEncodeOptions` | `EncodeOptions` after defaults are applied (advanced) |
 | `ResolvedDecodeOptions` | `DecodeOptions` after defaults are applied (advanced) |
-
-## Guides & Examples
-
-### Round-Trip Compatibility
-
-TOON provides lossless round-trips after normalization:
-
-```ts
-import { decode, encode } from '@toon-format/toon'
-
-const original = {
-  users: [
-    { id: 1, name: 'Ada', role: 'admin' },
-    { id: 2, name: 'Bob', role: 'user' }
-  ]
-}
-
-const toon = encode(original)
-const restored = decode(toon)
-
-console.log(JSON.stringify(original) === JSON.stringify(restored))
-// true
-```
-
-### Delimiter Strategies
-
-Tab delimiters (`\t`) often tokenize more efficiently than commas. Tabs are single characters that rarely appear in natural text, which reduces the need for quote-escaping and leads to smaller token counts in large datasets.
-
-Example:
-
-```toon
-items[2	]{sku	name	qty	price}:
-  A1	Widget	2	9.99
-  B2	Gadget	1	14.5
-```
-
-For maximum token savings on large tabular data, use tab delimiters:
-
-```ts
-encode(data, { delimiter: '\t' })
-```
-
-**Choosing a Delimiter:**
-
-- **Comma (`,`)**: Default, widely understood, good for simple tabular data.
-- **Tab (`\t`)**: Best for LLM token efficiency, excellent for large datasets.
-- **Pipe (`|`)**: Alternative when commas appear frequently in data.
