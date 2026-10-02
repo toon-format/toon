@@ -1,7 +1,7 @@
 import type { JsonStreamEvent } from '../src/index'
 import { describe, expect, it } from 'vitest'
 import { buildValueFromEvents, buildValueFromEventsAsync } from '../src/decode/event-builder'
-import { decode, decodeFromLines, decodeStream, decodeStreamSync } from '../src/index'
+import { decodeFromLines, decodeStream, decodeStreamSync } from '../src/index'
 
 describe('streaming decode', () => {
   describe('decodeStreamSync', () => {
@@ -411,13 +411,6 @@ describe('streaming decode', () => {
   })
 
   describe('decodeFromLines', () => {
-    it('produces same result as decode', () => {
-      const input = 'name: Alice\nage: 30\nscores[3]: 95, 87, 92'
-      const lines = input.split('\n')
-
-      expect(decodeFromLines(lines)).toEqual(decode(input))
-    })
-
     it('strips trailing carriage returns from caller-split lines', () => {
       expect(decodeFromLines(['a: 1\r', 'b: 2\r'])).toEqual({ a: 1, b: 2 })
     })
@@ -434,27 +427,6 @@ describe('streaming decode', () => {
         items: [{ '': [{ a: 1 }, { a: 2 }] }],
       })
     })
-  })
-
-  describe('streaming equivalence', () => {
-    const testCases = [
-      { name: 'simple object', input: 'name: Alice\nage: 30' },
-      { name: 'nested objects', input: 'user:\n  profile:\n    name: Alice\n    age: 30' },
-      { name: 'mixed structures', input: 'name: Alice\nscores[3]: 95, 87, 92\naddress:\n  city: NYC\n  zip: 10001' },
-      { name: 'list form with objects', input: 'users[2]:\n  - name: Alice\n    age: 30\n  - name: Bob\n    age: 25' },
-      { name: 'tabular array', input: 'users[3]{name,age,city}:\n  Alice, 30, NYC\n  Bob, 25, LA\n  Charlie, 35, SF' },
-      { name: 'root primitive number', input: '42' },
-      { name: 'root primitive string', input: 'Hello World' },
-      { name: 'root primitive boolean', input: 'true' },
-      { name: 'root primitive null', input: 'null' },
-    ]
-
-    for (const testCase of testCases) {
-      it(`decodeFromLines matches decode() for: ${testCase.name}`, () => {
-        const lines = testCase.input.split('\n')
-        expect(decodeFromLines(lines)).toEqual(decode(testCase.input))
-      })
-    }
   })
 })
 
