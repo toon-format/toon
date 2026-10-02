@@ -143,7 +143,7 @@ Anything that fits none of these – mixed types, non-uniform objects – falls 
 
 ## Key Features
 
-- 📊 **Token-Efficient & Accurate:** Matches JSON's retrieval accuracy while using 42.6% fewer tokens – see [Benchmarks](#benchmarks).
+- 📊 **Token-Efficient & Accurate:** Matches JSON's retrieval accuracy with fewer tokens – see [Benchmarks](#benchmarks).
 - 🔁 **JSON Data Model:** Encodes the same objects, arrays, and primitives as JSON with deterministic, lossless round-trips.
 - 🛤️ **LLM-Friendly Guardrails:** `[N]` declares how many rows, `{fields}` how wide – so truncated or malformed output can't slip through.
 - 📐 **Minimal Syntax:** Uses indentation instead of braces and minimizes quoting, giving YAML-like readability with CSV-style compactness.
