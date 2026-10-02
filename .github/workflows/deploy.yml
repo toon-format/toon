@@ -8,7 +8,8 @@ on:
       - docs/**
       - automd.config.ts
       - package.json
-      - eslint.config.ts
+      - packages/toon/package.json
+      - packages/toon/src/**
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
