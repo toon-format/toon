@@ -794,7 +794,7 @@ Guides and the API and CLI references live at [toonformat.dev](https://toonforma
 
 ## Media Type & File Extension
 
-TOON files use the `.toon` extension and the provisional media type `text/toon`. Documents are always UTF-8; the `charset=utf-8` parameter may be given but is assumed when absent. See [SPEC.md §17](https://github.com/toon-format/spec/blob/main/SPEC.md#17-iana-considerations) for normative details.
+TOON files use the `.toon` extension and the provisional media type `text/toon` (UTF-8) – see [spec §17](https://github.com/toon-format/spec/blob/main/SPEC.md#17-iana-considerations).
 
 ## Credits
 
