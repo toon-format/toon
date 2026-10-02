@@ -2,7 +2,6 @@
   "name": "@toon-format/cli",
   "type": "module",
   "version": "4.1.1",
-  "packageManager": "pnpm@11.17.0",
   "description": "CLI for JSON ↔ TOON conversion using @toon-format/toon",
   "author": "Johann Schopplich <hello@johannschopplich.com>",
   "license": "MIT",
