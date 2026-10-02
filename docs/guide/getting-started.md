@@ -79,23 +79,6 @@ The pattern is the same throughout TOON: declare structure once, stream data com
 
 Maps of uniform objects collapse as well: the [keyed tabular form](/guide/format-overview#keyed-tabular-objects) turns them into tables whose rows carry their own keys.
 
-### Design Goals
-
-TOON is optimized for specific use cases. It aims to:
-
-- Make arrays of uniform objects as compact as possible by declaring structure once and streaming data.
-- Stay fully lossless and deterministic – round-trips preserve all data and structure.
-- Keep parsing simple and robust for both LLMs and humans through explicit structure markers.
-- Provide validation guardrails (array lengths, field counts) that help detect truncation and malformed output.
-
-## When to Use TOON
-
-TOON excels with arrays of uniform objects – data with the same structure across items. For LLM prompts, the format produces deterministic, minimally quoted text with built-in validation. Explicit array lengths (`[N]`) and field lists (`{fields}`) help detect truncation and malformed data, while tabular form declares the field list once rather than repeating it in every row.
-
-::: tip
-The TOON format is stable, but also an idea in progress. Nothing's set in stone – help shape where it goes by contributing to the [spec](https://github.com/toon-format/spec) or sharing feedback.
-:::
-
 ## When Not to Use TOON
 
 TOON is not always the best choice. Consider alternatives when:
