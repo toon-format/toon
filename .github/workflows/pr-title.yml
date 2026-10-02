@@ -16,14 +16,13 @@ jobs:
     name: Lint PR title
     runs-on: ubuntu-slim
 
-    if: ${{ (github.event.action == 'opened' || github.event.changes.title != null) && github.actor != 'renovate[bot]' }}
+    if: ${{ (github.event.action == 'opened' || github.event.changes.title != null) }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
         with:
           persist-credentials: false
-          # Only fetch the config file from the repository
           sparse-checkout-cone-mode: false
           sparse-checkout: commitlint.config.ts
 
