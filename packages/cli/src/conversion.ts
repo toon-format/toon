@@ -6,6 +6,7 @@ import * as path from 'node:path'
 import process from 'node:process'
 import { estimateTokenCount } from 'tokenx'
 import { CliError, log } from 'utilful/cli'
+import { buildValueFromEventsAsync } from '../../toon/src/decode/event-builder.ts'
 import { decodeStream, encode, encodeLines } from '../../toon/src/index.ts'
 import { jsonStreamFromEvents } from './json-from-events.ts'
 import { formatInputLabel, readInput, readLinesFromSource } from './utils.ts'
@@ -82,7 +83,10 @@ export async function decodeToJson(config: {
   }
 
   const events = decodeStream(lineSource, decodeStreamOptions)
-  const jsonChunks = jsonStreamFromEvents(events, config.indentSize)
+  // Last-write-wins on duplicate keys (§14.3) needs the whole object, and strict mode rejects duplicates, so only strict mode streams.
+  const jsonChunks = config.strict
+    ? jsonStreamFromEvents(events, config.indentSize)
+    : [JSON.stringify(await buildValueFromEventsAsync(events), null, config.indentSize)]
 
   await writeStream(jsonChunks, { outputPath: config.output, separator: '' })
 
