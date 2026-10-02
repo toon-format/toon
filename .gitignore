@@ -4,5 +4,3 @@ node_modules
 .env
 docs/.vitepress/dist
 docs/.vitepress/cache
-packages/toon/test/fixtures/*.json
-packages/toon/test/fixtures/*.toon
