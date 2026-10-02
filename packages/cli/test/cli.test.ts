@@ -269,6 +269,20 @@ describe('toon CLI', () => {
       }
     })
 
+    it('keeps the last duplicate key with --no-strict', async () => {
+      const restoreStdin = mockStdin('name: Ada\nname: Bob\n')
+
+      try {
+        const { stdout } = await runCli(['--decode', '--no-strict'])
+
+        // `JSON.parse` would hide a duplicate key, so compare the raw output.
+        expect(stdout).toBe('{\n  "name": "Bob"\n}\n')
+      }
+      finally {
+        restoreStdin()
+      }
+    })
+
     it('keeps --stats diagnostics off stdout', async () => {
       const data = {
         items: [
