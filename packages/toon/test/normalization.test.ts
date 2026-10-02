@@ -1,7 +1,7 @@
 /* eslint-disable test/prefer-lowercase-title */
 import type { EncodeReplacer } from '../src/index'
 import { describe, expect, it } from 'vitest'
-import { decode, encode } from '../src/index'
+import { decode, encode, encodeLines } from '../src/index'
 
 describe('JavaScript-specific type normalization', () => {
   describe('BigInt normalization', () => {
@@ -49,6 +49,43 @@ describe('JavaScript-specific type normalization', () => {
     it('converts empty Set to empty array', () => {
       const result = encode(new Set())
       expect(result).toBe('[]')
+    })
+  })
+
+  describe('sparse array normalization', () => {
+    it.each([
+      { name: 'a single hole', input: Object.assign([], { length: 1 }), expected: [null], expectedToon: '[1]: null' },
+      { name: 'only holes', input: Object.assign([], { length: 3 }), expected: [null, null, null], expectedToon: '[3]: null,null,null' },
+      { name: 'primitive elements', input: Object.assign([], { length: 3, 0: 1, 2: 3 }), expected: [1, null, 3], expectedToon: '[3]: 1,null,3' },
+      {
+        name: 'object elements',
+        input: Object.assign([], { length: 3, 0: { x: 1 }, 2: { x: 2 } }),
+        expected: [{ x: 1 }, null, { x: 2 }],
+        expectedToon: '[3]:\n  - x: 1\n  - null\n  - x: 2',
+      },
+      {
+        name: 'array elements',
+        input: Object.assign([], { length: 3, 0: [1], 2: [2] }),
+        expected: [[1], null, [2]],
+        expectedToon: '[3]:\n  - [1]: 1\n  - null\n  - [1]: 2',
+      },
+      {
+        name: 'an object property',
+        input: { items: Object.assign([], { length: 2 }) },
+        expected: { items: [null, null] },
+        expectedToon: 'items[2]: null,null',
+      },
+      {
+        name: 'a toJSON result',
+        input: { toJSON: () => Object.assign([], { length: 2 }) },
+        expected: [null, null],
+        expectedToon: '[2]: null,null',
+      },
+    ])('normalizes holes to null for $name', ({ input, expected, expectedToon }) => {
+      const encoded = encode(input)
+      expect(encoded).toBe(expectedToon)
+      expect(decode(encoded)).toEqual(expected)
+      expect([...encodeLines(input)]).toEqual(expectedToon.split('\n'))
     })
   })
 

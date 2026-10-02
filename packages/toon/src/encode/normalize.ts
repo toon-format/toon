@@ -62,7 +62,7 @@ export function normalizeValue(value: unknown): JsonValue {
   }
 
   if (Array.isArray(value)) {
-    return value.map(normalizeValue)
+    return Array.from(value, normalizeValue)
   }
 
   if (value instanceof Set) {

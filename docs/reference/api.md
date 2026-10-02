@@ -63,6 +63,7 @@ Non-JSON-serializable values are normalized before encoding:
 | `BigInt` (within safe range) | Number |
 | `BigInt` (out of range) | Quoted decimal string (e.g., `"9007199254740993"`) |
 | `Date` | ISO string in quotes (e.g., `"2025-01-01T00:00:00.000Z"`) |
+| Sparse array | Array with empty slots normalized to `null` |
 | `Set` | Array of normalized values |
 | `Map` | Object with `String(key)` keys |
 | `undefined`, `function`, `symbol` | `null` |
