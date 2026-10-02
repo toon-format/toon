@@ -690,14 +690,7 @@ repositories[3]{id,name,repo,description,createdAt,updatedAt,pushedAt,stars,watc
 ## Installation & Quick Start
 
 ```bash
-# npm
 npm install @toon-format/toon
-
-# pnpm
-pnpm add @toon-format/toon
-
-# yarn
-yarn add @toon-format/toon
 ```
 
 To keep the [CLI](#cli) around instead of invoking it through `npx`, install it globally:
