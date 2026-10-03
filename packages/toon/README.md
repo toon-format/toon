@@ -784,7 +784,7 @@ Follow the detailed [LLM integration guide](https://toonformat.dev/guide/llm-pro
 
 **Playgrounds** – the [official playground](https://toonformat.dev/playground) converts JSON or YAML to TOON in real time, compares token counts, and shares experiments by URL. Community alternatives: [Format Tokenization Playground](https://www.curiouslychase.com/playground/format-tokenization-exploration), [TOON Tools](https://toontools.vercel.app/).
 
-**Editors** – [TOON Language Support](https://marketplace.visualstudio.com/items?itemName=vishalraut.vscode-toon) for VS Code (`code --install-extension vishalraut.vscode-toon`) adds highlighting, validation, and token analysis. [tree-sitter-toon](https://github.com/3swordman/tree-sitter-toon) covers Neovim, Helix, Emacs, and Zed; [toon.nvim](https://github.com/thalesgelinger/toon.nvim) is a Lua-native alternative. Elsewhere, YAML highlighting is a close approximation.
+**Editors** – the official [VS Code extension](https://marketplace.visualstudio.com/items?itemName=toon-format.toon) (`code --install-extension toon-format.toon`) adds syntax highlighting; the community [TOON Language Support](https://marketplace.visualstudio.com/items?itemName=vishalraut.vscode-toon) adds validation, conversion, and token analysis. [tree-sitter-toon](https://github.com/3swordman/tree-sitter-toon) covers Neovim, Helix, Emacs, and Zed; [toon.nvim](https://github.com/thalesgelinger/toon.nvim) is a Lua-native alternative. Elsewhere, YAML highlighting is a close approximation.
 
 **Tooling** – [Tooner](https://github.com/chaindead/tooner) is an MCP proxy that converts JSON tool responses to TOON.
 
