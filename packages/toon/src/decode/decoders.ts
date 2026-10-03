@@ -2,7 +2,7 @@ import type { ArrayHeaderInfo, DecodeStreamOptions, Depth, FieldNode, JsonPrimit
 import type { LineReader, LineRule } from './line-reader.ts'
 import type { ArrayHeaderParseResult } from './parser.ts'
 import { COLON, DEFAULT_DELIMITER, LIST_ITEM_MARKER, LIST_ITEM_PREFIX } from '../constants.ts'
-import { findClosingQuote, findUnquotedChar, trimSpaces } from '../shared/string-utils.ts'
+import { findUnquotedChar, trimSpaces } from '../shared/string-utils.ts'
 import { ToonDecodeError, withLine } from './errors.ts'
 import { createLineReader, driveAsync, driveSync, peekLine, readLine } from './line-reader.ts'
 import { countLeafFields, isArrayHeaderContent, isKeyValueContent, mapRowValuesToPrimitives, parseArrayHeaderLine, parseDelimitedValues, parseKeyToken, parsePrimitiveToken } from './parser.ts'
@@ -70,12 +70,12 @@ function* decodeDocument(reader: LineReader, options: DecoderContext): LineRule 
   yield* readLine(reader)
   const following = yield* peekLine(reader)
   const hasMore = following !== undefined
-  if (!hasMore && !isKeyValueLine(first)) {
+  if (!hasMore && !isKeyValueContent(first.content)) {
     yield { type: 'primitive', value: withLine(first, () => parsePrimitiveToken(first.content)) }
     return
   }
 
-  if (!isKeyValueLine(first) && following?.depth === 0) {
+  if (!isKeyValueContent(first.content) && following?.depth === 0) {
     throw new ToonDecodeError(
       'Top-level document must start with a key-value or array-header line',
       { line: first.lineNumber, source: first.raw },
@@ -630,20 +630,6 @@ function* followSiblingFields(
     else {
       break
     }
-  }
-}
-
-function isKeyValueLine(line: ParsedLine): boolean {
-  const content = line.content
-  if (content.startsWith('"')) {
-    const closingQuoteIndex = findClosingQuote(content, 0)
-    if (closingQuoteIndex === -1) {
-      return false
-    }
-    return content.slice(closingQuoteIndex + 1).includes(COLON)
-  }
-  else {
-    return content.includes(COLON)
   }
 }
 
