@@ -1,5 +1,5 @@
 import type { ArrayHeaderInfo, Delimiter, FieldNode, JsonPrimitive } from '../types.ts'
-import { BACKSLASH, CLOSE_BRACE, CLOSE_BRACKET, COLON, DELIMITERS, DOUBLE_QUOTE, FALSE_LITERAL, NULL_LITERAL, OPEN_BRACE, OPEN_BRACKET, PIPE, TAB, TRUE_LITERAL } from '../constants.ts'
+import { BACKSLASH, CLOSE_BRACE, CLOSE_BRACKET, COLON, DELIMITERS, DOUBLE_QUOTE, FALSE_LITERAL, NULL_LITERAL, OPEN_BRACE, OPEN_BRACKET, PIPE, SPACE, TAB, TRUE_LITERAL } from '../constants.ts'
 import { isBooleanOrNullLiteral, isNumericLiteral } from '../shared/literal-utils.ts'
 import { findClosingQuote, findUnquotedChar, trimSpaces, unescapeString } from '../shared/string-utils.ts'
 
@@ -507,6 +507,9 @@ export function parseQuotedKey(content: string, start: number): { key: string, e
   const keyContent = content.slice(start + 1, closingQuoteIndex)
   const key = unescapeString(keyContent)
   let parsePosition = closingQuoteIndex + 1
+  // Key tokens are trimmed like value tokens (§12), so `"a" : 1` is a key-value line.
+  while (content[parsePosition] === SPACE)
+    parsePosition++
 
   if (parsePosition >= content.length || content[parsePosition] !== COLON) {
     throw new SyntaxError('Missing colon after key')
