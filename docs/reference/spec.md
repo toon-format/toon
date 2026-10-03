@@ -8,6 +8,9 @@ description: Where the TOON specification lives, which version is current, and w
 
 The [TOON specification](https://github.com/toon-format/spec/blob/main/SPEC.md) is the authoritative reference for encoders, decoders, and validators. Implementers work through the [conformance checklist (§13)](https://github.com/toon-format/spec/blob/main/SPEC.md#13-conformance-and-options) for their class, the [CHANGELOG](https://github.com/toon-format/spec/blob/main/CHANGELOG.md) records each version, and [CONTRIBUTING](https://github.com/toon-format/spec/blob/main/CONTRIBUTING.md) covers how to propose changes.
 
+> [!NOTE]
+> The TOON specification is stable, but also an idea in progress. Nothing's set in stone – help shape where it goes by contributing to it or sharing feedback.
+
 ## Sections
 
 - [§1 Terminology and Conventions](https://github.com/toon-format/spec/blob/main/SPEC.md#1-terminology-and-conventions) – key terms and RFC 2119 keywords.
