@@ -790,7 +790,7 @@ Follow the detailed [LLM integration guide](https://toonformat.dev/guide/llm-pro
 
 ## Documentation
 
-Guides and the API and CLI references live at [toonformat.dev](https://toonformat.dev); ports to other languages are listed under [Implementations](https://toonformat.dev/ecosystem/implementations).
+Guides and the API and CLI references live at [toonformat.dev](https://toonformat.dev); ports to other languages are listed under [Implementations](https://toonformat.dev/ecosystem/implementations). The [Glossary](https://github.com/toon-format/spec/blob/main/CONTEXT.md) gives each concept one name, for contributors and tooling.
 
 ## Media Type & File Extension
 
