@@ -276,7 +276,7 @@ items[2|]{sku|name|qty|price}:
 Tab and pipe delimiters are explicitly encoded in the header brackets and field braces. Inside an array scope, only the active delimiter triggers quoting – the others are literal data. Object field values (`key: value`) follow the document delimiter (§11.1) regardless of any surrounding array's active delimiter.
 
 > [!TIP]
-> Tab delimiters often tokenize more efficiently than commas, especially for data with few quoted strings. Use `encode(data, { delimiter: '\t' })` for additional token savings.
+> Tab delimiters often tokenize more efficiently than commas, especially for data with few quoted strings. Use `encode(data, { delimiter: '\t' })` for additional token savings. Pipe suits data where commas are frequent.
 
 ## Comments
 
