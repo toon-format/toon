@@ -42,7 +42,17 @@ export function decodeStream(
 // #region Document dispatch
 
 function* decodeDocument(reader: LineReader, options: DecoderContext): LineRule {
-  const first = yield* peekLine(reader)
+  let first = yield* peekLine(reader)
+  // An indented first line is over-indented like any other line deeper than its scope.
+  while (first && first.depth !== 0) {
+    if (options.strict) {
+      throw overIndentedLineError(first, 0)
+    }
+    assertNotScalarLine(first)
+    yield* readLine(reader)
+    first = yield* peekLine(reader)
+  }
+
   if (!first) {
     yield { type: 'startObject' }
     yield { type: 'endObject' }
