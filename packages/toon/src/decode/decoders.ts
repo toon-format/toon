@@ -164,8 +164,12 @@ function keylessFieldsHeaderError(line: ParsedLine): ToonDecodeError {
 }
 
 // Strict decoding never silently discards input, so a line after the root form is an error.
+// Non-strict decoding skips it, except a bare token, which errors in both modes.
 function* assertFullyConsumed(reader: LineReader, strict: boolean): LineRule {
   if (!strict) {
+    let line: ParsedLine | undefined
+    while ((line = yield* readLine(reader)))
+      assertNotScalarLine(line)
     return
   }
   const line = yield* peekLine(reader)
