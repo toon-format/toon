@@ -507,7 +507,7 @@ export function parseQuotedKey(content: string, start: number): { key: string, e
   const keyContent = content.slice(start + 1, closingQuoteIndex)
   const key = unescapeString(keyContent)
   let parsePosition = closingQuoteIndex + 1
-  // Key tokens are trimmed like value tokens (§12), so `"a" : 1` is a key-value line.
+  // Key tokens are trimmed like value tokens, so `"a" : 1` is a key-value line.
   while (content[parsePosition] === SPACE)
     parsePosition++
 
