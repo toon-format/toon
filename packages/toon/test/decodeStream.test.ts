@@ -289,7 +289,7 @@ describe('streaming decode', () => {
     const strictErrorCases = [
       { name: 'an over-indented line under a primitive field', lines: ['a: 1', '    b: 2'], message: 'Over-indented line' },
       { name: 'trailing content after a root array', lines: ['[2]: 1,2', 'junk: 3'], message: 'Unexpected content after the document root' },
-      { name: 'an over-indented line inside a keyed tabular object', lines: ['m[2:]{v}:', '  a: 1', '    x: 2', '  b: 2'], message: 'Unexpected indentation inside keyed tabular object' },
+      { name: 'an over-indented line inside a keyed tabular object', lines: ['m[2:]{v}:', '  a: 1', '    x: 2', '  b: 2'], message: 'Over-indented line' },
       { name: 'an entry row without a colon', lines: ['m[1:]{v}:', '  noentrycolon'], message: 'Expected entry row inside keyed tabular object' },
       { name: 'duplicate entry keys', lines: ['m[2:]{v}:', '  a: 1', '  a: 2'], message: 'Duplicate sibling key' },
       { name: 'a keyed entry count mismatch', lines: ['m[2:]{v}:', '  a: 1'], message: 'keyed entries' },
