@@ -1,5 +1,5 @@
 import type { ArrayHeaderInfo, DecodeStreamOptions, Depth, FieldNode, JsonPrimitive, JsonStreamEvent, ParsedLine } from '../types.ts'
-import type { LineReader, LineRule } from './line-reader.ts'
+import type { LineEffect, LineReader, LineRule } from './line-reader.ts'
 import type { ArrayHeaderParseResult } from './parser.ts'
 import { COLON, DEFAULT_DELIMITER, LIST_ITEM_MARKER, LIST_ITEM_PREFIX } from '../constants.ts'
 import { findUnquotedChar, trimSpaces } from '../shared/string-utils.ts'
@@ -119,6 +119,16 @@ function assertNoDepthJump(firstNestedLine: ParsedLine, parentDepth: Depth, stri
       { line: firstNestedLine.lineNumber, source: firstNestedLine.raw },
     )
   }
+}
+
+// A depth jump is a strict error; non-strict decoding takes the first line's depth as the scope's content depth.
+function* scopeContentDepth(reader: LineReader, baseDepth: Depth, strict: boolean): LineEffect<Depth> {
+  const first = yield* peekLine(reader)
+  if (!first || first.depth <= baseDepth + 1) {
+    return baseDepth + 1
+  }
+  assertNoDepthJump(first, baseDepth, strict)
+  return first.depth
 }
 
 function overIndentedLineError(line: ParsedLine, expectedDepth: Depth): ToonDecodeError {
@@ -343,7 +353,7 @@ function* decodeKeyedObject(
   options: DecoderContext,
   headerLine: ParsedLine,
 ): LineRule {
-  const entryDepth = baseDepth + 1
+  const entryDepth = yield* scopeContentDepth(reader, baseDepth, options.strict)
   const leafFieldCount = countLeafFields(header.fields!)
   const seenEntryKeys = options.strict ? new Set<string>() : undefined
   let entryCount = 0
@@ -422,7 +432,7 @@ function* decodeTabularArray(
   options: DecoderContext,
   headerLine: ParsedLine,
 ): LineRule {
-  const rowDepth = baseDepth + 1
+  const rowDepth = yield* scopeContentDepth(reader, baseDepth, options.strict)
   let rowCount = 0
   let startLine: number | undefined
   let endLine: number | undefined
@@ -479,7 +489,7 @@ function* decodeListArray(
   options: DecoderContext,
   headerLine: ParsedLine,
 ): LineRule {
-  const itemDepth = baseDepth + 1
+  const itemDepth = yield* scopeContentDepth(reader, baseDepth, options.strict)
   let itemCount = 0
   let startLine: number | undefined
   let endLine: number | undefined
