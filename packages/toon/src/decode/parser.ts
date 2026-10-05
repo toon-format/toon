@@ -212,8 +212,9 @@ export function parseBracketSegment(
  * descending into nested field groups (`field{sub1,sub2}`).
  *
  * @remarks
- * Throws on empty segments, empty names, unmatched braces, and content
- * after a nested group's closing brace; callers decide strict fallthrough.
+ * Throws on empty segments, empty names, whitespace before a nested group,
+ * unmatched braces, and content after a nested group's closing brace;
+ * callers decide strict fallthrough.
  */
 export function parseFieldEntries(fieldsContent: string, delimiter: Delimiter): FieldNode[] {
   const entries = splitFieldEntries(fieldsContent, delimiter)
@@ -229,9 +230,12 @@ export function parseFieldEntries(fieldsContent: string, delimiter: Delimiter): 
       return { name: parseStringLiteral(trimmedEntry) }
     }
 
-    const namePart = trimSpaces(trimmedEntry.slice(0, groupStart))
+    const namePart = trimmedEntry.slice(0, groupStart)
     if (!namePart) {
       throw new SyntaxError('Missing field name before nested field group')
+    }
+    if (namePart.endsWith(SPACE)) {
+      throw new SyntaxError('Unexpected whitespace before nested field group')
     }
 
     const groupEnd = findMatchingBrace(trimmedEntry, groupStart)
