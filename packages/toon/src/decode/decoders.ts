@@ -43,7 +43,6 @@ export function decodeStream(
 
 function* decodeDocument(reader: LineReader, options: DecoderContext): LineRule {
   let first = yield* peekLine(reader)
-  // An indented first line is over-indented like any other line deeper than its scope.
   let skippedLeading = false
   while (first && first.depth !== 0) {
     yield* skipOverIndentedLine(reader, first, 0, options.strict)
@@ -133,7 +132,6 @@ function overIndentedLineError(line: ParsedLine, expectedDepth: Depth): ToonDeco
   )
 }
 
-// Strict decoding errors on a line deeper than its scope's content depth; non-strict decoding skips it.
 function* skipOverIndentedLine(reader: LineReader, line: ParsedLine, contentDepth: Depth, strict: boolean): LineRule {
   if (strict) {
     throw overIndentedLineError(line, contentDepth)
@@ -288,7 +286,6 @@ function* decodeObjectFields(
   }
 }
 
-// A depth jump is a strict error; non-strict decoding takes the first line's depth as the scope's content depth.
 function* scopeContentDepth(reader: LineReader, baseDepth: Depth, strict: boolean): LineEffect<Depth> {
   const first = yield* peekLine(reader)
   if (!first || first.depth <= baseDepth + 1) {
