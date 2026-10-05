@@ -44,8 +44,10 @@ export function decodeStream(
 function* decodeDocument(reader: LineReader, options: DecoderContext): LineRule {
   let first = yield* peekLine(reader)
   // An indented first line is over-indented like any other line deeper than its scope.
+  let skippedLeading = false
   while (first && first.depth !== 0) {
     yield* skipOverIndentedLine(reader, first, 0, options.strict)
+    skippedLeading = true
     first = yield* peekLine(reader)
   }
 
@@ -76,7 +78,8 @@ function* decodeDocument(reader: LineReader, options: DecoderContext): LineRule 
   yield* readLine(reader)
   const following = yield* peekLine(reader)
   const hasMore = following !== undefined
-  if (!hasMore && !isKeyValueContent(first.content)) {
+  // A skipped leading line makes the document multi-line, so no root primitive.
+  if (!hasMore && !skippedLeading && !isKeyValueContent(first.content)) {
     yield { type: 'primitive', value: withLine(first, () => parsePrimitiveToken(first.content)) }
     return
   }
