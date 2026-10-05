@@ -647,7 +647,8 @@ function* followSiblingFields(
       break
     }
 
-    if (nextLine.depth === followDepth && !nextLine.content.startsWith(LIST_ITEM_PREFIX)) {
+    // A hyphen marks a list item only at item depth, so a `- ` line here is a further field.
+    if (nextLine.depth === followDepth) {
       yield* readLine(reader)
       yield* decodeKeyValue(nextLine, reader, followDepth, options, seenKeys)
     }
