@@ -207,3 +207,9 @@ What changed is what the spec *requires* of an encoder, which matters if you mai
 **Options.** `indentSize` is accepted on both `EncodeOptions` and `DecodeOptions`; `indent` still works but is deprecated.
 
 Beyond that, v4.1 is conformance work: unstated error conditions made explicit, BOM handling specified, and a set of section renames in the spec.
+
+## v4.2
+
+No syntax changes. `@toon-format/toon` output changes in one case: a root string that starts with U+FEFF is now quoted, so it no longer reads as a byte-order mark.
+
+The spec now requires the encoder output `@toon-format/toon` already produced – shortest round-trip numbers, literal UTF-8, quoting only where needed. Decoders settle edge cases no encoder emits, such as an indented first line or `: 1` as the empty key. With `--no-strict`, the CLI keeps the last duplicate key, like the library.
