@@ -45,15 +45,16 @@ export function parseArrayHeaderLine(
     return { kind: 'notHeader' }
   }
 
-  // A header key can't contain an unquoted colon, so this is a key-value line.
+  // A header needs a colon, and its key can't contain one.
+  // Past this check, a grammar failure makes the line invalid instead of a key-value line.
   const firstColonIndex = findUnquotedChar(content, COLON)
-  if (firstColonIndex !== -1 && firstColonIndex < bracketStart) {
+  if (firstColonIndex === -1 || firstColonIndex < bracketStart) {
     return { kind: 'notHeader' }
   }
 
   const bracketEnd = findUnquotedChar(content, CLOSE_BRACKET, bracketStart)
   if (bracketEnd === -1) {
-    return { kind: 'notHeader' }
+    return { kind: 'invalid', reason: 'Unterminated bracket segment' }
   }
 
   let colonIndex = bracketEnd + 1
@@ -80,7 +81,7 @@ export function parseArrayHeaderLine(
 
   colonIndex = findUnquotedChar(content, COLON, Math.max(bracketEnd, braceEnd))
   if (colonIndex === -1) {
-    return { kind: 'notHeader' }
+    return { kind: 'invalid', reason: 'Missing colon after array header' }
   }
 
   const gapStart = Math.max(bracketEnd + 1, braceEnd)
