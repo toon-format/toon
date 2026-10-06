@@ -213,3 +213,9 @@ Beyond that, v4.1 is conformance work: unstated error conditions made explicit, 
 No syntax changes. `@toon-format/toon` output changes in one case: a root string that starts with U+FEFF is now quoted, so it no longer reads as a byte-order mark.
 
 The spec now requires the encoder output `@toon-format/toon` already produced – shortest round-trip numbers, literal UTF-8, quoting only where needed. Decoders settle edge cases no encoder emits, such as an indented first line or `: 1` as the empty key. With `--no-strict`, the CLI keeps the last duplicate key, like the library.
+
+## v4.3
+
+No syntax changes, and `@toon-format/toon` output is byte-identical between v4.2 and v4.3.
+
+A line whose first unquoted `[` comes before its first unquoted colon is now always an array header, so it has to be a valid one. In strict mode, the decoder rejects lines such as `a[1:` or `a[2:]{x}` instead of reading `a[1` or `a[2` as a key. No encoder emits these lines, and non-strict decoding is unchanged.
