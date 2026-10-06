@@ -1,5 +1,5 @@
 minimumReleaseAgeExclude:
-  - '@toon-format/spec@4.1.2'
+  - '@toon-format/spec@4.2.0'
   - utilful@3.5.1
 
 shellEmulator: true
