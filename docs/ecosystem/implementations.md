@@ -58,6 +58,6 @@ Building a TOON implementation for a new language? Here are the steps:
 
 1. **Follow the spec**: Implement the [latest specification](https://github.com/toon-format/spec/blob/main/SPEC.md).
 2. **Add tests**: Run the [reference test suite](https://github.com/toon-format/spec/tree/main/tests) from a spec release tag in CI – its language-agnostic fixtures validate compatibility across implementations.
-3. **Declare the spec version**: State the version you target in your README, e.g. `toon-spec: 4.1` ([§13](https://github.com/toon-format/spec/blob/main/SPEC.md#13-conformance-and-options)).
+3. **Declare the spec version**: State the version you target in your README, e.g. `toon-spec: 4.2` ([§13](https://github.com/toon-format/spec/blob/main/SPEC.md#13-conformance-and-options)).
 4. **Document usage**: Provide a clear README with installation and usage examples.
 5. **Share it**: Open a PR that adds one row for your project to [this page](https://github.com/toon-format/toon/blob/main/docs/ecosystem/implementations.md).
