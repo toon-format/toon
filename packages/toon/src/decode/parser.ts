@@ -18,7 +18,8 @@ export function parseArrayHeaderLine(
   content: string,
   defaultDelimiter: Delimiter,
 ): ArrayHeaderParseResult {
-  const trimmedToken = content.trimStart()
+  // Only spaces lead into a key; an NBSP or tab there is part of it.
+  const trimmedToken = content.replace(/^ +/, '')
 
   let bracketStart = -1
 
