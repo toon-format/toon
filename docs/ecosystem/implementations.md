@@ -20,7 +20,7 @@ The code examples throughout this documentation site use the TypeScript implemen
 | **Python** | [toon-python](https://github.com/toon-format/toon-python) | – | Beta |
 | **Rust** | [toon-rust](https://github.com/toon-format/toon-rust) | 3.0 | ✅ Stable |
 | **Swift** | [toon-swift](https://github.com/toon-format/toon-swift) | 4.1 | ✅ Stable |
-| **TypeScript/JavaScript** | [toon](https://github.com/toon-format/toon/tree/main/packages/toon) | 4.1 | ✅ Stable |
+| **TypeScript/JavaScript** | [toon](https://github.com/toon-format/toon/tree/main/packages/toon) | 4.3 | ✅ Stable |
 
 ## Community Implementations
 
