@@ -65,7 +65,7 @@ export function parseArrayHeaderLine(
   if (braceStart !== -1 && braceStart < findUnquotedChar(content, COLON, bracketEnd)) {
     const gapBeforeBrace = content.slice(bracketEnd + 1, braceStart)
     if (gapBeforeBrace !== '') {
-      const trimmedGap = gapBeforeBrace.trim()
+      const trimmedGap = trimWhitespace(gapBeforeBrace)
       return {
         kind: 'invalid',
         reason: trimmedGap === ''
@@ -88,7 +88,7 @@ export function parseArrayHeaderLine(
   const gapStart = Math.max(bracketEnd + 1, braceEnd)
   const gapBeforeColon = content.slice(gapStart, colonIndex)
   if (gapBeforeColon !== '') {
-    const trimmedGap = gapBeforeColon.trim()
+    const trimmedGap = trimWhitespace(gapBeforeColon)
     return {
       kind: 'invalid',
       reason: trimmedGap === ''
@@ -532,9 +532,13 @@ export function parseKeyToken(content: string, start: number): { key: string, en
 
 // #region Array content detection helpers
 
-// Whitespace is SP and HTAB only; a host `trimEnd()` would also catch NBSP.
+// Whitespace is SP and HTAB only; a host `trim()` or `trimEnd()` would also catch NBSP.
 function endsWithWhitespace(value: string): boolean {
   return value.endsWith(SPACE) || value.endsWith(TAB)
+}
+
+function trimWhitespace(value: string): string {
+  return value.replace(/^[ \t]+|[ \t]+$/g, '')
 }
 
 export function isArrayHeaderContent(content: string): boolean {
