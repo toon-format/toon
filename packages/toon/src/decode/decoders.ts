@@ -498,7 +498,8 @@ function* decodeListItem(
     return
   }
   else if (line.content.startsWith(LIST_ITEM_PREFIX)) {
-    afterHyphen = line.content.slice(LIST_ITEM_PREFIX.length)
+    // "-" may be followed by several spaces, so `-   [2]: x` reads like `-   a: 1`.
+    afterHyphen = line.content.slice(LIST_ITEM_PREFIX.length).replace(/^ +/, '')
   }
   else {
     throw new ToonDecodeError(
