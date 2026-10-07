@@ -40,13 +40,13 @@ export function formatInputLabel(source: InputSource): string {
   return relativePath || path.basename(source.path)
 }
 
-export async function* readLinesFromSource(source: InputSource, strict: boolean): AsyncIterable<string> {
+export async function* readLinesFromSource(source: InputSource): AsyncIterable<string> {
   const stream = source.type === 'stdin'
     ? process.stdin
     : createReadStream(source.path)
 
-  // Node's own string decoding substitutes U+FFFD, which a strict decoder MUST NOT do.
-  const decoder = new TextDecoder('utf-8', { fatal: strict })
+  // Node's own string decoding substitutes U+FFFD, which a decoder MUST NOT do.
+  const decoder = new TextDecoder('utf-8', { fatal: true })
   let buffer = ''
 
   for await (const chunk of stream) {
@@ -72,6 +72,6 @@ function decodeUtf8(decoder: TextDecoder, chunk?: Uint8Array): string {
     return chunk === undefined ? decoder.decode() : decoder.decode(chunk, { stream: true })
   }
   catch {
-    throw new CliError('Input is not valid UTF-8. Pass --no-strict to replace ill-formed bytes')
+    throw new CliError('Input is not valid UTF-8')
   }
 }
