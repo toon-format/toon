@@ -104,8 +104,7 @@ export function parseArrayHeaderLine(
     if (rawKey !== rawKey.trimEnd()) {
       return { kind: 'invalid', reason: 'Unexpected whitespace between key and bracket segment' }
     }
-    // Unreachable given the quote and bracket guards above. Leaving it uncaught
-    // preserves the both-modes throw instead of adding a non-strict swallow.
+    // Unreachable given the quote and bracket guards above.
     key = rawKey.startsWith(DOUBLE_QUOTE) ? parseStringLiteral(rawKey) : rawKey
   }
 
@@ -215,8 +214,7 @@ export function parseBracketSegment(
  *
  * @remarks
  * Throws on empty segments, empty names, whitespace before a nested group,
- * unmatched braces, and content after a nested group's closing brace;
- * callers decide strict fallthrough.
+ * unmatched braces, and content after a nested group's closing brace.
  */
 export function parseFieldEntries(fieldsContent: string, delimiter: Delimiter): FieldNode[] {
   const entries = splitFieldEntries(fieldsContent, delimiter)
