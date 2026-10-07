@@ -49,7 +49,7 @@ Community members have created implementations in additional languages:
 | **PHP / TYPO3** | [t3-toon](https://github.com/therohanparmar/t3-toon) | 3.3 | [@therohanparmar](https://github.com/therohanparmar) |
 | **Python** (Rust backend) | [toons](https://github.com/alesanfra/toons) | 4.1 | [@alesanfra](https://github.com/alesanfra) |
 | **R** | [toon](https://github.com/laresbernardo/toon) | – | [@laresbernardo](https://github.com/laresbernardo) |
-| **Ruby** | [toon-fu](https://github.com/hoblin/toon-fu) | 4.1 | [@hoblin](https://github.com/hoblin) |
+| **Ruby** | [toon-fu](https://github.com/hoblin/toon-fu) | 4.3 | [@hoblin](https://github.com/hoblin) |
 | **Scala** | [toon4s](https://github.com/com-vitthalmirji/toon4s) | 3.0 | [@vim89](https://github.com/vim89) |
 | **Zig** | [toon-zig](https://github.com/LatentEvals/toon-zig) | 3.0 | [@montanaflynn](https://github.com/montanaflynn) |
 
