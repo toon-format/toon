@@ -26,7 +26,7 @@ The [TOON specification](https://github.com/toon-format/spec/blob/main/SPEC.md) 
 - [§11 Delimiters](https://github.com/toon-format/spec/blob/main/SPEC.md#11-delimiters) – comma, tab, and pipe, and their scope.
 - [§12 Indentation and Whitespace](https://github.com/toon-format/spec/blob/main/SPEC.md#12-indentation-and-whitespace) – what encoders emit and decoders accept.
 - [§13 Conformance and Options](https://github.com/toon-format/spec/blob/main/SPEC.md#13-conformance-and-options) – conformance classes, options, and checklists.
-- [§14 Strict Mode Errors](https://github.com/toon-format/spec/blob/main/SPEC.md#14-strict-mode-errors-and-diagnostics-authoritative-checklist) – every error strict mode raises.
+- [§14 Decode Errors and Non-Strict Recoveries](https://github.com/toon-format/spec/blob/main/SPEC.md#14-decode-errors-and-non-strict-recoveries-authoritative-checklist) – every decode error, and the five recoveries `strict: false` applies.
 - [§15 Security Considerations](https://github.com/toon-format/spec/blob/main/SPEC.md#15-security-considerations) – injection risks and the checks against them.
 - [§16 Internationalization](https://github.com/toon-format/spec/blob/main/SPEC.md#16-internationalization) – Unicode and locale-independent numbers.
 - [§17 IANA Considerations](https://github.com/toon-format/spec/blob/main/SPEC.md#17-iana-considerations) – the provisional `text/toon` media type.
