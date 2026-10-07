@@ -234,7 +234,7 @@ export function parseFieldEntries(fieldsContent: string, delimiter: Delimiter): 
     if (!namePart) {
       throw new SyntaxError('Missing field name before nested field group')
     }
-    if (endsWithWhitespace(namePart)) {
+    if (namePart.endsWith(SPACE)) {
       throw new SyntaxError('Unexpected whitespace before nested field group')
     }
 
