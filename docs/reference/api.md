@@ -624,14 +624,11 @@ By default (`strict: true`), the decoder validates input strictly:
 
 All decode errors are thrown as [`ToonDecodeError`](#error-handling) instances with structured `line` and `source` fields.
 
-Set `strict: false` to skip these checks. Duplicate sibling keys then resolve with last-write-wins in document order. A declared `[N]` never truncates a scope: every list item, tabular row, and entry row the scope actually contains is decoded, whether that is fewer or more than `N` (§14.1).
+Set `strict: false` to apply the five recoveries of §14.4 instead: a declared `[N]` never truncates a scope, so every value, list item, row, and entry row it contains is decoded; duplicate keys resolve with last-write-wins in document order; indentation may be a non-multiple of `indentSize` or use tabs, one level each; blank lines inside an array or keyed object are ignored; and a scope's first line may sit deeper than expected and set the scope's depth. Every other check is an error in both modes.
 
-Five conditions are errors in both modes, because no recovery preserves the document's meaning (§14): a missing colon in key context, an invalid escape or unterminated quoted string, characters after a quoted token's closing quote, a bare token line inside an array or object scope, and a document whose depth-0 lines are neither headers nor key-value lines.
-
-**Documented decoder policies.** The specification requires each implementation to state the choices it leaves open (§4, §12, §15):
+**Documented decoder policies.** The specification requires each implementation to state the choices it leaves open (§4, §15):
 
 - **Numbers out of range**: a token matching §4's number grammar whose magnitude exceeds the IEEE 754 double range decodes as a string; one that underflows decodes as numeric `0`; one that fits but cannot be represented exactly decodes as the nearest double. Use a `replacer` or post-process the decoded value when exact decimals matter.
-- **Tab indentation**: rejected in strict mode. With `strict: false`, leading tabs are indentation and are removed from the line's content; each leading tab contributes one level of depth.
 - **Object representation**: decoded objects are plain JavaScript objects. `__proto__`, `constructor`, and `prototype` are materialized as ordinary own entries and never mutate the prototype chain (§15). JavaScript reorders integer-like keys ahead of string keys, so a document whose keys include integer-like tokens does not preserve document key order (§2).
 
 ### `DecodeStreamOptions`
