@@ -17,8 +17,13 @@ for (const fixtures of fixtureFiles) {
           await expect(decodeAsync()).rejects.toThrow()
         }
         else {
-          expect(decode(input, test.options)).toEqual(test.expected)
-          await expect(decodeAsync()).resolves.toEqual(test.expected)
+          // toEqual ignores key order, and JSON.stringify drops the sign of -0.
+          const result = decode(input, test.options)
+          expect(result).toEqual(test.expected)
+          expect(JSON.stringify(result)).toBe(JSON.stringify(test.expected))
+          const asyncResult = await decodeAsync()
+          expect(asyncResult).toEqual(test.expected)
+          expect(JSON.stringify(asyncResult)).toBe(JSON.stringify(test.expected))
         }
       })
     }
