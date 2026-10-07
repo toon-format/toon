@@ -101,7 +101,7 @@ export function parseArrayHeaderLine(
   if (bracketStart > 0) {
     const rawKey = content.slice(0, bracketStart)
     // Trimming here would silently turn `foo [2]:` into a header with key `foo`.
-    if (rawKey !== rawKey.trimEnd()) {
+    if (endsWithWhitespace(rawKey)) {
       return { kind: 'invalid', reason: 'Unexpected whitespace between key and bracket segment' }
     }
     // Unreachable given the quote and bracket guards above.
@@ -234,7 +234,7 @@ export function parseFieldEntries(fieldsContent: string, delimiter: Delimiter): 
     if (!namePart) {
       throw new SyntaxError('Missing field name before nested field group')
     }
-    if (namePart !== namePart.trimEnd()) {
+    if (endsWithWhitespace(namePart)) {
       throw new SyntaxError('Unexpected whitespace before nested field group')
     }
 
@@ -532,8 +532,13 @@ export function parseKeyToken(content: string, start: number): { key: string, en
 
 // #region Array content detection helpers
 
+// Whitespace is SP and HTAB only; a host `trimEnd()` would also catch NBSP.
+function endsWithWhitespace(value: string): boolean {
+  return value.endsWith(SPACE) || value.endsWith(TAB)
+}
+
 export function isArrayHeaderContent(content: string): boolean {
-  return content.trim().startsWith(OPEN_BRACKET) && findUnquotedChar(content, COLON) !== -1
+  return trimSpaces(content).startsWith(OPEN_BRACKET) && findUnquotedChar(content, COLON) !== -1
 }
 
 export function isKeyValueContent(content: string): boolean {
