@@ -30,5 +30,5 @@ The [TOON specification](https://github.com/toon-format/spec/blob/main/SPEC.md) 
 - [§15 Security Considerations](https://github.com/toon-format/spec/blob/main/SPEC.md#15-security-considerations) – injection risks and the checks against them.
 - [§16 Internationalization](https://github.com/toon-format/spec/blob/main/SPEC.md#16-internationalization) – Unicode and locale-independent numbers.
 - [§17 IANA Considerations](https://github.com/toon-format/spec/blob/main/SPEC.md#17-iana-considerations) – the provisional `text/toon` media type.
-- [§18 Versioning and Extensibility](https://github.com/toon-format/spec/blob/main/SPEC.md#18-versioning-and-extensibility) – what a major or minor version may change.
+- [§18 Versioning](https://github.com/toon-format/spec/blob/main/SPEC.md#18-versioning) – what a major or minor version may change.
 - [Appendix C: Test Suite](https://github.com/toon-format/spec/blob/main/SPEC.md#appendix-c-test-suite-and-compliance-informative) – the fixtures implementations run.
