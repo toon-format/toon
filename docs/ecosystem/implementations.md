@@ -20,7 +20,7 @@ The code examples throughout this documentation site use the TypeScript implemen
 | **Python** | [toon-python](https://github.com/toon-format/toon-python) | – | Beta |
 | **Rust** | [toon-rust](https://github.com/toon-format/toon-rust) | 3.0 | ✅ Stable |
 | **Swift** | [toon-swift](https://github.com/toon-format/toon-swift) | 4.1 | ✅ Stable |
-| **TypeScript/JavaScript** | [toon](https://github.com/toon-format/toon/tree/main/packages/toon) | 4.3 | ✅ Stable |
+| **TypeScript/JavaScript** | [toon](https://github.com/toon-format/toon/tree/main/packages/toon) | 4.4 | ✅ Stable |
 
 ## Community Implementations
 
@@ -59,6 +59,6 @@ Building a TOON implementation for a new language? Here are the steps:
 
 1. **Follow the spec**: Implement the [latest specification](https://github.com/toon-format/spec/blob/main/SPEC.md).
 2. **Add tests**: Run the [reference test suite](https://github.com/toon-format/spec/tree/main/tests) from a spec release tag in CI – its language-agnostic fixtures validate compatibility across implementations.
-3. **Declare the spec version**: State the version you target in your README, e.g. `toon-spec: 4.3` ([§13](https://github.com/toon-format/spec/blob/main/SPEC.md#13-conformance-and-options)).
+3. **Declare the spec version**: State the version you target in your README, e.g. `toon-spec: 4.4` ([§13](https://github.com/toon-format/spec/blob/main/SPEC.md#13-conformance-and-options)).
 4. **Document usage**: Provide a clear README with installation and usage examples.
 5. **Share it**: Open a PR that adds one row for your project to [this page](https://github.com/toon-format/toon/blob/main/docs/ecosystem/implementations.md).
