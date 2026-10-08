@@ -18,25 +18,19 @@ export function parseArrayHeaderLine(
   content: string,
   defaultDelimiter: Delimiter,
 ): ArrayHeaderParseResult {
-  // Only spaces lead into a key; an NBSP or tab there is part of it.
-  const trimmedToken = content.replace(/^ +/, '')
-
   let bracketStart = -1
 
-  if (trimmedToken.startsWith(DOUBLE_QUOTE)) {
-    const closingQuoteIndex = findClosingQuote(trimmedToken, 0)
+  if (content.startsWith(DOUBLE_QUOTE)) {
+    const closingQuoteIndex = findClosingQuote(content, 0)
     if (closingQuoteIndex === -1) {
       return { kind: 'notHeader' }
     }
 
-    const afterQuote = trimmedToken.slice(closingQuoteIndex + 1)
-    if (!afterQuote.startsWith(OPEN_BRACKET)) {
+    if (content[closingQuoteIndex + 1] !== OPEN_BRACKET) {
       return { kind: 'notHeader' }
     }
 
-    const leadingWhitespace = content.length - trimmedToken.length
-    const keyEndIndex = leadingWhitespace + closingQuoteIndex + 1
-    bracketStart = content.indexOf(OPEN_BRACKET, keyEndIndex)
+    bracketStart = closingQuoteIndex + 1
   }
   else {
     bracketStart = findUnquotedChar(content, OPEN_BRACKET)
