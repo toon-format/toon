@@ -155,7 +155,7 @@ When using the `--stats` flag with encode, the CLI builds the full TOON string o
 | `--delimiter <char>` | Array delimiter: `,` (comma), tab character, `\|` (pipe). Pass tab as `$'\t'` in bash/zsh |
 | `--indent <number>` | Indentation size (default: `2`) |
 | `--stats` | Show token count estimates and savings (encode only) |
-| `--no-strict` | Decode with the spec's non-strict recoveries: advisory array counts, last-write-wins on duplicate keys, lenient indentation |
+| `--no-strict` | Decode with the spec's five non-strict recoveries: advisory array counts, last-write-wins on duplicate keys, lenient indentation, blank lines inside arrays and keyed objects, depth jumps |
 | `--verbose` | Print the stack trace on failure (default: `false`) |
 
 ## Advanced Examples
@@ -225,7 +225,7 @@ Relax validation for hand-written or model-generated input:
 toon data.toon --no-strict -o output.json
 ```
 
-With `--no-strict`, the decoder stops enforcing array counts and indentation multiples, accepts tab indentation, blank lines inside arrays, and a scope whose first line sits too deep, and lets the last of duplicate sibling keys win. Malformed headers, stray indentation, row-width mismatches, trailing content, and ill-formed UTF-8 still throw.
+With `--no-strict`, the decoder stops enforcing array counts and indentation multiples, accepts tab indentation, blank lines inside arrays and keyed objects, and a scope whose first line sits too deep, and lets the last of duplicate sibling keys win. Malformed headers, stray indentation, row-width mismatches, trailing content, and ill-formed UTF-8 still throw.
 
 ### Decode Error Output
 

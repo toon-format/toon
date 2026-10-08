@@ -66,7 +66,7 @@ toon data.json --stats
 | `--delimiter <char>` | Array delimiter: `,` (comma), tab character, `\|` (pipe). Pass tab as `$'\t'` in bash/zsh |
 | `--indent <number>` | Indentation size (default: `2`) |
 | `--stats` | Show token count estimates and savings (encode only) |
-| `--no-strict` | Decode with the spec's non-strict recoveries: advisory array counts, last-write-wins on duplicate keys, lenient indentation |
+| `--no-strict` | Decode with the spec's five non-strict recoveries: advisory array counts, last-write-wins on duplicate keys, lenient indentation, blank lines inside arrays and keyed objects, depth jumps |
 | `--verbose` | Print the stack trace on failure (default: `false`) |
 
 For token statistics output, delimiter guidance, lenient decoding, decode error rendering, and streaming behavior, see the [CLI documentation](https://toonformat.dev/cli/).
