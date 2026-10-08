@@ -358,4 +358,4 @@ The `toJSON()` method:
 
 ---
 
-For complete rules on quoting, escaping, type conversions, and strict-mode decoding, see [spec §2–4 (data model), §7 (strings and keys), and §14 (strict mode)](https://github.com/toon-format/spec/blob/main/SPEC.md).
+For complete rules on quoting, escaping, type conversions, and decode errors, see [spec §2–4 (data model), §7 (strings and keys), and §14 (decode errors and non-strict recoveries)](https://github.com/toon-format/spec/blob/main/SPEC.md).
