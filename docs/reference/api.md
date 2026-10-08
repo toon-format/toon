@@ -611,7 +611,7 @@ Configuration for [`decode()`](#decode-input-options) and [`decodeFromLines()`](
 | `indentSize` | `number` | `2` | Expected number of spaces per indentation level |
 | `strict` | `boolean` | `true` | Throw where `false` applies the five §14.4 recoveries (array counts, duplicate keys, indentation, blank lines, depth jumps) |
 
-The decoder validates input:
+By default, the decoder validates input:
 
 - **Invalid escape sequences**: Throws on `\x`, unterminated strings, lone-surrogate `\uXXXX`
 - **Syntax errors**: Throws on missing colons, malformed headers
