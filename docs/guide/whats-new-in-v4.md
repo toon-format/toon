@@ -219,3 +219,9 @@ The spec now requires the encoder output `@toon-format/toon` already produced �
 No syntax changes, and `@toon-format/toon` output is byte-identical between v4.2 and v4.3.
 
 A line whose first unquoted `[` comes before its first unquoted colon is now always an array header, so it has to be a valid one. In strict mode, the decoder rejects lines such as `a[1:` or `a[2:]{x}` instead of reading `a[1` or `a[2` as a key. No encoder emits these lines, and non-strict decoding is unchanged.
+
+## v4.4
+
+No syntax changes, and `@toon-format/toon` output is byte-identical between v4.3 and v4.4.
+
+`strict: false` now applies exactly the five recoveries the spec defines – advisory array counts, last-write-wins on duplicate keys, lenient indentation, blank lines inside an array or keyed object, and a scope whose first line sits too deep – and throws on everything else. What used to slip through now throws in both modes: malformed headers that fell back to `key: value` lines, rows of the wrong width, over-indented lines, trailing content after a root array, and, with `--no-strict`, ill-formed UTF-8. Only space and tab count as whitespace, so an NBSP is part of a key or value, and a list-item hyphen may be followed by several spaces.
