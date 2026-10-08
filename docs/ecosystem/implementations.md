@@ -12,13 +12,13 @@ The code examples throughout this documentation site use the TypeScript implemen
 
 | Language | Repository | Spec | Status |
 |----------|------------|------|--------|
-| **.NET** | [toon-dotnet](https://github.com/toon-format/toon-dotnet) | 3.0 | In Development |
-| **Dart** | [toon-dart](https://github.com/toon-format/toon-dart) | 1.4 | In Development |
-| **Go** | [toon-go](https://github.com/toon-format/toon-go) | – | In Development |
-| **Java** | [toon-java](https://github.com/toon-format/toon-java) | 4.1 | ✅ Stable |
-| **Julia** | [ToonFormat.jl](https://github.com/toon-format/ToonFormat.jl) | 3.0 | ✅ Stable |
-| **Python** | [toon-python](https://github.com/toon-format/toon-python) | – | Beta |
-| **Rust** | [toon-rust](https://github.com/toon-format/toon-rust) | 3.0 | ✅ Stable |
+| **.NET** | [toon-dotnet](https://github.com/toon-format/toon-dotnet) | 4.4 | In Development |
+| **Dart** | [toon-dart](https://github.com/toon-format/toon-dart) | 4.4 | In Development |
+| **Go** | [toon-go](https://github.com/toon-format/toon-go) | 4.4 | In Development |
+| **Java** | [toon-java](https://github.com/toon-format/toon-java) | 4.4 | ✅ Stable |
+| **Julia** | [ToonFormat.jl](https://github.com/toon-format/ToonFormat.jl) | 4.4 | ✅ Stable |
+| **Python** | [toon-python](https://github.com/toon-format/toon-python) | 4.2 | Beta |
+| **Rust** | [toon-rust](https://github.com/toon-format/toon-rust) | 4.1 | ✅ Stable |
 | **Swift** | [toon-swift](https://github.com/toon-format/toon-swift) | 4.1 | ✅ Stable |
 | **TypeScript/JavaScript** | [toon](https://github.com/toon-format/toon/tree/main/packages/toon) | 4.4 | ✅ Stable |
 
