@@ -609,9 +609,9 @@ Configuration for [`decode()`](#decode-input-options) and [`decodeFromLines()`](
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `indentSize` | `number` | `2` | Expected number of spaces per indentation level |
-| `strict` | `boolean` | `true` | Enable strict validation (array counts, indentation, delimiter consistency) |
+| `strict` | `boolean` | `true` | Throw where `false` applies the five §14.4 recoveries (array counts, duplicate keys, indentation, blank lines, depth jumps) |
 
-By default (`strict: true`), the decoder validates input strictly:
+The decoder validates input:
 
 - **Invalid escape sequences**: Throws on `\x`, unterminated strings, lone-surrogate `\uXXXX`
 - **Syntax errors**: Throws on missing colons, malformed headers
@@ -638,7 +638,7 @@ Configuration for [`decodeStreamSync()`](#decodestreamsync-lines-options) and [`
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `indentSize` | `number` | `2` | Expected number of spaces per indentation level |
-| `strict` | `boolean` | `true` | Enable strict validation (array counts, indentation, delimiter consistency) |
+| `strict` | `boolean` | `true` | Throw where `false` applies the five §14.4 recoveries (array counts, duplicate keys, indentation, blank lines, depth jumps) |
 
 ## TypeScript Types
 
