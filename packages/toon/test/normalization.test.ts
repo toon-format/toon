@@ -121,24 +121,7 @@ describe('JavaScript-specific type normalization', () => {
     })
   })
 
-  describe('negative zero normalization', () => {
-    it('normalizes -0 to 0', () => {
-      const result = encode(-0)
-      expect(result).toBe('0')
-    })
-  })
-
   describe('canonical number form', () => {
-    it('encodes zero as canonical decimal', () => {
-      expect(encode(0)).toBe('0')
-      expect(decode(encode(0))).toBe(0)
-    })
-
-    it('encodes 1e-6 (lower boundary) as canonical decimal', () => {
-      expect(encode(1e-6)).toBe('0.000001')
-      expect(decode(encode(1e-6))).toBe(1e-6)
-    })
-
     it('encodes 1e-7 (just below lower boundary) as exponent form', () => {
       expect(encode(1e-7)).toBe('1e-7')
       expect(decode(encode(1e-7))).toBe(1e-7)

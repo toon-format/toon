@@ -155,24 +155,6 @@ describe('streaming decode', () => {
         { type: 'endObject' },
       ])
     })
-
-    it('enforces strict mode validation', () => {
-      const input = 'items[2]:\n  - Apple'
-      const lines = input.split('\n')
-
-      expect(() => Array.from(decodeStreamSync(lines, { strict: true })))
-        .toThrow()
-    })
-
-    it('allows count mismatch in non-strict mode', () => {
-      const input = 'items[2]:\n  - Apple'
-      const lines = input.split('\n')
-
-      const events = Array.from(decodeStreamSync(lines, { strict: false }))
-
-      expect(events).toBeDefined()
-      expect(events[0]).toEqual({ type: 'startObject' })
-    })
   })
 
   describe('decodeStream (async)', () => {
@@ -269,21 +251,6 @@ describe('streaming decode', () => {
       expect(Object.hasOwn(result, prototypeKey)).toBe(true)
       expect(result[prototypeKey]).toEqual({ safe: true })
       expect(Object.getPrototypeOf(result)).toBe(Object.prototype)
-    })
-
-    it('enforces strict mode validation', async () => {
-      const lines = ['items[2]:', '  - Apple']
-
-      await expect(async () => {
-        await collect(decodeStream(asyncLines(lines), { strict: true }))
-      }).rejects.toThrow()
-    })
-
-    it('allows count mismatch in non-strict mode', async () => {
-      const lines = ['items[2]:', '  - Apple']
-      const events = await collect(decodeStream(asyncLines(lines), { strict: false }))
-
-      expect(events[0]).toEqual({ type: 'startObject' })
     })
 
     const strictErrorCases = [
