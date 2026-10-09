@@ -98,7 +98,6 @@ export function parseArrayHeaderLine(
     if (endsWithWhitespace(rawKey)) {
       return { kind: 'invalid', reason: 'Unexpected whitespace between key and bracket segment' }
     }
-    // Unreachable given the quote and bracket guards above.
     key = rawKey.startsWith(DOUBLE_QUOTE) ? parseStringLiteral(rawKey) : rawKey
   }
 
