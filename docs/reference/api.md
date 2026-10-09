@@ -610,7 +610,7 @@ Configuration for [`decode()`](#decode-input-options) and [`decodeFromLines()`](
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `indentSize` | `number` | `2` | Expected number of spaces per indentation level |
-| `strict` | `boolean` | `true` | Throw where `false` applies the five §14.4 recoveries (array counts, duplicate keys, indentation, blank lines, depth jumps) |
+| `strict` | `boolean` | `true` | Throw where `false` applies the five §14.4 recoveries listed below |
 
 By default, the decoder validates input:
 
@@ -639,7 +639,7 @@ Configuration for [`decodeStreamSync()`](#decodestreamsync-lines-options) and [`
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `indentSize` | `number` | `2` | Expected number of spaces per indentation level |
-| `strict` | `boolean` | `true` | Throw where `false` applies the five §14.4 recoveries (array counts, duplicate keys, indentation, blank lines, depth jumps) |
+| `strict` | `boolean` | `true` | Same as in [`DecodeOptions`](#decodeoptions) |
 
 ## TypeScript Types
 
