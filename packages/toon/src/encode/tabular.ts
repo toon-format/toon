@@ -11,6 +11,7 @@ export function extractTabularFields(rows: readonly JsonObject[]): FieldNode[] |
   if (firstKeys.length === 0)
     return
 
+  // All objects must have the same set of keys (order per object may vary).
   for (const row of rows) {
     if (Object.keys(row).length !== firstKeys.length) {
       return
