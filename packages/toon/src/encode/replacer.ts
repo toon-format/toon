@@ -36,7 +36,6 @@ function transformReplaced(
     return transformChildren(original, replacer, path)
   }
 
-  // Normalize in case the replacer returned a non-`JsonValue`.
   return transformChildren(normalizeValue(replaced), replacer, path)
 }
 

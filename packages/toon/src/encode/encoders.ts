@@ -25,7 +25,6 @@ export function* encodeJsonValue(value: JsonValue, options: ResolvedEncodeOption
     yield* encodeArrayLines(undefined, value, depth, options)
   }
   else if (isJsonObject(value)) {
-    // A keyed-eligible root object uses the keyless keyed header.
     const keyedFields = extractKeyedTabularFields(value)
     if (keyedFields) {
       yield* encodeKeyedObjectLines(undefined, value, keyedFields, depth, options)
@@ -258,7 +257,6 @@ function* encodeObjectAsListItemLines(
     }
   }
 
-  // Keyed first field: header on the hyphen line, entry rows at depth +2, siblings at +1.
   if (isJsonObject(firstValue)) {
     const keyedFields = extractKeyedTabularFields(firstValue)
     if (keyedFields) {
@@ -290,7 +288,6 @@ function* encodeObjectAsListItemLines(
       yield indentedListItem(depth, `${encodedKey}${arrayLine}`, options.indentSize)
     }
     else {
-      // Non-inline array items sit at depth + 2, below the hyphen line.
       const header = formatHeader(firstValue.length, { delimiter: options.delimiter })
       yield indentedListItem(depth, `${encodedKey}${header}`, options.indentSize)
 

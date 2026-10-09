@@ -11,7 +11,6 @@ export function extractTabularFields(rows: readonly JsonObject[]): FieldNode[] |
   if (firstKeys.length === 0)
     return
 
-  // All objects must have the same set of keys (order per object may vary).
   for (const row of rows) {
     if (Object.keys(row).length !== firstKeys.length) {
       return
@@ -59,12 +58,10 @@ export function collectRowLeaves(row: JsonObject, fields: readonly FieldNode[]):
 }
 
 function classifyColumn(name: string, values: readonly JsonValue[]): FieldNode | undefined {
-  // Uniform-primitive column: a bare leaf field.
   if (values.every(value => isEncodablePrimitive(value))) {
     return { name }
   }
 
-  // Nested-uniform column: non-empty objects sharing one key set, classified recursively.
   if (!values.every(value => isJsonObject(value) && !isEmptyObject(value))) {
     return
   }

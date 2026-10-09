@@ -268,7 +268,6 @@ function* decodeArrayFromHeader(
   options: DecoderContext,
   headerLine: ParsedLine,
 ): LineRule {
-  // Keyed tabular header: decodes to an object, not an array.
   if (header.keyed) {
     yield* decodeKeyedObject(header, reader, baseDepth, options, headerLine)
     return
