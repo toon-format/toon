@@ -3,7 +3,7 @@
   "type": "module",
   "version": "4.4.0",
   "private": true,
-  "packageManager": "pnpm@11.28.5",
+  "packageManager": "pnpm@12.16.1",
   "scripts": {
     "build": "pnpm -r --filter='./packages/**' run build",
     "automd": "automd",
