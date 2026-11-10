@@ -1,5 +1,5 @@
 import type { ArrayHeaderInfo, Delimiter, FieldNode, JsonPrimitive } from '../types.ts'
-import { BACKSLASH, CLOSE_BRACE, CLOSE_BRACKET, COLON, DELIMITERS, DOUBLE_QUOTE, FALSE_LITERAL, NULL_LITERAL, OPEN_BRACE, OPEN_BRACKET, PIPE, TAB, TRUE_LITERAL } from '../constants.ts'
+import { BACKSLASH, CLOSE_BRACE, CLOSE_BRACKET, COLON, DELIMITERS, DOUBLE_QUOTE, FALSE_LITERAL, NULL_LITERAL, OPEN_BRACE, OPEN_BRACKET, PIPE, SPACE, TAB, TRUE_LITERAL } from '../constants.ts'
 import { isBooleanOrNullLiteral, isNumericLiteral } from '../shared/literal-utils.ts'
 import { findClosingQuote, findUnquotedChar, trimSpaces, unescapeString } from '../shared/string-utils.ts'
 
@@ -18,24 +18,19 @@ export function parseArrayHeaderLine(
   content: string,
   defaultDelimiter: Delimiter,
 ): ArrayHeaderParseResult {
-  const trimmedToken = content.trimStart()
-
   let bracketStart = -1
 
-  if (trimmedToken.startsWith(DOUBLE_QUOTE)) {
-    const closingQuoteIndex = findClosingQuote(trimmedToken, 0)
+  if (content.startsWith(DOUBLE_QUOTE)) {
+    const closingQuoteIndex = findClosingQuote(content, 0)
     if (closingQuoteIndex === -1) {
       return { kind: 'notHeader' }
     }
 
-    const afterQuote = trimmedToken.slice(closingQuoteIndex + 1)
-    if (!afterQuote.startsWith(OPEN_BRACKET)) {
+    if (content[closingQuoteIndex + 1] !== OPEN_BRACKET) {
       return { kind: 'notHeader' }
     }
 
-    const leadingWhitespace = content.length - trimmedToken.length
-    const keyEndIndex = leadingWhitespace + closingQuoteIndex + 1
-    bracketStart = content.indexOf(OPEN_BRACKET, keyEndIndex)
+    bracketStart = closingQuoteIndex + 1
   }
   else {
     bracketStart = findUnquotedChar(content, OPEN_BRACKET)
@@ -45,15 +40,16 @@ export function parseArrayHeaderLine(
     return { kind: 'notHeader' }
   }
 
-  // A header key can't contain an unquoted colon, so this is a key-value line.
+  // A header needs a colon, and its key can't contain one.
+  // Past this check, a grammar failure makes the line invalid instead of a key-value line.
   const firstColonIndex = findUnquotedChar(content, COLON)
-  if (firstColonIndex !== -1 && firstColonIndex < bracketStart) {
+  if (firstColonIndex === -1 || firstColonIndex < bracketStart) {
     return { kind: 'notHeader' }
   }
 
   const bracketEnd = findUnquotedChar(content, CLOSE_BRACKET, bracketStart)
   if (bracketEnd === -1) {
-    return { kind: 'notHeader' }
+    return { kind: 'invalid', reason: 'Unterminated bracket segment' }
   }
 
   let colonIndex = bracketEnd + 1
@@ -63,7 +59,7 @@ export function parseArrayHeaderLine(
   if (braceStart !== -1 && braceStart < findUnquotedChar(content, COLON, bracketEnd)) {
     const gapBeforeBrace = content.slice(bracketEnd + 1, braceStart)
     if (gapBeforeBrace !== '') {
-      const trimmedGap = gapBeforeBrace.trim()
+      const trimmedGap = trimWhitespace(gapBeforeBrace)
       return {
         kind: 'invalid',
         reason: trimmedGap === ''
@@ -80,13 +76,13 @@ export function parseArrayHeaderLine(
 
   colonIndex = findUnquotedChar(content, COLON, Math.max(bracketEnd, braceEnd))
   if (colonIndex === -1) {
-    return { kind: 'notHeader' }
+    return { kind: 'invalid', reason: 'Missing colon after array header' }
   }
 
   const gapStart = Math.max(bracketEnd + 1, braceEnd)
   const gapBeforeColon = content.slice(gapStart, colonIndex)
   if (gapBeforeColon !== '') {
-    const trimmedGap = gapBeforeColon.trim()
+    const trimmedGap = trimWhitespace(gapBeforeColon)
     return {
       kind: 'invalid',
       reason: trimmedGap === ''
@@ -99,11 +95,9 @@ export function parseArrayHeaderLine(
   if (bracketStart > 0) {
     const rawKey = content.slice(0, bracketStart)
     // Trimming here would silently turn `foo [2]:` into a header with key `foo`.
-    if (rawKey !== rawKey.trimEnd()) {
+    if (endsWithWhitespace(rawKey)) {
       return { kind: 'invalid', reason: 'Unexpected whitespace between key and bracket segment' }
     }
-    // Unreachable given the quote and bracket guards above. Leaving it uncaught
-    // preserves the both-modes throw instead of adding a non-strict swallow.
     key = rawKey.startsWith(DOUBLE_QUOTE) ? parseStringLiteral(rawKey) : rawKey
   }
 
@@ -212,8 +206,8 @@ export function parseBracketSegment(
  * descending into nested field groups (`field{sub1,sub2}`).
  *
  * @remarks
- * Throws on empty segments, empty names, unmatched braces, and content
- * after a nested group's closing brace; callers decide strict fallthrough.
+ * Throws on empty segments, empty names, whitespace before a nested group,
+ * unmatched braces, and content after a nested group's closing brace.
  */
 export function parseFieldEntries(fieldsContent: string, delimiter: Delimiter): FieldNode[] {
   const entries = splitFieldEntries(fieldsContent, delimiter)
@@ -229,9 +223,12 @@ export function parseFieldEntries(fieldsContent: string, delimiter: Delimiter): 
       return { name: parseStringLiteral(trimmedEntry) }
     }
 
-    const namePart = trimSpaces(trimmedEntry.slice(0, groupStart))
+    const namePart = trimmedEntry.slice(0, groupStart)
     if (!namePart) {
       throw new SyntaxError('Missing field name before nested field group')
+    }
+    if (namePart.endsWith(SPACE)) {
+      throw new SyntaxError('Unexpected whitespace before nested field group')
     }
 
     const groupEnd = findMatchingBrace(trimmedEntry, groupStart)
@@ -507,6 +504,8 @@ export function parseQuotedKey(content: string, start: number): { key: string, e
   const keyContent = content.slice(start + 1, closingQuoteIndex)
   const key = unescapeString(keyContent)
   let parsePosition = closingQuoteIndex + 1
+  while (content[parsePosition] === SPACE)
+    parsePosition++
 
   if (parsePosition >= content.length || content[parsePosition] !== COLON) {
     throw new SyntaxError('Missing colon after key')
@@ -526,8 +525,17 @@ export function parseKeyToken(content: string, start: number): { key: string, en
 
 // #region Array content detection helpers
 
+// Whitespace is SP and HTAB only; a host `trim()` or `trimEnd()` would also catch NBSP.
+function endsWithWhitespace(value: string): boolean {
+  return value.endsWith(SPACE) || value.endsWith(TAB)
+}
+
+function trimWhitespace(value: string): string {
+  return value.replace(/^[ \t]+|[ \t]+$/g, '')
+}
+
 export function isArrayHeaderContent(content: string): boolean {
-  return content.trim().startsWith(OPEN_BRACKET) && findUnquotedChar(content, COLON) !== -1
+  return trimSpaces(content).startsWith(OPEN_BRACKET) && findUnquotedChar(content, COLON) !== -1
 }
 
 export function isKeyValueContent(content: string): boolean {

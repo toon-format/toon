@@ -63,6 +63,7 @@ Non-JSON-serializable values are normalized before encoding:
 | `BigInt` (within safe range) | Number |
 | `BigInt` (out of range) | Quoted decimal string (e.g., `"9007199254740993"`) |
 | `Date` | ISO string in quotes (e.g., `"2025-01-01T00:00:00.000Z"`) |
+| Empty slot in a sparse array | `null` |
 | `Set` | Array of normalized values |
 | `Map` | Object with `String(key)` keys |
 | `undefined`, `function`, `symbol` | `null` |
@@ -600,7 +601,7 @@ encode(data, { delimiter: '|' })
 
 :::
 
-See [Delimiter Strategies](#delimiter-strategies) for guidance on choosing delimiters.
+See [Delimiter Options](/guide/format-overview#delimiter-options) for guidance on choosing delimiters.
 
 ### `DecodeOptions`
 
@@ -609,29 +610,26 @@ Configuration for [`decode()`](#decode-input-options) and [`decodeFromLines()`](
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `indentSize` | `number` | `2` | Expected number of spaces per indentation level |
-| `strict` | `boolean` | `true` | Enable strict validation (array counts, indentation, delimiter consistency) |
+| `strict` | `boolean` | `true` | Throw where `false` applies the five §14.4 recoveries listed below |
 
-By default (`strict: true`), the decoder validates input strictly:
+By default, the decoder validates input:
 
 - **Invalid escape sequences**: Throws on `\x`, unterminated strings, lone-surrogate `\uXXXX`
 - **Syntax errors**: Throws on missing colons, malformed headers
 - **Array length mismatches**: Throws when declared length doesn't match actual count
 - **Keyed tabular mismatches**: Throws when the entry-row count doesn't match the declared count or a row's cell count doesn't match the header's leaf fields (§9.5)
 - **Header delimiter mismatch**: Throws when the bracket-declared delimiter differs from the field-list delimiter (§14.2)
-- **Indentation errors**: Throws when leading spaces aren't exact multiples of `indentSize`, on depth jumps of more than one level into a nested scope, and on over-indented lines that belong to no scope (§14.2) – strict decoding never silently discards input, including trailing content after a completed root array or keyed tabular root (§5)
+- **Indentation errors**: Throws when leading spaces aren't exact multiples of `indentSize`, on depth jumps of more than one level into a nested scope, and on over-indented lines that belong to no scope (§14.2) – decoding never silently discards input, including trailing content after a completed root array or keyed tabular root (§5)
 - **Header structure**: Throws on leading-zero or non-integer array lengths, malformed keyed markers, and intervening content between bracket/fields/colon
 - **Duplicate sibling keys**: Throws when an object has two children with the same key, including duplicate entry keys (§14.3)
 
 All decode errors are thrown as [`ToonDecodeError`](#error-handling) instances with structured `line` and `source` fields.
 
-Set `strict: false` to skip these checks. Duplicate sibling keys then resolve with last-write-wins in document order. A declared `[N]` never truncates a scope: every list item, tabular row, and entry row the scope actually contains is decoded, whether that is fewer or more than `N` (§14.1).
+Set `strict: false` to apply the five recoveries of §14.4 instead: a declared `[N]` never truncates a scope, so every value, list item, row, and entry row it contains is decoded; duplicate keys resolve with last-write-wins in document order; indentation may be a non-multiple of `indentSize` or use tabs, one level each; blank lines inside an array or keyed object are ignored; and a scope's first line may sit deeper than expected and set the scope's depth. Every other check is an error in both modes.
 
-Five conditions are errors in both modes, because no recovery preserves the document's meaning (§14): a missing colon in key context, an invalid escape or unterminated quoted string, characters after a quoted token's closing quote, a bare token line inside an array or object scope, and a document whose depth-0 lines are neither headers nor key-value lines.
-
-**Documented decoder policies.** The specification requires each implementation to state the choices it leaves open (§4, §12, §15):
+**Documented decoder policies.** The specification requires each implementation to state the choices it leaves open (§4, §15):
 
 - **Numbers out of range**: a token matching §4's number grammar whose magnitude exceeds the IEEE 754 double range decodes as a string; one that underflows decodes as numeric `0`; one that fits but cannot be represented exactly decodes as the nearest double. Use a `replacer` or post-process the decoded value when exact decimals matter.
-- **Tab indentation**: rejected in strict mode. With `strict: false`, leading tabs are indentation and are removed from the line's content; each leading tab contributes one level of depth.
 - **Object representation**: decoded objects are plain JavaScript objects. `__proto__`, `constructor`, and `prototype` are materialized as ordinary own entries and never mutate the prototype chain (§15). JavaScript reorders integer-like keys ahead of string keys, so a document whose keys include integer-like tokens does not preserve document key order (§2).
 
 ### `DecodeStreamOptions`
@@ -641,7 +639,7 @@ Configuration for [`decodeStreamSync()`](#decodestreamsync-lines-options) and [`
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `indentSize` | `number` | `2` | Expected number of spaces per indentation level |
-| `strict` | `boolean` | `true` | Enable strict validation (array counts, indentation, delimiter consistency) |
+| `strict` | `boolean` | `true` | Same as in [`DecodeOptions`](#decodeoptions) |
 
 ## TypeScript Types
 
@@ -685,50 +683,3 @@ DELIMITERS // { comma: ',', tab: '\t', pipe: '|' }
 | `EncodeReplacer` | Signature of the [replacer function](#replacer-function) |
 | `ResolvedEncodeOptions` | `EncodeOptions` after defaults are applied (advanced) |
 | `ResolvedDecodeOptions` | `DecodeOptions` after defaults are applied (advanced) |
-
-## Guides & Examples
-
-### Round-Trip Compatibility
-
-TOON provides lossless round-trips after normalization:
-
-```ts
-import { decode, encode } from '@toon-format/toon'
-
-const original = {
-  users: [
-    { id: 1, name: 'Ada', role: 'admin' },
-    { id: 2, name: 'Bob', role: 'user' }
-  ]
-}
-
-const toon = encode(original)
-const restored = decode(toon)
-
-console.log(JSON.stringify(original) === JSON.stringify(restored))
-// true
-```
-
-### Delimiter Strategies
-
-Tab delimiters (`\t`) often tokenize more efficiently than commas. Tabs are single characters that rarely appear in natural text, which reduces the need for quote-escaping and leads to smaller token counts in large datasets.
-
-Example:
-
-```toon
-items[2	]{sku	name	qty	price}:
-  A1	Widget	2	9.99
-  B2	Gadget	1	14.5
-```
-
-For maximum token savings on large tabular data, use tab delimiters:
-
-```ts
-encode(data, { delimiter: '\t' })
-```
-
-**Choosing a Delimiter:**
-
-- **Comma (`,`)**: Default, widely understood, good for simple tabular data.
-- **Tab (`\t`)**: Best for LLM token efficiency, excellent for large datasets.
-- **Pipe (`|`)**: Alternative when commas appear frequently in data.

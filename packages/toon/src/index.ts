@@ -1,4 +1,4 @@
-import type { DecodeOptions, DecodeStreamOptions, EncodeOptions, JsonStreamEvent, JsonValue, ResolvedDecodeOptions, ResolvedEncodeOptions } from './types.ts'
+import type { DecodeOptions, DecodeStreamOptions, EncodeOptions, JsonStreamEvent, JsonValue, ResolvedEncodeOptions } from './types.ts'
 import { DEFAULT_DELIMITER } from './constants.ts'
 import { decodeStream as decodeStreamCore, decodeStreamSync as decodeStreamSyncCore } from './decode/decoders.ts'
 import { buildValueFromEvents } from './decode/event-builder.ts'
@@ -31,10 +31,6 @@ export type {
 /**
  * Encodes a JavaScript value into TOON format string.
  *
- * @param input Any JavaScript value (objects, arrays, primitives)
- * @param options Optional encoding configuration
- * @returns TOON formatted string
- *
  * @example
  * ```ts
  * encode({ name: 'Ada', age: 30 })
@@ -58,10 +54,6 @@ export function encode(input: unknown, options?: EncodeOptions): string {
 
 /**
  * Decodes a TOON format string into a JavaScript value.
- *
- * @param input TOON formatted string
- * @param options Optional decoding configuration
- * @returns Parsed JavaScript value (object, array, or primitive)
  *
  * @example
  * ```ts
@@ -87,10 +79,6 @@ export function decode(input: string, options?: DecodeOptions): JsonValue {
  *
  * This function yields TOON lines one at a time without building the full string,
  * making it suitable for streaming large outputs to files, HTTP responses, or process stdout.
- *
- * @param input Any JavaScript value (objects, arrays, primitives)
- * @param options Optional encoding configuration
- * @returns Iterable of TOON lines (without trailing newlines)
  *
  * @example
  * ```ts
@@ -123,10 +111,6 @@ export function encodeLines(input: unknown, options?: EncodeOptions): Iterable<s
  * Convenience wrapper around the streaming decoder that builds the full
  * value in memory.
  *
- * @param lines Iterable of TOON lines (without newlines)
- * @param options Optional decoding configuration
- * @returns Parsed JavaScript value (object, array, or primitive)
- *
  * @example
  * ```ts
  * const lines = ['name: Ada', 'age: 30']
@@ -135,8 +119,7 @@ export function encodeLines(input: unknown, options?: EncodeOptions): Iterable<s
  * ```
  */
 export function decodeFromLines(lines: Iterable<string>, options?: DecodeOptions): JsonValue {
-  const resolvedOptions = resolveDecodeOptions(options)
-  const events = decodeStreamSyncCore(lines, resolvedOptions)
+  const events = decodeStreamSyncCore(lines, options)
   return buildValueFromEvents(events)
 }
 
@@ -145,10 +128,6 @@ export function decodeFromLines(lines: Iterable<string>, options?: DecodeOptions
  *
  * Yields structured events (startObject, endObject, startArray, endArray, key,
  * primitive) that represent the JSON data model without building the full value tree.
- *
- * @param lines Iterable of TOON lines (without newlines)
- * @param options Optional decoding configuration
- * @returns Iterable of JSON stream events
  *
  * @example
  * ```ts
@@ -172,10 +151,6 @@ export function decodeStreamSync(lines: Iterable<string>, options?: DecodeStream
  * Yields structured events (startObject, endObject, startArray, endArray, key,
  * primitive) that represent the JSON data model without building the full value tree.
  * Supports both sync and async iterables.
- *
- * @param source Async or sync iterable of TOON lines (without newlines)
- * @param options Optional decoding configuration
- * @returns Async iterable of JSON stream events
  *
  * @example
  * ```ts
@@ -206,12 +181,5 @@ function resolveOptions(options?: EncodeOptions): ResolvedEncodeOptions {
     indentSize: options?.indentSize ?? options?.indent ?? 2,
     delimiter,
     replacer: options?.replacer,
-  }
-}
-
-function resolveDecodeOptions(options?: DecodeOptions): ResolvedDecodeOptions {
-  return {
-    indentSize: options?.indentSize ?? options?.indent ?? 2,
-    strict: options?.strict ?? true,
   }
 }

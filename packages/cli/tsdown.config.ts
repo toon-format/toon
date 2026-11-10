@@ -5,7 +5,7 @@ const config: UserConfig = defineConfig({
   entry: {
     index: 'src/entry.ts',
   },
-  dts: true,
+  dts: false,
 })
 
 export default config

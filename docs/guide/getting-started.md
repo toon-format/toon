@@ -79,31 +79,14 @@ The pattern is the same throughout TOON: declare structure once, stream data com
 
 Maps of uniform objects collapse as well: the [keyed tabular form](/guide/format-overview#keyed-tabular-objects) turns them into tables whose rows carry their own keys.
 
-### Design Goals
-
-TOON is optimized for specific use cases. It aims to:
-
-- Make arrays of uniform objects as compact as possible by declaring structure once and streaming data.
-- Stay fully lossless and deterministic – round-trips preserve all data and structure.
-- Keep parsing simple and robust for both LLMs and humans through explicit structure markers.
-- Provide validation guardrails (array lengths, field counts) that help detect truncation and malformed output.
-
-## When to Use TOON
-
-TOON excels with arrays of uniform objects – data with the same structure across items. For LLM prompts, the format produces deterministic, minimally quoted text with built-in validation. Explicit array lengths (`[N]`) and field lists (`{fields}`) help detect truncation and malformed data, while tabular form declares the field list once rather than repeating it in every row.
-
-::: tip
-The TOON format is stable, but also an idea in progress. Nothing's set in stone – help shape where it goes by contributing to the [spec](https://github.com/toon-format/spec) or sharing feedback.
-:::
-
 ## When Not to Use TOON
 
-TOON is not always the best choice. Consider alternatives when:
+TOON excels with arrays of uniform objects. Reach for something else when:
 
-- **Deeply nested or non-uniform structures** (tabular eligibility ≈ 0%): JSON-compact often uses fewer tokens. Example: complex configuration objects with many nested levels.
-- **Semi-uniform arrays** (~40–60% tabular eligibility): Token savings diminish. Prefer JSON if your pipelines already rely on it.
-- **Pure tabular data**: CSV is smaller than TOON for flat tables. TOON adds minimal overhead (~5–10%) to provide structure (array length declarations, field lists, delimiter scoping) that improves LLM reliability.
-- **Latency-critical applications**: Benchmark on your exact setup. Some deployments (especially local/quantized models) may process compact JSON faster despite TOON's lower token count.
+- **Structures are deeply nested or non-uniform** (tabular eligibility ≈ 0%) – compact JSON often wins outright.
+- **Arrays are semi-uniform** (~40–60% eligibility) – savings shrink; stay on JSON if your pipeline already speaks it.
+- **Data is purely tabular** – CSV is smaller. TOON's ~5–10% overhead buys declared lengths, field lists, and delimiter scoping, which is a reliability trade, not a size one.
+- **Latency dominates** – some deployments (notably local or quantized models) process compact JSON faster despite the higher token count. Measure TTFT and total time on your own setup.
 
 ::: info
 For data-driven comparisons across different structures, see [Benchmarks](/guide/benchmarks). When optimizing for latency, measure TTFT, tokens/sec, and total time for both TOON and JSON-compact, and use whichever is faster in your specific environment.

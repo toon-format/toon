@@ -1,8 +1,8 @@
-import type { ArgsDef, CommandDef, RunMainOptions } from 'utilful/cli'
+import type { CommandDef, RunMainOptions } from 'utilful/cli'
 import type { Delimiter } from '../../toon/src/index.ts'
 import type { InputSource } from './types.ts'
 import * as path from 'node:path'
-import { CliError, commonArgs, defineCommand } from 'utilful/cli'
+import { CliError, defineCommand } from 'utilful/cli'
 import { DEFAULT_DELIMITER, ToonDecodeError } from '../../toon/src/index.ts'
 import { assertValidDelimiter } from '../../toon/src/shared/validation.ts'
 import pkg from '../package.json' with { type: 'json' }
@@ -12,19 +12,7 @@ import { detectMode } from './utils.ts'
 
 const { name, version } = pkg
 
-interface ConvertArgs extends ArgsDef {
-  input: { type: 'positional', description: string, required: false }
-  output: { type: 'string', description: string, alias: string }
-  encode: { type: 'boolean', description: string, alias: string }
-  decode: { type: 'boolean', description: string, alias: string }
-  delimiter: { type: 'string', description: string, default: string }
-  indent: { type: 'string', description: string, default: string }
-  strict: { type: 'boolean', description: string, default: true }
-  stats: { type: 'boolean', description: string }
-}
-
-const args: ConvertArgs = {
-  ...commonArgs,
+const args = {
   input: {
     type: 'positional',
     description: 'Input file path (omit or use "-" to read from stdin)',
@@ -64,7 +52,7 @@ const args: ConvertArgs = {
     type: 'boolean',
     description: 'Show token statistics',
   },
-}
+} as const
 
 export const cliOptions: RunMainOptions = {
   expectedErrors: [ToonDecodeError],
@@ -73,7 +61,7 @@ export const cliOptions: RunMainOptions = {
     : undefined,
 }
 
-export const mainCommand: CommandDef<ConvertArgs> = defineCommand({
+export const mainCommand: CommandDef<typeof args> = defineCommand({
   meta: {
     name,
     description: 'TOON CLI – Convert between JSON and TOON',

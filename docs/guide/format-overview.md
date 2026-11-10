@@ -276,7 +276,7 @@ items[2|]{sku|name|qty|price}:
 Tab and pipe delimiters are explicitly encoded in the header brackets and field braces. Inside an array scope, only the active delimiter triggers quoting – the others are literal data. Object field values (`key: value`) follow the document delimiter (§11.1) regardless of any surrounding array's active delimiter.
 
 > [!TIP]
-> Tab delimiters often tokenize more efficiently than commas, especially for data with few quoted strings. Use `encode(data, { delimiter: '\t' })` for additional token savings.
+> Tab delimiters often tokenize more efficiently than commas, especially for data with few quoted strings. Use `encode(data, { delimiter: '\t' })` for additional token savings. Pipe suits data where commas are frequent.
 
 ## Comments
 
@@ -304,6 +304,7 @@ TOON quotes strings **only when necessary** to maximize token efficiency. A stri
 - It contains the relevant delimiter (the active delimiter inside an array scope, or the document delimiter elsewhere)
 - It equals `"-"` or starts with `"-"` followed by any character
 - It equals `"#"` or starts with `"#"` (the line would read as a comment)
+- It is a root primitive and starts with U+FEFF (the decoder would strip it as a byte-order mark)
 
 Otherwise, strings can be unquoted. Unicode, emoji, and strings with internal (non-leading/trailing) spaces are safe unquoted:
 
@@ -357,4 +358,4 @@ The `toJSON()` method:
 
 ---
 
-For complete rules on quoting, escaping, type conversions, and strict-mode decoding, see [spec §2–4 (data model), §7 (strings and keys), and §14 (strict mode)](https://github.com/toon-format/spec/blob/main/SPEC.md).
+For complete rules on quoting, escaping, type conversions, and decode errors, see [spec §2–4 (data model), §7 (strings and keys), and §14 (decode errors and non-strict recoveries)](https://github.com/toon-format/spec/blob/main/SPEC.md).

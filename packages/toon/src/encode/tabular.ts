@@ -59,12 +59,10 @@ export function collectRowLeaves(row: JsonObject, fields: readonly FieldNode[]):
 }
 
 function classifyColumn(name: string, values: readonly JsonValue[]): FieldNode | undefined {
-  // Uniform-primitive column: a bare leaf field.
   if (values.every(value => isEncodablePrimitive(value))) {
     return { name }
   }
 
-  // Nested-uniform column: non-empty objects sharing one key set, classified recursively.
   if (!values.every(value => isJsonObject(value) && !isEmptyObject(value))) {
     return
   }

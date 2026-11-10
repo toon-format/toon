@@ -3,7 +3,7 @@ import { createReadStream } from 'node:fs'
 import * as fsp from 'node:fs/promises'
 import * as path from 'node:path'
 import process from 'node:process'
-import { CliError } from 'utilful/cli'
+import { CliError, readStdin } from 'utilful/cli'
 
 export function detectMode(
   input: InputSource,
@@ -27,7 +27,7 @@ export function detectMode(
 
 export async function readInput(source: InputSource): Promise<string> {
   if (source.type === 'stdin')
-    return readFromStdin()
+    return readStdin()
 
   return fsp.readFile(source.path, 'utf-8')
 }
@@ -40,50 +40,13 @@ export function formatInputLabel(source: InputSource): string {
   return relativePath || path.basename(source.path)
 }
 
-function readFromStdin(): Promise<string> {
-  const { stdin } = process
-
-  if (stdin.readableEnded)
-    return Promise.resolve('')
-
-  return new Promise((resolve, reject) => {
-    let data = ''
-
-    const onData = (chunk: string) => {
-      data += chunk
-    }
-
-    function cleanup() {
-      stdin.off('data', onData)
-      stdin.off('error', onError)
-      stdin.off('end', onEnd)
-    }
-
-    function onError(error: Error) {
-      cleanup()
-      reject(error)
-    }
-
-    function onEnd() {
-      cleanup()
-      resolve(data)
-    }
-
-    stdin.setEncoding('utf-8')
-    stdin.on('data', onData)
-    stdin.once('error', onError)
-    stdin.once('end', onEnd)
-    stdin.resume()
-  })
-}
-
-export async function* readLinesFromSource(source: InputSource, strict: boolean): AsyncIterable<string> {
+export async function* readLinesFromSource(source: InputSource): AsyncIterable<string> {
   const stream = source.type === 'stdin'
     ? process.stdin
     : createReadStream(source.path)
 
-  // Node's own string decoding substitutes U+FFFD, which a strict decoder MUST NOT do.
-  const decoder = new TextDecoder('utf-8', { fatal: strict })
+  // Node's own string decoding substitutes U+FFFD, which a decoder MUST NOT do.
+  const decoder = new TextDecoder('utf-8', { fatal: true })
   let buffer = ''
 
   for await (const chunk of stream) {
@@ -109,6 +72,6 @@ function decodeUtf8(decoder: TextDecoder, chunk?: Uint8Array): string {
     return chunk === undefined ? decoder.decode() : decoder.decode(chunk, { stream: true })
   }
   catch {
-    throw new CliError('Input is not valid UTF-8. Pass --no-strict to replace ill-formed bytes')
+    throw new CliError('Input is not valid UTF-8')
   }
 }

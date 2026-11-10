@@ -9,10 +9,9 @@ export function assertExpectedCount(
   actual: number,
   expected: number,
   itemType: string,
-  options: { strict: boolean },
   line: ParsedLine,
 ): void {
-  if (options.strict && actual !== expected) {
+  if (actual !== expected) {
     throw new ToonDecodeError(
       `Expected ${expected} ${itemType}, but got ${actual}`,
       { line: line.lineNumber, source: line.raw },
@@ -51,13 +50,12 @@ export function validateNoExtraTabularRows(
 }
 
 export function validateNoBlankLinesInRange(
-  startLine: number,
-  endLine: number,
+  startLine: number | undefined,
+  endLine: number | undefined,
   blankLines: BlankLineInfo[],
-  strict: boolean,
   context: string,
 ): void {
-  if (!strict)
+  if (startLine === undefined || endLine === undefined)
     return
 
   const firstBlank = blankLines.find(

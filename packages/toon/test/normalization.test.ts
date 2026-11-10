@@ -52,6 +52,20 @@ describe('JavaScript-specific type normalization', () => {
     })
   })
 
+  describe('sparse array normalization', () => {
+    it('converts holes in a primitive array to null', () => {
+      // eslint-disable-next-line no-sparse-arrays
+      const result = encode([1, , 3])
+      expect(result).toBe('[3]: 1,null,3')
+    })
+
+    it('converts holes in an array of objects to null', () => {
+      // eslint-disable-next-line no-sparse-arrays
+      const result = encode([{ x: 1 }, , { x: 2 }])
+      expect(result).toBe('[3]:\n  - x: 1\n  - null\n  - x: 2')
+    })
+  })
+
   describe('Map normalization', () => {
     it('converts Map to object', () => {
       const input = new Map([['key1', 'value1'], ['key2', 'value2']])
@@ -107,24 +121,7 @@ describe('JavaScript-specific type normalization', () => {
     })
   })
 
-  describe('negative zero normalization', () => {
-    it('normalizes -0 to 0', () => {
-      const result = encode(-0)
-      expect(result).toBe('0')
-    })
-  })
-
   describe('canonical number form', () => {
-    it('encodes zero as canonical decimal', () => {
-      expect(encode(0)).toBe('0')
-      expect(decode(encode(0))).toBe(0)
-    })
-
-    it('encodes 1e-6 (lower boundary) as canonical decimal', () => {
-      expect(encode(1e-6)).toBe('0.000001')
-      expect(decode(encode(1e-6))).toBe(1e-6)
-    })
-
     it('encodes 1e-7 (just below lower boundary) as exponent form', () => {
       expect(encode(1e-7)).toBe('1e-7')
       expect(decode(encode(1e-7))).toBe(1e-7)

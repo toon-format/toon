@@ -18,16 +18,11 @@ describe('toon CLI', () => {
         count: 3,
         nested: { ok: true },
       }
-      const restoreStdin = mockStdin(JSON.stringify(data))
+      mockStdin(JSON.stringify(data))
 
-      try {
-        const { stdout } = await runCli([])
+      const { stdout } = await runCli([])
 
-        expect(stdout).toBe(`${encode(data)}\n`)
-      }
-      finally {
-        restoreStdin()
-      }
+      expect(stdout).toBe(`${encode(data)}\n`)
     })
 
     it('encodes a JSON file into a TOON file', async () => {
@@ -66,17 +61,12 @@ describe('toon CLI', () => {
     it('encodes JSON from stdin into a file', async () => {
       const data = { key: 'value' }
       const directory = createDirectory()
-      const restoreStdin = mockStdin(JSON.stringify(data))
+      mockStdin(JSON.stringify(data))
 
-      try {
-        const { stderr } = await runCli(['--output', 'output.toon'], { cwd: directory })
+      const { stderr } = await runCli(['--output', 'output.toon'], { cwd: directory })
 
-        expect(await readOutput(directory, 'output.toon')).toBe(`${encode(data)}\n`)
-        expect(stderr).toMatch(/Encoded.*stdin[^\n\r\u2028\u2029\u2192]*\u2192.*output\.toon/)
-      }
-      finally {
-        restoreStdin()
-      }
+      expect(await readOutput(directory, 'output.toon')).toBe(`${encode(data)}\n`)
+      expect(stderr).toMatch(/Encoded.*stdin[^\n\r\u2028\u2029\u2192]*\u2192.*output\.toon/)
     })
 
     it('encodes an empty object', async () => {
@@ -132,32 +122,22 @@ describe('toon CLI', () => {
 
     it('decodes TOON from stdin', async () => {
       const data = { items: ['a', 'b'], count: 2 }
-      const restoreStdin = mockStdin(encode(data))
+      mockStdin(encode(data))
 
-      try {
-        const { stdout } = await runCli(['--decode'])
+      const { stdout } = await runCli(['--decode'])
 
-        expect(JSON.parse(stdout)).toEqual(data)
-      }
-      finally {
-        restoreStdin()
-      }
+      expect(JSON.parse(stdout)).toEqual(data)
     })
 
     it('decodes TOON from stdin into a file', async () => {
       const data = { name: 'test', values: [1, 2, 3] }
       const directory = createDirectory()
-      const restoreStdin = mockStdin(encode(data))
+      mockStdin(encode(data))
 
-      try {
-        const { stderr } = await runCli(['--decode', '--output', 'output.json'], { cwd: directory })
+      const { stderr } = await runCli(['--decode', '--output', 'output.json'], { cwd: directory })
 
-        expect(JSON.parse(await readOutput(directory, 'output.json'))).toEqual(data)
-        expect(stderr).toMatch(/Decoded.*stdin[^\n\r\u2028\u2029\u2192]*\u2192.*output\.json/)
-      }
-      finally {
-        restoreStdin()
-      }
+      expect(JSON.parse(await readOutput(directory, 'output.json'))).toEqual(data)
+      expect(stderr).toMatch(/Decoded.*stdin[^\n\r\u2028\u2029\u2192]*\u2192.*output\.json/)
     })
 
     it('decodes a root number, string and boolean', async () => {
@@ -168,16 +148,11 @@ describe('toon CLI', () => {
       ] as const
 
       for (const [input, expected] of cases) {
-        const restoreStdin = mockStdin(input)
+        mockStdin(input)
 
-        try {
-          const { stdout } = await runCli(['--decode'])
+        const { stdout } = await runCli(['--decode'])
 
-          expect(JSON.parse(stdout)).toBe(expected)
-        }
-        finally {
-          restoreStdin()
-        }
+        expect(JSON.parse(stdout)).toBe(expected)
       }
     })
 
@@ -206,16 +181,11 @@ describe('toon CLI', () => {
   describe('options', () => {
     it('encodes with a custom --delimiter', async () => {
       const data = { items: [1, 2, 3] }
-      const restoreStdin = mockStdin(JSON.stringify(data))
+      mockStdin(JSON.stringify(data))
 
-      try {
-        const { stdout } = await runCli(['--delimiter', '|'])
+      const { stdout } = await runCli(['--delimiter', '|'])
 
-        expect(stdout).toBe(`${encode(data, { delimiter: '|' })}\n`)
-      }
-      finally {
-        restoreStdin()
-      }
+      expect(stdout).toBe(`${encode(data, { delimiter: '|' })}\n`)
     })
 
     it('encodes with a custom --indent', async () => {
@@ -224,16 +194,11 @@ describe('toon CLI', () => {
           deep: { value: 1 },
         },
       }
-      const restoreStdin = mockStdin(JSON.stringify(data))
+      mockStdin(JSON.stringify(data))
 
-      try {
-        const { stdout } = await runCli(['--indent', '4'])
+      const { stdout } = await runCli(['--indent', '4'])
 
-        expect(stdout).toBe(`${encode(data, { indent: 4 })}\n`)
-      }
-      finally {
-        restoreStdin()
-      }
+      expect(stdout).toBe(`${encode(data, { indent: 4 })}\n`)
     })
 
     it('indents decoded JSON by --indent', async () => {
@@ -256,13 +221,22 @@ describe('toon CLI', () => {
 
     it('accepts tab indentation with --no-strict', async () => {
       // Strict decoding rejects this input, so the flag has to be what admits it.
-      const restoreStdin = mockStdin('a:\n\tb: 1\n')
+      mockStdin('a:\n\tb: 1\n')
+
+      const { stdout, exitCode } = await runCli(['--decode', '--no-strict'])
+
+      expect(exitCode).toBe(0)
+      expect(JSON.parse(stdout)).toEqual({ a: { b: 1 } })
+    })
+
+    it('keeps the last duplicate key with --no-strict', async () => {
+      const restoreStdin = mockStdin('name: Ada\nname: Bob\n')
 
       try {
-        const { stdout, exitCode } = await runCli(['--decode', '--no-strict'])
+        const { stdout } = await runCli(['--decode', '--no-strict'])
 
-        expect(exitCode).toBe(0)
-        expect(JSON.parse(stdout)).toEqual({ a: { b: 1 } })
+        // `JSON.parse` would hide a duplicate key, so compare the raw output.
+        expect(stdout).toBe('{\n  "name": "Bob"\n}\n')
       }
       finally {
         restoreStdin()
@@ -291,48 +265,33 @@ describe('toon CLI', () => {
 
   describe('error reporting', () => {
     it('rejects invalid JSON from stdin', async () => {
-      const restoreStdin = mockStdin('{ invalid json }')
+      mockStdin('{ invalid json }')
 
-      try {
-        const { stderr, exitCode } = await runCli([])
+      const { stderr, exitCode } = await runCli([])
 
-        expect(exitCode).toBe(1)
-        expect(stderr).toContain('Failed to parse JSON')
-      }
-      finally {
-        restoreStdin()
-      }
+      expect(exitCode).toBe(1)
+      expect(stderr).toContain('Failed to parse JSON')
     })
 
     it('renders a TOON decode error with line context, source, and caret', async () => {
-      const restoreStdin = mockStdin('a:\n\tb: 1\n')
+      mockStdin('a:\n\tb: 1\n')
 
-      try {
-        const { stderr, exitCode } = await runCli(['--decode'])
+      const { stderr, exitCode } = await runCli(['--decode'])
 
-        expect(exitCode).toBe(1)
-        expect(stderr).toContain('Failed to decode TOON at line 2:')
-        expect(stderr).toContain('  2 | →b: 1')
-        expect(stderr).toContain('      ^')
-        expect(stderr).not.toMatch(/^\s+at \S+/m)
-      }
-      finally {
-        restoreStdin()
-      }
+      expect(exitCode).toBe(1)
+      expect(stderr).toContain('Failed to decode TOON at line 2:')
+      expect(stderr).toContain('  2 | →b: 1')
+      expect(stderr).toContain('      ^')
+      expect(stderr).not.toMatch(/^\s+at \S+/m)
     })
 
     it('prints the stack trace with --verbose', async () => {
-      const restoreStdin = mockStdin('a:\n\tb: 1\n')
+      mockStdin('a:\n\tb: 1\n')
 
-      try {
-        const { stderr } = await runCli(['--decode', '--verbose'])
+      const { stderr } = await runCli(['--decode', '--verbose'])
 
-        expect(stderr).toContain('Failed to decode TOON at line 2:')
-        expect(stderr).toMatch(/at \S+/)
-      }
-      finally {
-        restoreStdin()
-      }
+      expect(stderr).toContain('Failed to decode TOON at line 2:')
+      expect(stderr).toMatch(/at \S+/)
     })
 
     it('rejects an invalid --delimiter', async () => {

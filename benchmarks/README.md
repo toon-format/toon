@@ -2,9 +2,6 @@
 
 Benchmarks measuring TOON's **token efficiency** and **retrieval accuracy** compared to JSON, XML, YAML, and CSV.
 
-> [!NOTE]
-> Results are automatically embedded in the [main README](https://github.com/toon-format/toon/#benchmarks). This guide focuses on running the benchmarks locally.
-
 ## Quick Start
 
 ```bash
@@ -87,16 +84,7 @@ Answers are validated deterministically with type-aware comparison (`50000` = `$
 
 ### Setup
 
-1. Edit [`src/evaluate.ts`](./src/evaluate.ts) and add models to the exported `MODELS` array:
-   ```ts
-   export const MODELS: ModelDescriptor[] = [
-     { id: 'gpt-5.4-nano', rpm: 50, create: () => openai('gpt-5.4-nano') },
-     { id: 'claude-haiku-4-5-20251001', rpm: 50, create: () => anthropic('claude-haiku-4-5-20251001') },
-     { id: 'gemini-3.6-flash', rpm: 25, create: () => google('gemini-3.6-flash') },
-     { id: 'grok-4.5', rpm: 25, reasoning: 'low', create: () => xai('grok-4.5') },
-     // Add your models here
-   ]
-   ```
+1. Add models to `MODELS` in [`src/evaluate.ts`](./src/evaluate.ts).
 2. Duplicate `.env.example` to `.env` and add your API keys:
    ```bash
    cp .env.example .env
@@ -126,47 +114,3 @@ Edit [`src/constants.ts`](./src/constants.ts) to adjust:
 
 - `DEFAULT_CONCURRENCY` – Parallel tasks (default: 10)
 - `DRY_RUN_LIMITS` – Questions per dry run (default: 10)
-
-Rate limits now live on each [`src/evaluate.ts`](./src/evaluate.ts) `MODELS` entry via its `rpm` field.
-
-## Project Structure
-
-```
-scripts/
-├── accuracy-benchmark.ts         # Retrieval accuracy benchmark
-├── token-efficiency-benchmark.ts # Token counting benchmark
-├── fetch-github-repos.ts         # Update GitHub dataset
-├── verify-feature-datasets.ts    # Keyed/nested-group dataset guards
-├── verify-structural-corruption.ts # Corruption invariant guards
-└── verify-utils.ts               # Shared verify script plumbing
-src/
-├── constants.ts                  # Configuration
-├── datasets.ts                   # Test data generators
-├── evaluate.ts                   # LLM evaluation
-├── formats.ts                    # Format registry (converters, primers, fences, labels)
-├── normalize.ts                  # Answer normalization
-├── report.ts                     # Markdown reports
-├── storage.ts                    # Result caching
-├── structural-corruption.ts      # Post-encode text corruption
-├── types.ts                      # Type definitions
-├── utils.ts                      # Helpers
-└── questions/                    # Question generators
-    ├── analytics.ts
-    ├── event-logs.ts
-    ├── github.ts
-    ├── index.ts
-    ├── keyed.ts
-    ├── nested-config.ts
-    ├── nested-group.ts
-    ├── nested.ts
-    ├── structural-validation.ts
-    ├── structure.ts
-    ├── tabular.ts
-    └── utils.ts
-data/
-└── github-repos.json             # Top 100 GitHub repos
-results/
-├── token-efficiency.md           # Token savings report
-├── retrieval-accuracy.md         # Accuracy report
-└── accuracy/models/              # Per-model results (JSON)
-```

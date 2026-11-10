@@ -10,56 +10,55 @@ The code examples throughout this documentation site use the TypeScript implemen
 
 ## Official Implementations
 
-| Language | Repository | Status |
-|----------|------------|--------|
-| **.NET** | [toon-dotnet](https://github.com/toon-format/toon-dotnet) | In Development |
-| **Dart** | [toon-dart](https://github.com/toon-format/toon-dart) | In Development |
-| **Go** | [toon-go](https://github.com/toon-format/toon-go) | In Development |
-| **Java** | [toon-java](https://github.com/toon-format/toon-java) | ✅ Stable |
-| **Julia** | [ToonFormat.jl](https://github.com/toon-format/ToonFormat.jl) | ✅ Stable |
-| **Python** | [toon-python](https://github.com/toon-format/toon-python) | ✅ Stable |
-| **Rust** | [toon-rust](https://github.com/toon-format/toon-rust) | ✅ Stable |
-| **Swift** | [toon-swift](https://github.com/toon-format/toon-swift) | ✅ Stable |
-| **TypeScript/JavaScript** | [toon](https://github.com/toon-format/toon/tree/main/packages/toon) | ✅ Stable |
+| Language | Repository | Spec |
+|----------|------------|------|
+| **.NET** | [toon-dotnet](https://github.com/toon-format/toon-dotnet) | 4.4 |
+| **Dart** | [toon-dart](https://github.com/toon-format/toon-dart) | 4.4 |
+| **Go** | [toon-go](https://github.com/toon-format/toon-go) | 4.4 |
+| **Java** | [toon-java](https://github.com/toon-format/toon-java) | 4.4 |
+| **Julia** | [ToonFormat.jl](https://github.com/toon-format/ToonFormat.jl) | 4.4 |
+| **Python** | [toon-python](https://github.com/toon-format/toon-python) | 4.2 |
+| **Rust** | [toon-rust](https://github.com/toon-format/toon-rust) | 4.1 |
+| **Swift** | [toon-swift](https://github.com/toon-format/toon-swift) | 4.1 |
+| **TypeScript/JavaScript** | [toon](https://github.com/toon-format/toon/tree/main/packages/toon) | 4.4 |
 
 ## Community Implementations
 
 Community members have created implementations in additional languages:
 
-| Language | Repository | Maintainer |
-|----------|------------|------------|
-| **Apex** | [ApexToon](https://github.com/Eacaw/ApexToon) | [@Eacaw](https://github.com/Eacaw) |
-| **C** | [TOONc](https://github.com/UsboKirishima/TOONc) | [@UsboKirishima](https://github.com/UsboKirishima) |
-| **C++** | [ctoon](https://github.com/mohammadraziei/ctoon) | [@mohammadraziei](https://github.com/mohammadraziei) |
-| **C#** | [ToonEncoder](https://github.com/Cysharp/ToonEncoder) | [@Cysharp](https://github.com/Cysharp/ToonEncoder) |
-| **C#** | [Corvus.JsonSchema](https://github.com/corvus-dotnet/Corvus.JsonSchema/blob/main/docs/Toon.md) | [@mwadams](https://github.com/corvus-dotnet/Corvus.JsonSchema/) |
-| **Clojure** | [toon](https://github.com/vadelabs/toon) | [@vadelabs](https://github.com/vadelabs) |
-| **Crystal** | [toon-crystal](https://github.com/mamantoha/toon-crystal) | [@mamantoha](https://github.com/mamantoha) |
-| **Delphi** | [delphi-toon](https://github.com/ernestoalconada/delphi-toon) | [@ernestoalconada](https://github.com/ernestoalconada) |
-| **Elixir** | [toon_ex](https://github.com/kentaro/toon_ex) | [@kentaro](https://github.com/kentaro) |
-| **Gleam** | [toon_codec](https://github.com/axelbellec/toon_codec) | [@axelbellec](https://github.com/axelbellec) |
-| **Go** | [gotoon](https://github.com/alpkeskin/gotoon) | [@alpkeskin](https://github.com/alpkeskin) |
-| **Java** | [json-io](https://github.com/jdereg/json-io) | [@jdereg](https://github.com/jdereg) |
-| **Kotlin** | [ktoon](https://github.com/lukelast/ktoon)| [@lukelast](https://github.com/lukelast) |
-| **Laravel Framework** | [laravel-toon](https://github.com/mischasigtermans/laravel-toon) | [@mischasigtermans](https://github.com/mischasigtermans) |
-| **Lua/Neovim** | [toon.nvim](https://github.com/thalesgelinger/toon.nvim) | [@thalesgelinger](https://github.com/thalesgelinger) |
-| **Matlab** | [ctoon](https://github.com/mohammadraziei/ctoon) | [@mohammadraziei](https://github.com/mohammadraziei) |
-| **OCaml** | [ocaml-toon](https://github.com/davesnx/ocaml-toon) | [@davesnx](https://github.com/davesnx) |
-| **Perl** | [Data::TOON](https://github.com/ytnobody/p5-Data-TOON) | [@ytnobody](https://github.com/ytnobody) |
-| **PHP** | [toon-php](https://github.com/HelgeSverre/toon-php) | [@HelgeSverre](https://github.com/HelgeSverre) |
-| **PHP / TYPO3** | [t3-toon](https://github.com/therohanparmar/t3-toon) | [@therohanparmar](https://github.com/therohanparmar) |
-| **Python** (C++ backend) | [ctoon](https://github.com/mohammadraziei/ctoon) | [@mohammadraziei](https://github.com/mohammadraziei) |
-| **Python** (Rust backend) | [toons](https://github.com/alesanfra/toons) | [@alesanfra](https://github.com/alesanfra) |
-| **R** | [toon](https://github.com/laresbernardo/toon) | [@laresbernardo](https://github.com/laresbernardo) |
-| **Ruby** | [toon-ruby](https://github.com/andrepcg/toon-ruby) | [@andrepcg](https://github.com/andrepcg) |
-| **Scala** | [toon4s](https://github.com/vim89/toon4s) | [@vim89](https://github.com/vim89) |
-| **Zig** | [toon-zig](https://github.com/LatentEvals/toon-zig) | [@montanaflynn](https://github.com/montanaflynn) |
+| Language | Repository | Spec | Maintainer |
+|----------|------------|------|------------|
+| **Apex** | [ApexToon](https://github.com/Eacaw/ApexToon) | – | [@Eacaw](https://github.com/Eacaw) |
+| **C** | [TOONc](https://github.com/UsboKirishima/TOONc) | – | [@UsboKirishima](https://github.com/UsboKirishima) |
+| **C** (bindings for C++, Go, Julia, MATLAB, Python, Rust, Zig) | [ctoon](https://github.com/MohammadRaziei/ctoon) | 4.1 | [@MohammadRaziei](https://github.com/MohammadRaziei) |
+| **C#** | [ToonEncoder](https://github.com/Cysharp/ToonEncoder) | – | [@Cysharp](https://github.com/Cysharp) |
+| **C#** | [Corvus.JsonSchema](https://github.com/corvus-dotnet/Corvus.JsonSchema/blob/main/docs/Toon.md) | – | [@mwadams](https://github.com/mwadams) |
+| **Clojure** | [toon](https://github.com/vadelabs/toon) | 3.0 | [@vadelabs](https://github.com/vadelabs) |
+| **Crystal** | [toon-crystal](https://github.com/mamantoha/toon-crystal) | 4.1 | [@mamantoha](https://github.com/mamantoha) |
+| **Delphi** | [delphi-toon](https://github.com/ernestoalconada/delphi-toon) | – | [@ernestoalconada](https://github.com/ernestoalconada) |
+| **Elixir** | [toon_ex](https://github.com/kentaro/toon_ex) | 1.3 | [@kentaro](https://github.com/kentaro) |
+| **Gleam** | [toon_codec](https://github.com/axelbellec/toon_codec) | 1.2 | [@axelbellec](https://github.com/axelbellec) |
+| **Go** | [gotoon](https://github.com/alpkeskin/gotoon) | – | [@alpkeskin](https://github.com/alpkeskin) |
+| **Java** | [json-io](https://github.com/jdereg/json-io) | 3.3 | [@jdereg](https://github.com/jdereg) |
+| **Kotlin** | [ktoon](https://github.com/lukelast/ktoon) | 4.1 | [@lukelast](https://github.com/lukelast) |
+| **Laravel Framework** | [laravel-toon](https://github.com/mischasigtermans/laravel-toon) | 3.0 | [@mischasigtermans](https://github.com/mischasigtermans) |
+| **Lua/Neovim** | [toon.nvim](https://github.com/thalesgelinger/toon.nvim) | 1.3 | [@thalesgelinger](https://github.com/thalesgelinger) |
+| **OCaml** | [ocaml-toon](https://github.com/davesnx/ocaml-toon) | – | [@davesnx](https://github.com/davesnx) |
+| **Perl** | [Data::TOON](https://github.com/ytnobody/p5-Data-TOON) | 1.0 | [@ytnobody](https://github.com/ytnobody) |
+| **PHP** | [toon-php](https://github.com/HelgeSverre/toon-php) | 3.3 | [@HelgeSverre](https://github.com/HelgeSverre) |
+| **PHP / TYPO3** | [t3-toon](https://github.com/therohanparmar/t3-toon) | 3.3 | [@therohanparmar](https://github.com/therohanparmar) |
+| **Python** (Rust backend) | [toons](https://github.com/alesanfra/toons) | 4.1 | [@alesanfra](https://github.com/alesanfra) |
+| **R** | [toon](https://github.com/laresbernardo/toon) | – | [@laresbernardo](https://github.com/laresbernardo) |
+| **Ruby** | [toon-fu](https://github.com/hoblin/toon-fu) | 4.3 | [@hoblin](https://github.com/hoblin) |
+| **Scala** | [toon4s](https://github.com/com-vitthalmirji/toon4s) | 3.0 | [@vim89](https://github.com/vim89) |
+| **Zig** | [toon-zig](https://github.com/LatentEvals/toon-zig) | 3.0 | [@montanaflynn](https://github.com/montanaflynn) |
 
 ## Contributing an Implementation
 
 Building a TOON implementation for a new language? Here are the steps:
 
 1. **Follow the spec**: Implement the [latest specification](https://github.com/toon-format/spec/blob/main/SPEC.md).
-2. **Add tests**: Run the [reference test suite](https://github.com/toon-format/spec/tree/main/tests) – its language-agnostic fixtures validate compatibility across implementations.
-3. **Document usage**: Provide a clear README with installation and usage examples.
-4. **Share it**: Open a PR to add your implementation to the README at [github.com/toon-format/toon](https://github.com/toon-format/toon).
+2. **Add tests**: Run the [reference test suite](https://github.com/toon-format/spec/tree/main/tests) from a spec release tag in CI – its language-agnostic fixtures validate compatibility across implementations.
+3. **Declare the spec version**: State the version you target in your README, e.g. `toon-spec: 4.4` ([§13](https://github.com/toon-format/spec/blob/main/SPEC.md#13-conformance-and-options)).
+4. **Document usage**: Provide a clear README with installation and usage examples.
+5. **Share it**: Open a PR that adds one row for your project to [this page](https://github.com/toon-format/toon/blob/main/docs/ecosystem/implementations.md).

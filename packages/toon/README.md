@@ -1,10 +1,10 @@
-![Summary card: JSON encodes to TOON for LLM prompts, with token and accuracy benchmarks](./.github/og_v4.png)
+![Summary card: JSON encodes to TOON for LLM prompts, with token and accuracy benchmarks](./docs/public/og_v4.png)
 
 # Token-Oriented Object Notation (TOON)
 
 [![CI](https://github.com/toon-format/toon/actions/workflows/ci.yml/badge.svg)](https://github.com/toon-format/toon/actions)
 [![npm version](https://img.shields.io/npm/v/@toon-format/toon.svg?labelColor=1b1b1f&color=fef3c0)](https://www.npmjs.com/package/@toon-format/toon)
-[![SPEC v4.1](https://img.shields.io/badge/spec-v4.1-fef3c0?labelColor=1b1b1f)](https://github.com/toon-format/spec)
+[![SPEC v4.4](https://img.shields.io/badge/spec-v4.4-fef3c0?labelColor=1b1b1f)](https://github.com/toon-format/spec)
 [![npm downloads (total)](https://img.shields.io/npm/dt/@toon-format/toon.svg?labelColor=1b1b1f&color=fef3c0)](https://www.npmjs.com/package/@toon-format/toon)
 [![License: MIT](https://img.shields.io/badge/license-MIT-fef3c0?labelColor=1b1b1f)](./LICENSE)
 
@@ -29,7 +29,6 @@ Think of it as a translation layer: use JSON programmatically, and encode it as 
 - [Ecosystem](#ecosystem)
 - [Documentation](#documentation)
 - [Media Type & File Extension](#media-type--file-extension)
-- [Other Implementations](#other-implementations)
 - [📋 Full Specification](https://github.com/toon-format/spec/blob/main/SPEC.md)
 
 ## Why TOON?
@@ -143,7 +142,7 @@ Anything that fits none of these – mixed types, non-uniform objects – falls 
 
 ## Key Features
 
-- 📊 **Token-Efficient & Accurate:** Matches JSON's retrieval accuracy while using 42.6% fewer tokens – see [Benchmarks](#benchmarks).
+- 📊 **Token-Efficient & Accurate:** Matches JSON's retrieval accuracy with fewer tokens – see [Benchmarks](#benchmarks).
 - 🔁 **JSON Data Model:** Encodes the same objects, arrays, and primitives as JSON with deterministic, lossless round-trips.
 - 🛤️ **LLM-Friendly Guardrails:** `[N]` declares how many rows, `{fields}` how wide – so truncated or malformed output can't slip through.
 - 📐 **Minimal Syntax:** Uses indentation instead of braces and minimizes quoting, giving YAML-like readability with CSV-style compactness.
@@ -690,14 +689,7 @@ repositories[3]{id,name,repo,description,createdAt,updatedAt,pushedAt,stars,watc
 ## Installation & Quick Start
 
 ```bash
-# npm
 npm install @toon-format/toon
-
-# pnpm
-pnpm add @toon-format/toon
-
-# yarn
-yarn add @toon-format/toon
 ```
 
 To keep the [CLI](#cli) around instead of invoking it through `npx`, install it globally:
@@ -792,40 +784,17 @@ Follow the detailed [LLM integration guide](https://toonformat.dev/guide/llm-pro
 
 **Playgrounds** – the [official playground](https://toonformat.dev/playground) converts JSON or YAML to TOON in real time, compares token counts, and shares experiments by URL. Community alternatives: [Format Tokenization Playground](https://www.curiouslychase.com/playground/format-tokenization-exploration), [TOON Tools](https://toontools.vercel.app/).
 
-**Editors** – [TOON Language Support](https://marketplace.visualstudio.com/items?itemName=vishalraut.vscode-toon) for VS Code (`code --install-extension vishalraut.vscode-toon`) adds highlighting, validation, and token analysis. [tree-sitter-toon](https://github.com/3swordman/tree-sitter-toon) covers Neovim, Helix, Emacs, and Zed; [toon.nvim](https://github.com/thalesgelinger/toon.nvim) is a Lua-native alternative. Elsewhere, YAML highlighting is a close approximation.
+**Editors** – the official [VS Code extension](https://marketplace.visualstudio.com/items?itemName=toon-format.toon) (`code --install-extension toon-format.toon`) adds syntax highlighting; the community [TOON Language Support](https://marketplace.visualstudio.com/items?itemName=vishalraut.vscode-toon) adds validation, conversion, and token analysis. [tree-sitter-toon](https://github.com/3swordman/tree-sitter-toon) covers Neovim, Helix, Emacs, and Zed; [toon.nvim](https://github.com/thalesgelinger/toon.nvim) is a Lua-native alternative. Elsewhere, YAML highlighting is a close approximation.
 
 **Tooling** – [Tooner](https://github.com/chaindead/tooner) is an MCP proxy that converts JSON tool responses to TOON.
 
 ## Documentation
 
-### Getting Started
-
-- [Introduction & Installation](https://toonformat.dev/guide/getting-started) – What TOON is, when to use it, first steps
-- [Format Overview](https://toonformat.dev/guide/format-overview) – Complete syntax with examples
-- [Benchmarks](https://toonformat.dev/guide/benchmarks) – Accuracy & token efficiency results
-
-### Tools & Integration
-
-- [CLI](https://toonformat.dev/cli/) – Command-line tool for JSON↔TOON conversions
-- [Playgrounds](https://toonformat.dev/ecosystem/tools-and-playgrounds) – Interactive tools
-- [Using TOON with LLMs](https://toonformat.dev/guide/llm-prompts) – Prompting strategies & validation
-
-### References
-
-- [API Reference](https://toonformat.dev/reference/api) – TypeScript/JavaScript encode/decode API
-- [Syntax Cheatsheet](https://toonformat.dev/reference/syntax-cheatsheet) – Quick format lookup
-- [Specification](https://github.com/toon-format/spec/blob/main/SPEC.md) – Normative rules for implementers
-- [Glossary](https://github.com/toon-format/spec/blob/main/CONTEXT.md) – One name per concept, for contributors and tooling
+Guides and the API and CLI references live at [toonformat.dev](https://toonformat.dev); ports to other languages are listed under [Implementations](https://toonformat.dev/ecosystem/implementations). The [Glossary](https://github.com/toon-format/spec/blob/main/CONTEXT.md) gives each concept one name, for contributors and tooling.
 
 ## Media Type & File Extension
 
-TOON files use the `.toon` extension and the provisional media type `text/toon`. Documents are always UTF-8; the `charset=utf-8` parameter may be given but is assumed when absent. See [SPEC.md §17](https://github.com/toon-format/spec/blob/main/SPEC.md#17-iana-considerations) for normative details.
-
-## Other Implementations
-
-TOON has official and community implementations across multiple languages including Python, Rust, Go, Java, Swift, .NET, and many more.
-
-See the full list of implementations in the [documentation](https://toonformat.dev/ecosystem/implementations).
+TOON files use the `.toon` extension and the provisional media type `text/toon` (UTF-8) – see [spec §17](https://github.com/toon-format/spec/blob/main/SPEC.md#17-iana-considerations).
 
 ## Credits
 

@@ -8,14 +8,14 @@
     "preview": "vitepress preview"
   },
   "devDependencies": {
-    "@vueuse/core": "^14.3.0",
+    "@vueuse/core": "^14.4.0",
     "fflate": "^0.8.3",
     "gpt-tokenizer": "^3.4.0",
     "markdown-it-mathjax3": "^4.3.2",
-    "uint8array-extras": "^1.5.0",
-    "unocss": "^66.7.5",
+    "uint8array-extras": "^1.6.0",
+    "unocss": "^66.10.5",
     "vitepress": "^1.6.4",
-    "vitepress-plugin-llms": "^1.13.3",
-    "yaml": "^2.9.0"
+    "vitepress-plugin-llms": "^1.14.0",
+    "yaml": "^2.9.1"
   }
 }

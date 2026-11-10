@@ -1,8 +1,7 @@
 {
   "name": "@toon-format/toon",
   "type": "module",
-  "version": "4.1.1",
-  "packageManager": "pnpm@11.17.0",
+  "version": "4.4.0",
   "description": "Token-Oriented Object Notation (TOON) – compact, human-readable serialization of JSON data for LLM prompts",
   "author": "Johann Schopplich <hello@johannschopplich.com>",
   "license": "MIT",
@@ -38,6 +37,6 @@
     "test": "vitest"
   },
   "devDependencies": {
-    "@toon-format/spec": "^4.1.1"
+    "@toon-format/spec": "^4.4.0"
   }
 }

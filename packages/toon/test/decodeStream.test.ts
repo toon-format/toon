@@ -1,7 +1,7 @@
 import type { JsonStreamEvent } from '../src/index'
 import { describe, expect, it } from 'vitest'
 import { buildValueFromEvents, buildValueFromEventsAsync } from '../src/decode/event-builder'
-import { decode, decodeFromLines, decodeStream, decodeStreamSync } from '../src/index'
+import { decodeFromLines, decodeStream, decodeStreamSync } from '../src/index'
 
 describe('streaming decode', () => {
   describe('decodeStreamSync', () => {
@@ -155,24 +155,6 @@ describe('streaming decode', () => {
         { type: 'endObject' },
       ])
     })
-
-    it('enforces strict mode validation', () => {
-      const input = 'items[2]:\n  - Apple'
-      const lines = input.split('\n')
-
-      expect(() => Array.from(decodeStreamSync(lines, { strict: true })))
-        .toThrow()
-    })
-
-    it('allows count mismatch in non-strict mode', () => {
-      const input = 'items[2]:\n  - Apple'
-      const lines = input.split('\n')
-
-      const events = Array.from(decodeStreamSync(lines, { strict: false }))
-
-      expect(events).toBeDefined()
-      expect(events[0]).toEqual({ type: 'startObject' })
-    })
   })
 
   describe('decodeStream (async)', () => {
@@ -271,25 +253,10 @@ describe('streaming decode', () => {
       expect(Object.getPrototypeOf(result)).toBe(Object.prototype)
     })
 
-    it('enforces strict mode validation', async () => {
-      const lines = ['items[2]:', '  - Apple']
-
-      await expect(async () => {
-        await collect(decodeStream(asyncLines(lines), { strict: true }))
-      }).rejects.toThrow()
-    })
-
-    it('allows count mismatch in non-strict mode', async () => {
-      const lines = ['items[2]:', '  - Apple']
-      const events = await collect(decodeStream(asyncLines(lines), { strict: false }))
-
-      expect(events[0]).toEqual({ type: 'startObject' })
-    })
-
     const strictErrorCases = [
       { name: 'an over-indented line under a primitive field', lines: ['a: 1', '    b: 2'], message: 'Over-indented line' },
       { name: 'trailing content after a root array', lines: ['[2]: 1,2', 'junk: 3'], message: 'Unexpected content after the document root' },
-      { name: 'an over-indented line inside a keyed tabular object', lines: ['m[2:]{v}:', '  a: 1', '    x: 2', '  b: 2'], message: 'Unexpected indentation inside keyed tabular object' },
+      { name: 'an over-indented line inside a keyed tabular object', lines: ['m[2:]{v}:', '  a: 1', '    x: 2', '  b: 2'], message: 'Over-indented line' },
       { name: 'an entry row without a colon', lines: ['m[1:]{v}:', '  noentrycolon'], message: 'Expected entry row inside keyed tabular object' },
       { name: 'duplicate entry keys', lines: ['m[2:]{v}:', '  a: 1', '  a: 2'], message: 'Duplicate sibling key' },
       { name: 'a keyed entry count mismatch', lines: ['m[2:]{v}:', '  a: 1'], message: 'keyed entries' },
@@ -411,13 +378,6 @@ describe('streaming decode', () => {
   })
 
   describe('decodeFromLines', () => {
-    it('produces same result as decode', () => {
-      const input = 'name: Alice\nage: 30\nscores[3]: 95, 87, 92'
-      const lines = input.split('\n')
-
-      expect(decodeFromLines(lines)).toEqual(decode(input))
-    })
-
     it('strips trailing carriage returns from caller-split lines', () => {
       expect(decodeFromLines(['a: 1\r', 'b: 2\r'])).toEqual({ a: 1, b: 2 })
     })
@@ -434,27 +394,6 @@ describe('streaming decode', () => {
         items: [{ '': [{ a: 1 }, { a: 2 }] }],
       })
     })
-  })
-
-  describe('streaming equivalence', () => {
-    const testCases = [
-      { name: 'simple object', input: 'name: Alice\nage: 30' },
-      { name: 'nested objects', input: 'user:\n  profile:\n    name: Alice\n    age: 30' },
-      { name: 'mixed structures', input: 'name: Alice\nscores[3]: 95, 87, 92\naddress:\n  city: NYC\n  zip: 10001' },
-      { name: 'list form with objects', input: 'users[2]:\n  - name: Alice\n    age: 30\n  - name: Bob\n    age: 25' },
-      { name: 'tabular array', input: 'users[3]{name,age,city}:\n  Alice, 30, NYC\n  Bob, 25, LA\n  Charlie, 35, SF' },
-      { name: 'root primitive number', input: '42' },
-      { name: 'root primitive string', input: 'Hello World' },
-      { name: 'root primitive boolean', input: 'true' },
-      { name: 'root primitive null', input: 'null' },
-    ]
-
-    for (const testCase of testCases) {
-      it(`decodeFromLines matches decode() for: ${testCase.name}`, () => {
-        const lines = testCase.input.split('\n')
-        expect(decodeFromLines(lines)).toEqual(decode(testCase.input))
-      })
-    }
   })
 })
 

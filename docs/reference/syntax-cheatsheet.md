@@ -267,6 +267,7 @@ Strings **must** be quoted if they:
 - Contain the relevant delimiter – the active delimiter inside an array scope, or the document delimiter (comma by default) for object field values
 - Equal `"-"` or start with `"-"` followed by any character
 - Equal `"#"` or start with `"#"` (the line would read as a comment)
+- Are a root primitive and start with U+FEFF (the decoder would strip it as a byte-order mark)
 
 Otherwise, strings can be unquoted. Unicode and emoji are safe:
 

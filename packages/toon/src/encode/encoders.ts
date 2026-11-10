@@ -1,6 +1,7 @@
 import type { Depth, FieldNode, JsonArray, JsonObject, JsonValue, ResolvedEncodeOptions } from '../types.ts'
 import type { EncodablePrimitive } from './raw-string.ts'
-import { LIST_ITEM_MARKER, LIST_ITEM_PREFIX } from '../constants.ts'
+import { BYTE_ORDER_MARK, DOUBLE_QUOTE, LIST_ITEM_MARKER, LIST_ITEM_PREFIX } from '../constants.ts'
+import { escapeString } from '../shared/string-utils.ts'
 import { isArrayOfArrays, isArrayOfObjects, isArrayOfPrimitives, isEmptyObject, isEncodablePrimitive, isJsonArray, isJsonObject } from './normalize.ts'
 import { encodeAndJoinPrimitives, encodeKey, encodePrimitive, formatHeader } from './primitives.ts'
 import { collectRowLeaves, extractKeyedTabularFields, extractTabularFields } from './tabular.ts'
@@ -9,7 +10,10 @@ import { collectRowLeaves, extractKeyedTabularFields, extractTabularFields } fro
 
 export function* encodeJsonValue(value: JsonValue, options: ResolvedEncodeOptions, depth: Depth): Generator<string> {
   if (isEncodablePrimitive(value)) {
-    const encodedPrimitive = encodePrimitive(value, options.delimiter)
+    // Unquoted, a leading U+FEFF would be read as the document's byte-order mark and stripped on decode.
+    const encodedPrimitive = typeof value === 'string' && value.startsWith(BYTE_ORDER_MARK)
+      ? `${DOUBLE_QUOTE}${escapeString(value)}${DOUBLE_QUOTE}`
+      : encodePrimitive(value, options.delimiter)
 
     if (encodedPrimitive !== '')
       yield encodedPrimitive
@@ -21,7 +25,6 @@ export function* encodeJsonValue(value: JsonValue, options: ResolvedEncodeOption
     yield* encodeArrayLines(undefined, value, depth, options)
   }
   else if (isJsonObject(value)) {
-    // A keyed-eligible root object uses the keyless keyed header.
     const keyedFields = extractKeyedTabularFields(value)
     if (keyedFields) {
       yield* encodeKeyedObjectLines(undefined, value, keyedFields, depth, options)
@@ -254,7 +257,6 @@ function* encodeObjectAsListItemLines(
     }
   }
 
-  // Keyed first field: header on the hyphen line, entry rows at depth +2, siblings at +1.
   if (isJsonObject(firstValue)) {
     const keyedFields = extractKeyedTabularFields(firstValue)
     if (keyedFields) {
@@ -286,7 +288,6 @@ function* encodeObjectAsListItemLines(
       yield indentedListItem(depth, `${encodedKey}${arrayLine}`, options.indentSize)
     }
     else {
-      // Non-inline array items sit at depth + 2, below the hyphen line.
       const header = formatHeader(firstValue.length, { delimiter: options.delimiter })
       yield indentedListItem(depth, `${encodedKey}${header}`, options.indentSize)
 

@@ -22,13 +22,13 @@ npx @toon-format/cli input.json --stats -o output.toon
 
 ### VS Code
 
-[TOON Language Support](https://marketplace.visualstudio.com/items?itemName=vishalraut.vscode-toon) – Syntax highlighting, validation, conversion, and token analysis.
-
-Install from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=vishalraut.vscode-toon) or via command line:
+[TOON Support](https://marketplace.visualstudio.com/items?itemName=toon-format.toon) – the official extension: syntax highlighting, also on [Open VSX](https://open-vsx.org/extension/toon-format/toon).
 
 ```bash
-code --install-extension vishalraut.vscode-toon
+code --install-extension toon-format.toon
 ```
+
+[TOON Language Support](https://marketplace.visualstudio.com/items?itemName=vishalraut.vscode-toon) – a community extension that adds validation, conversion, and token analysis.
 
 ### Tree-sitter Grammar
 

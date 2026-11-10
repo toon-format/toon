@@ -1,8 +1,8 @@
 import type { ArrayHeaderInfo, DecodeStreamOptions, Depth, FieldNode, JsonPrimitive, JsonStreamEvent, ParsedLine } from '../types.ts'
-import type { LineReader, LineRule } from './line-reader.ts'
+import type { LineEffect, LineReader, LineRule } from './line-reader.ts'
 import type { ArrayHeaderParseResult } from './parser.ts'
 import { COLON, DEFAULT_DELIMITER, LIST_ITEM_MARKER, LIST_ITEM_PREFIX } from '../constants.ts'
-import { findClosingQuote, findUnquotedChar, trimSpaces } from '../shared/string-utils.ts'
+import { findUnquotedChar, trimSpaces } from '../shared/string-utils.ts'
 import { ToonDecodeError, withLine } from './errors.ts'
 import { createLineReader, driveAsync, driveSync, peekLine, readLine } from './line-reader.ts'
 import { countLeafFields, isArrayHeaderContent, isKeyValueContent, mapRowValuesToPrimitives, parseArrayHeaderLine, parseDelimitedValues, parseKeyToken, parsePrimitiveToken } from './parser.ts'
@@ -43,6 +43,10 @@ export function decodeStream(
 
 function* decodeDocument(reader: LineReader, options: DecoderContext): LineRule {
   const first = yield* peekLine(reader)
+  if (first && first.depth !== 0) {
+    throw overIndentedLineError(first, 0)
+  }
+
   if (!first) {
     yield { type: 'startObject' }
     yield { type: 'endObject' }
@@ -53,7 +57,7 @@ function* decodeDocument(reader: LineReader, options: DecoderContext): LineRule 
     yield* readLine(reader)
     yield { type: 'startArray', length: 0 }
     yield { type: 'endArray' }
-    yield* assertFullyConsumed(reader, options.strict)
+    yield* assertFullyConsumed(reader)
     return
   }
 
@@ -62,7 +66,7 @@ function* decodeDocument(reader: LineReader, options: DecoderContext): LineRule 
     if (headerInfo) {
       yield* readLine(reader)
       yield* decodeArrayFromHeader(headerInfo.header, headerInfo.inlineValues, reader, 0, options, first)
-      yield* assertFullyConsumed(reader, options.strict)
+      yield* assertFullyConsumed(reader)
       return
     }
   }
@@ -70,12 +74,12 @@ function* decodeDocument(reader: LineReader, options: DecoderContext): LineRule 
   yield* readLine(reader)
   const following = yield* peekLine(reader)
   const hasMore = following !== undefined
-  if (!hasMore && !isKeyValueLine(first)) {
+  if (!hasMore && !isKeyValueContent(first.content)) {
     yield { type: 'primitive', value: withLine(first, () => parsePrimitiveToken(first.content)) }
     return
   }
 
-  if (!isKeyValueLine(first) && following?.depth === 0) {
+  if (!isKeyValueContent(first.content) && following?.depth === 0) {
     throw new ToonDecodeError(
       'Top-level document must start with a key-value or array-header line',
       { line: first.lineNumber, source: first.raw },
@@ -93,12 +97,7 @@ function* decodeDocument(reader: LineReader, options: DecoderContext): LineRule 
     }
 
     if (line.depth !== 0) {
-      if (options.strict) {
-        throw overIndentedLineError(line, 0)
-      }
-      assertNotScalarLine(line)
-      yield* readLine(reader)
-      continue
+      throw overIndentedLineError(line, 0)
     }
 
     yield* readLine(reader)
@@ -128,20 +127,6 @@ function overIndentedLineError(line: ParsedLine, expectedDepth: Depth): ToonDeco
   )
 }
 
-// Both modes reject a bare token outside root primitive position, so it must not reach
-// the non-strict paths that drop an over-indented line.
-function assertNotScalarLine(line: ParsedLine): void {
-  const isListItem = line.content.startsWith(LIST_ITEM_PREFIX) || line.content === LIST_ITEM_MARKER
-  if (isListItem || findUnquotedChar(line.content, COLON) !== -1) {
-    return
-  }
-
-  throw new ToonDecodeError(
-    'Unexpected bare token line outside root primitive position',
-    { line: line.lineNumber, source: line.raw },
-  )
-}
-
 function keylessKeyedError(line: ParsedLine): ToonDecodeError {
   return new ToonDecodeError(
     'Keyless keyed header is only valid at the document root',
@@ -163,11 +148,8 @@ function keylessFieldsHeaderError(line: ParsedLine): ToonDecodeError {
   )
 }
 
-// Strict decoding never silently discards input, so a line after the root form is an error.
-function* assertFullyConsumed(reader: LineReader, strict: boolean): LineRule {
-  if (!strict) {
-    return
-  }
+// Decoding never silently discards input, so a line after the root form is an error.
+function* assertFullyConsumed(reader: LineReader): LineRule {
   const line = yield* peekLine(reader)
   if (line) {
     throw new ToonDecodeError(
@@ -210,7 +192,7 @@ function* decodeKeyValue(
     return
   }
 
-  if (arrayHeader && arrayHeader.header.key === undefined && options.strict) {
+  if (arrayHeader && arrayHeader.header.key === undefined) {
     throw arrayHeader.header.keyed ? keylessKeyedError(line) : keylessHeaderError(line)
   }
 
@@ -258,25 +240,24 @@ function* decodeObjectFields(
       break
     }
 
-    if (computedDepth === undefined && line.depth >= baseDepth) {
-      computedDepth = line.depth
+    computedDepth ??= line.depth
+
+    if (line.depth !== computedDepth) {
+      throw overIndentedLineError(line, computedDepth)
     }
 
-    if (line.depth === computedDepth) {
-      yield* readLine(reader)
-      yield* decodeKeyValue(line, reader, computedDepth, options, seenKeys)
-    }
-    else if (computedDepth !== undefined && line.depth > computedDepth) {
-      if (options.strict) {
-        throw overIndentedLineError(line, computedDepth)
-      }
-      assertNotScalarLine(line)
-      yield* readLine(reader)
-    }
-    else {
-      break
-    }
+    yield* readLine(reader)
+    yield* decodeKeyValue(line, reader, computedDepth, options, seenKeys)
   }
+}
+
+function* scopeContentDepth(reader: LineReader, baseDepth: Depth, strict: boolean): LineEffect<Depth> {
+  const first = yield* peekLine(reader)
+  if (!first || first.depth <= baseDepth + 1) {
+    return baseDepth + 1
+  }
+  assertNoDepthJump(first, baseDepth, strict)
+  return first.depth
 }
 
 function* decodeArrayFromHeader(
@@ -287,7 +268,6 @@ function* decodeArrayFromHeader(
   options: DecoderContext,
   headerLine: ParsedLine,
 ): LineRule {
-  // Keyed tabular header: decodes to an object, not an array.
   if (header.keyed) {
     yield* decodeKeyedObject(header, reader, baseDepth, options, headerLine)
     return
@@ -317,15 +297,11 @@ function* decodeInlinePrimitiveArray(
   options: DecoderContext,
   headerLine: ParsedLine,
 ): Generator<JsonStreamEvent> {
-  if (!trimSpaces(inlineValues)) {
-    assertExpectedCount(0, header.length, 'inline-form values', options, headerLine)
-    return
-  }
-
   const values = withLine(headerLine, () => parseDelimitedValues(inlineValues, header.delimiter))
   const primitives = withLine(headerLine, () => mapRowValuesToPrimitives(values))
 
-  assertExpectedCount(primitives.length, header.length, 'inline-form values', options, headerLine)
+  if (options.strict)
+    assertExpectedCount(primitives.length, header.length, 'inline-form values', headerLine)
 
   for (const primitive of primitives) {
     yield { type: 'primitive', value: primitive }
@@ -339,7 +315,7 @@ function* decodeKeyedObject(
   options: DecoderContext,
   headerLine: ParsedLine,
 ): LineRule {
-  const entryDepth = baseDepth + 1
+  const entryDepth = yield* scopeContentDepth(reader, baseDepth, options.strict)
   const leafFieldCount = countLeafFields(header.fields!)
   const seenEntryKeys = options.strict ? new Set<string>() : undefined
   let entryCount = 0
@@ -357,26 +333,15 @@ function* decodeKeyedObject(
       break
     }
 
-    if (line.depth > entryDepth) {
-      if (options.strict) {
-        throw new ToonDecodeError(
-          'Unexpected indentation inside keyed tabular object',
-          { line: line.lineNumber, source: line.raw },
-        )
-      }
-      yield* readLine(reader)
-      continue
+    if (line.depth !== entryDepth) {
+      throw overIndentedLineError(line, entryDepth)
     }
 
     if (findUnquotedChar(line.content, COLON) === -1) {
-      if (options.strict) {
-        throw new ToonDecodeError(
-          'Expected entry row inside keyed tabular object',
-          { line: line.lineNumber, source: line.raw },
-        )
-      }
-      yield* readLine(reader)
-      continue
+      throw new ToonDecodeError(
+        'Expected entry row inside keyed tabular object',
+        { line: line.lineNumber, source: line.raw },
+      )
     }
 
     yield* readLine(reader)
@@ -394,7 +359,7 @@ function* decodeKeyedObject(
     const values = cellsContent === ''
       ? []
       : withLine(line, () => parseDelimitedValues(cellsContent, header.delimiter))
-    assertExpectedCount(values.length, leafFieldCount, 'keyed entry cells', options, line)
+    assertExpectedCount(values.length, leafFieldCount, 'keyed entry cells', line)
 
     const primitives = withLine(line, () => mapRowValuesToPrimitives(values))
     yield* yieldObjectFromFields(header.fields!, primitives)
@@ -402,10 +367,9 @@ function* decodeKeyedObject(
     entryCount++
   }
 
-  assertExpectedCount(entryCount, header.length, 'keyed entries', options, lastEntryLine)
-
-  if (options.strict && startLine !== undefined && endLine !== undefined) {
-    validateNoBlankLinesInRange(startLine, endLine, reader.scanState.blankLines, options.strict, 'keyed tabular object')
+  if (options.strict) {
+    assertExpectedCount(entryCount, header.length, 'keyed entries', lastEntryLine)
+    validateNoBlankLinesInRange(startLine, endLine, reader.scanState.blankLines, 'keyed tabular object')
   }
 
   yield { type: 'endObject' }
@@ -418,7 +382,7 @@ function* decodeTabularArray(
   options: DecoderContext,
   headerLine: ParsedLine,
 ): LineRule {
-  const rowDepth = baseDepth + 1
+  const rowDepth = yield* scopeContentDepth(reader, baseDepth, options.strict)
   let rowCount = 0
   let startLine: number | undefined
   let endLine: number | undefined
@@ -427,44 +391,38 @@ function* decodeTabularArray(
   // Only strict stops at N, leaving the surplus to `validateNoExtraTabularRows`; non-strict reads on so [N] never truncates.
   while (!options.strict || rowCount < header.length) {
     const line = yield* peekLine(reader)
-    if (!line || line.depth < rowDepth) {
+    if (!line || line.depth <= baseDepth) {
       break
     }
 
-    if (line.depth === rowDepth) {
-      if (!isDataRow(line.content, header.delimiter)) {
-        break
-      }
-
-      if (startLine === undefined) {
-        startLine = line.lineNumber
-      }
-      endLine = line.lineNumber
-      lastRowLine = line
-
-      yield* readLine(reader)
-      const values = withLine(line, () => parseDelimitedValues(line.content, header.delimiter))
-      assertExpectedCount(values.length, countLeafFields(header.fields!), 'tabular row values', options, line)
-
-      const primitives = withLine(line, () => mapRowValuesToPrimitives(values))
-      yield* yieldObjectFromFields(header.fields!, primitives)
-
-      rowCount++
+    if (line.depth !== rowDepth) {
+      throw overIndentedLineError(line, rowDepth)
     }
-    else {
+
+    if (!isDataRow(line.content, header.delimiter)) {
       break
     }
-  }
 
-  assertExpectedCount(rowCount, header.length, 'tabular rows', options, lastRowLine)
+    if (startLine === undefined) {
+      startLine = line.lineNumber
+    }
+    endLine = line.lineNumber
+    lastRowLine = line
 
-  if (options.strict && startLine !== undefined && endLine !== undefined) {
-    validateNoBlankLinesInRange(startLine, endLine, reader.scanState.blankLines, options.strict, 'tabular array')
+    yield* readLine(reader)
+    const values = withLine(line, () => parseDelimitedValues(line.content, header.delimiter))
+    assertExpectedCount(values.length, countLeafFields(header.fields!), 'tabular row values', line)
+
+    const primitives = withLine(line, () => mapRowValuesToPrimitives(values))
+    yield* yieldObjectFromFields(header.fields!, primitives)
+
+    rowCount++
   }
 
   if (options.strict) {
-    const nextLine = yield* peekLine(reader)
-    validateNoExtraTabularRows(nextLine, rowDepth, header)
+    assertExpectedCount(rowCount, header.length, 'tabular rows', lastRowLine)
+    validateNoBlankLinesInRange(startLine, endLine, reader.scanState.blankLines, 'tabular array')
+    validateNoExtraTabularRows(yield* peekLine(reader), rowDepth, header)
   }
 }
 
@@ -475,7 +433,7 @@ function* decodeListArray(
   options: DecoderContext,
   headerLine: ParsedLine,
 ): LineRule {
-  const itemDepth = baseDepth + 1
+  const itemDepth = yield* scopeContentDepth(reader, baseDepth, options.strict)
   let itemCount = 0
   let startLine: number | undefined
   let endLine: number | undefined
@@ -484,43 +442,40 @@ function* decodeListArray(
   // Only strict stops at N, leaving the surplus to `validateNoExtraListItems`; non-strict reads on so [N] never truncates.
   while (!options.strict || itemCount < header.length) {
     const line = yield* peekLine(reader)
-    if (!line || line.depth < itemDepth) {
+    if (!line || line.depth <= baseDepth) {
       break
+    }
+
+    if (line.depth !== itemDepth) {
+      throw overIndentedLineError(line, itemDepth)
     }
 
     const isListItem = line.content.startsWith(LIST_ITEM_PREFIX) || line.content === LIST_ITEM_MARKER
-
-    if (line.depth === itemDepth && isListItem) {
-      if (startLine === undefined) {
-        startLine = line.lineNumber
-      }
-      endLine = line.lineNumber
-      lastItemLine = line
-
-      yield* decodeListItem(reader, itemDepth, options)
-
-      const lastConsumedLine = reader.lastLine
-      if (lastConsumedLine) {
-        endLine = lastConsumedLine.lineNumber
-        lastItemLine = lastConsumedLine
-      }
-
-      itemCount++
-    }
-    else {
+    if (!isListItem) {
       break
     }
-  }
 
-  assertExpectedCount(itemCount, header.length, 'list-form items', options, lastItemLine)
+    if (startLine === undefined) {
+      startLine = line.lineNumber
+    }
+    endLine = line.lineNumber
+    lastItemLine = line
 
-  if (options.strict && startLine !== undefined && endLine !== undefined) {
-    validateNoBlankLinesInRange(startLine, endLine, reader.scanState.blankLines, options.strict, 'list-form array')
+    yield* decodeListItem(reader, itemDepth, options)
+
+    const lastConsumedLine = reader.lastLine
+    if (lastConsumedLine) {
+      endLine = lastConsumedLine.lineNumber
+      lastItemLine = lastConsumedLine
+    }
+
+    itemCount++
   }
 
   if (options.strict) {
-    const nextLine = yield* peekLine(reader)
-    validateNoExtraListItems(nextLine, itemDepth, header.length)
+    assertExpectedCount(itemCount, header.length, 'list-form items', lastItemLine)
+    validateNoBlankLinesInRange(startLine, endLine, reader.scanState.blankLines, 'list-form array')
+    validateNoExtraListItems(yield* peekLine(reader), itemDepth, header.length)
   }
 }
 
@@ -542,7 +497,8 @@ function* decodeListItem(
     return
   }
   else if (line.content.startsWith(LIST_ITEM_PREFIX)) {
-    afterHyphen = line.content.slice(LIST_ITEM_PREFIX.length)
+    // "-" may be followed by several spaces, so `-   [2]: x` reads like `-   a: 1`.
+    afterHyphen = line.content.slice(LIST_ITEM_PREFIX.length).replace(/^ +/, '')
   }
   else {
     throw new ToonDecodeError(
@@ -570,14 +526,10 @@ function* decodeListItem(
     if (arrayHeader) {
       // There is no keyless keyed or fields-bearing list-item form.
       if (arrayHeader.header.keyed || arrayHeader.header.fields !== undefined) {
-        if (options.strict) {
-          throw arrayHeader.header.keyed ? keylessKeyedError(itemLine) : keylessFieldsHeaderError(itemLine)
-        }
+        throw arrayHeader.header.keyed ? keylessKeyedError(itemLine) : keylessFieldsHeaderError(itemLine)
       }
-      else {
-        yield* decodeArrayFromHeader(arrayHeader.header, arrayHeader.inlineValues, reader, baseDepth, options, itemLine)
-        return
-      }
+      yield* decodeArrayFromHeader(arrayHeader.header, arrayHeader.inlineValues, reader, baseDepth, options, itemLine)
+      return
     }
   }
 
@@ -623,27 +575,13 @@ function* followSiblingFields(
       break
     }
 
-    if (nextLine.depth === followDepth && !nextLine.content.startsWith(LIST_ITEM_PREFIX)) {
-      yield* readLine(reader)
-      yield* decodeKeyValue(nextLine, reader, followDepth, options, seenKeys)
+    if (nextLine.depth !== followDepth) {
+      throw overIndentedLineError(nextLine, followDepth)
     }
-    else {
-      break
-    }
-  }
-}
 
-function isKeyValueLine(line: ParsedLine): boolean {
-  const content = line.content
-  if (content.startsWith('"')) {
-    const closingQuoteIndex = findClosingQuote(content, 0)
-    if (closingQuoteIndex === -1) {
-      return false
-    }
-    return content.slice(closingQuoteIndex + 1).includes(COLON)
-  }
-  else {
-    return content.includes(COLON)
+    // A hyphen marks a list item only at item depth, so a `- ` line here is a further field.
+    yield* readLine(reader)
+    yield* decodeKeyValue(nextLine, reader, followDepth, options, seenKeys)
   }
 }
 
@@ -663,10 +601,7 @@ function resolveArrayHeader(
   }
 
   if (result.kind === 'invalid') {
-    if (strict) {
-      throw new SyntaxError(result.reason)
-    }
-    return undefined
+    throw new SyntaxError(result.reason)
   }
 
   // A valid header may still carry a strict-only violation that non-strict resolves via LWW.
@@ -686,11 +621,6 @@ function* yieldObjectFromFields(
   function* walkFieldGroup(nodes: readonly FieldNode[]): Generator<JsonStreamEvent> {
     yield { type: 'startObject' }
     for (const node of nodes) {
-      // A non-strict width mismatch leaves trailing leaf fields with no cell; they are absent, not undefined.
-      if (!node.children && cellIndex >= primitives.length) {
-        continue
-      }
-
       yield { type: 'key', key: node.name }
       if (node.children) {
         yield* walkFieldGroup(node.children)

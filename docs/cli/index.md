@@ -155,8 +155,8 @@ When using the `--stats` flag with encode, the CLI builds the full TOON string o
 | `--delimiter <char>` | Array delimiter: `,` (comma), tab character, `\|` (pipe). Pass tab as `$'\t'` in bash/zsh |
 | `--indent <number>` | Indentation size (default: `2`) |
 | `--stats` | Show token count estimates and savings (encode only) |
-| `--no-strict` | Skip decode validation (array counts, indentation, header delimiter); last-write-wins on duplicate keys |
-| `--verbose` | Show full stack traces and cause chains for errors (default: `false`) |
+| `--no-strict` | Decode with the spec's five non-strict recoveries (see [Lenient Decoding](#lenient-decoding)) |
+| `--verbose` | Print the stack trace on failure (default: `false`) |
 
 ## Advanced Examples
 
@@ -214,18 +214,18 @@ items[2]{id,name,qty,price}:
 :::
 
 ::: tip
-Tab delimiters often tokenize more efficiently than commas and reduce the need for quote-escaping. Use `--delimiter $'\t'` (bash/zsh) for maximum token savings on large tabular data. See [Delimiter Strategies](/reference/api#delimiter-strategies) for full guidance.
+Tab delimiters often tokenize more efficiently than commas and reduce the need for quote-escaping. Use `--delimiter $'\t'` (bash/zsh) for maximum token savings on large tabular data. See [Delimiter Options](/guide/format-overview#delimiter-options) for full guidance.
 :::
 
 ### Lenient Decoding
 
-Skip validation for faster, more forgiving decoding:
+Relax validation for hand-written or model-generated input:
 
 ```bash
 toon data.toon --no-strict -o output.json
 ```
 
-With `--no-strict`, the decoder stops enforcing array count matches, indentation multiples, and header delimiter mismatches. Duplicate sibling keys no longer throw – the last value wins. Malformed array headers fall back to plain `key: value` lines instead of erroring.
+With `--no-strict`, the decoder stops enforcing array counts and indentation multiples, accepts tab indentation, blank lines inside arrays and keyed objects, and a scope whose first line sits too deep, and lets the last of duplicate sibling keys win. Malformed headers, stray indentation, row-width mismatches, trailing content, and ill-formed UTF-8 still throw.
 
 ### Decode Error Output
 
@@ -247,7 +247,7 @@ The CLI prints:
       ^
 ```
 
-The exit code is `1` on any error. Stack traces are suppressed by default. Pass `--verbose` to include the full stack and the underlying cause chain – useful when filing a bug report or diagnosing an unexpected error path:
+The exit code is `1` on any error. Stack traces are suppressed by default. Pass `--verbose` to include the full stack – useful when filing a bug report or diagnosing an unexpected error path:
 
 ```bash
 cat broken.toon | toon --decode --verbose

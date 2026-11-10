@@ -1,20 +1,18 @@
 import type { Fixtures } from './types'
-import { readFileSync } from 'node:fs'
-import { createRequire } from 'node:module'
+import { readdir, readFile } from 'node:fs/promises'
 
-const require = createRequire(import.meta.url)
+const fixturesDir = new URL('tests/fixtures/', import.meta.resolve('@toon-format/spec/package.json'))
 
 /**
- * Loads spec fixture files via `JSON.parse`.
+ * Loads every spec fixture file of a category via `JSON.parse`.
  *
  * @remarks
  * Static JSON imports go through Vite's JSON-to-literal transform, where a
  * literal `__proto__` key sets the object's prototype instead of an own
  * property – silently corrupting the prototype-safety fixtures.
  */
-export function loadFixtures(category: 'encode' | 'decode', fileNames: readonly string[]): Fixtures[] {
-  return fileNames.map((fileName) => {
-    const fixturePath = require.resolve(`@toon-format/spec/tests/fixtures/${category}/${fileName}.json`)
-    return JSON.parse(readFileSync(fixturePath, 'utf-8')) as Fixtures
-  })
+export async function loadFixtures(category: 'encode' | 'decode'): Promise<Fixtures[]> {
+  const categoryDir = new URL(`${category}/`, fixturesDir)
+  const fileNames = (await readdir(categoryDir)).filter(fileName => fileName.endsWith('.json')).sort()
+  return Promise.all(fileNames.map(async fileName => JSON.parse(await readFile(new URL(fileName, categoryDir), 'utf8')) as Fixtures))
 }
