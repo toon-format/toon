@@ -64,7 +64,7 @@ toon data.json --stats
 | `-e, --encode` | Force encode mode (overrides auto-detection) |
 | `-d, --decode` | Force decode mode (overrides auto-detection) |
 | `--delimiter <char>` | Array delimiter: `,` (comma), tab character, `\|` (pipe). Pass tab as `$'\t'` in bash/zsh |
-| `--indent <number>` | Indentation size (default: `2`) |
+| `--indent <number>` | Indentation size, at least 1 (default: `2`) |
 | `--stats` | Show token count estimates and savings (encode only) |
 | `--no-strict` | Decode with the spec's five non-strict recoveries: advisory array counts, last-write-wins on duplicate keys, lenient indentation, blank lines inside arrays and keyed objects, depth jumps |
 | `--verbose` | Print the stack trace on failure (default: `false`) |

@@ -5,7 +5,7 @@ import { buildValueFromEvents } from './decode/event-builder.ts'
 import { encodeJsonValue } from './encode/encoders.ts'
 import { normalizeValue } from './encode/normalize.ts'
 import { applyReplacer } from './encode/replacer.ts'
-import { assertValidDelimiter } from './shared/validation.ts'
+import { assertValidDelimiter, assertValidIndentSize } from './shared/validation.ts'
 
 export { DEFAULT_DELIMITER, DELIMITERS } from './constants.ts'
 export { ToonDecodeError } from './decode/errors.ts'
@@ -177,8 +177,11 @@ function resolveOptions(options?: EncodeOptions): ResolvedEncodeOptions {
   const delimiter = options?.delimiter ?? DEFAULT_DELIMITER
   assertValidDelimiter(delimiter)
 
+  const indentSize = options?.indentSize ?? options?.indent ?? 2
+  assertValidIndentSize(indentSize)
+
   return {
-    indentSize: options?.indentSize ?? options?.indent ?? 2,
+    indentSize,
     delimiter,
     replacer: options?.replacer,
   }

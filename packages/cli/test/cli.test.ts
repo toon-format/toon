@@ -316,6 +316,17 @@ describe('toon CLI', () => {
       expect(stderr).toContain('Invalid indent value')
     })
 
+    it.each(['0', '-1'])('rejects --indent %s', async (indent) => {
+      const directory = createDirectory({
+        'input.json': JSON.stringify({ value: { nested: 1 } }),
+      })
+
+      const { stderr, exitCode } = await runCli(['input.json', '--indent', indent], { cwd: directory })
+
+      expect(exitCode).toBe(1)
+      expect(stderr).toContain('Invalid indent value')
+    })
+
     it('reports a missing input file', async () => {
       const directory = createDirectory()
 
