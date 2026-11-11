@@ -11,6 +11,13 @@ export function assertValidDelimiter(delimiter: string): asserts delimiter is De
   }
 }
 
+/** Rejects an indentSize that cannot mark nesting, since the spec requires a positive number of spaces. */
+export function assertValidIndentSize(indentSize: number): void {
+  if (!Number.isInteger(indentSize) || indentSize < 1) {
+    throw new RangeError(`Invalid indentSize ${String(indentSize)}. It must be an integer of at least 1`)
+  }
+}
+
 /**
  * Checks if a key can be used without quotes.
  *

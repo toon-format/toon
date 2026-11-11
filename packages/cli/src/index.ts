@@ -77,7 +77,7 @@ export const mainCommand: CommandDef<typeof args> = defineCommand({
     const outputPath = args.output ? path.resolve(args.output) : undefined
 
     const indentSize = Number.parseInt(args.indent || '2', 10)
-    if (Number.isNaN(indentSize) || indentSize < 0) {
+    if (Number.isNaN(indentSize) || indentSize < 1) {
       throw new CliError(`Invalid indent value: ${args.indent}`)
     }
 

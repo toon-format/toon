@@ -153,7 +153,7 @@ When using the `--stats` flag with encode, the CLI builds the full TOON string o
 | `-e, --encode` | Force encode mode (overrides auto-detection) |
 | `-d, --decode` | Force decode mode (overrides auto-detection) |
 | `--delimiter <char>` | Array delimiter: `,` (comma), tab character, `\|` (pipe). Pass tab as `$'\t'` in bash/zsh |
-| `--indent <number>` | Indentation size (default: `2`) |
+| `--indent <number>` | Indentation size, at least 1 (default: `2`) |
 | `--stats` | Show token count estimates and savings (encode only) |
 | `--no-strict` | Decode with the spec's five non-strict recoveries (see [Lenient Decoding](#lenient-decoding)) |
 | `--verbose` | Print the stack trace on failure (default: `false`) |
