@@ -30,7 +30,7 @@ Community members have created implementations in additional languages:
 |----------|------------|------|------------|
 | **Apex** | [ApexToon](https://github.com/Eacaw/ApexToon) | – | [@Eacaw](https://github.com/Eacaw) |
 | **C** | [TOONc](https://github.com/UsboKirishima/TOONc) | – | [@UsboKirishima](https://github.com/UsboKirishima) |
-| **C** (bindings for C++, Go, Julia, MATLAB, Python, Rust, Zig) | [ctoon](https://github.com/MohammadRaziei/ctoon) | 4.1 | [@MohammadRaziei](https://github.com/MohammadRaziei) |
+| **C** (bindings for C++, Go, Julia, MATLAB, Python, Octave, Rust, Zig) | [ctoon](https://github.com/MohammadRaziei/ctoon) | 4.4 | [@MohammadRaziei](https://github.com/MohammadRaziei) |
 | **C#** | [ToonEncoder](https://github.com/Cysharp/ToonEncoder) | – | [@Cysharp](https://github.com/Cysharp) |
 | **C#** | [Corvus.JsonSchema](https://github.com/corvus-dotnet/Corvus.JsonSchema/blob/main/docs/Toon.md) | – | [@mwadams](https://github.com/mwadams) |
 | **Clojure** | [toon](https://github.com/vadelabs/toon) | 3.0 | [@vadelabs](https://github.com/vadelabs) |
