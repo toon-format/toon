@@ -41,7 +41,7 @@ Community members have created implementations in additional languages:
 | **Go** | [gotoon](https://github.com/alpkeskin/gotoon) | – | [@alpkeskin](https://github.com/alpkeskin) |
 | **Java** | [json-io](https://github.com/jdereg/json-io) | 3.3 | [@jdereg](https://github.com/jdereg) |
 | **Kotlin** | [ktoon](https://github.com/lukelast/ktoon) | 4.1 | [@lukelast](https://github.com/lukelast) |
-| **Laravel Framework** | [laravel-toon](https://github.com/mischasigtermans/laravel-toon) | 3.0 | [@mischasigtermans](https://github.com/mischasigtermans) |
+| **Laravel Framework** | [laravel-toon](https://github.com/mischasigtermans/laravel-toon) | 4.1 | [@mischasigtermans](https://github.com/mischasigtermans) |
 | **Lua/Neovim** | [toon.nvim](https://github.com/thalesgelinger/toon.nvim) | 1.3 | [@thalesgelinger](https://github.com/thalesgelinger) |
 | **OCaml** | [ocaml-toon](https://github.com/davesnx/ocaml-toon) | – | [@davesnx](https://github.com/davesnx) |
 | **Perl** | [Data::TOON](https://github.com/ytnobody/p5-Data-TOON) | 1.0 | [@ytnobody](https://github.com/ytnobody) |
