@@ -579,7 +579,7 @@ Configuration for [`encode()`](#encode-input-options) and [`encodeLines()`](#enc
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `indentSize` | `number` | `2` | Number of spaces per indentation level |
+| `indentSize` | `number` | `2` | Number of spaces per indentation level (integer, at least 1) |
 | `delimiter` | `','` \| `'\t'` \| `'\|'` | `','` | Delimiter for array values and tabular rows |
 | `replacer` | `EncodeReplacer` | `undefined` | Optional hook to transform or omit values before encoding (see [Replacer Function](#replacer-function)) |
 
@@ -609,7 +609,7 @@ Configuration for [`decode()`](#decode-input-options) and [`decodeFromLines()`](
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `indentSize` | `number` | `2` | Expected number of spaces per indentation level |
+| `indentSize` | `number` | `2` | Expected number of spaces per indentation level (integer, at least 1) |
 | `strict` | `boolean` | `true` | Throw where `false` applies the five §14.4 recoveries listed below |
 
 By default, the decoder validates input:
@@ -638,7 +638,7 @@ Configuration for [`decodeStreamSync()`](#decodestreamsync-lines-options) and [`
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `indentSize` | `number` | `2` | Expected number of spaces per indentation level |
+| `indentSize` | `number` | `2` | Expected number of spaces per indentation level (integer, at least 1) |
 | `strict` | `boolean` | `true` | Same as in [`DecodeOptions`](#decodeoptions) |
 
 ## TypeScript Types

@@ -11,6 +11,12 @@ export function assertValidDelimiter(delimiter: string): asserts delimiter is De
   }
 }
 
+export function assertValidIndentSize(indentSize: number): void {
+  if (!Number.isInteger(indentSize) || indentSize < 1) {
+    throw new RangeError(`Invalid indentSize ${indentSize}. It must be an integer of at least 1`)
+  }
+}
+
 /**
  * Checks if a key can be used without quotes.
  *

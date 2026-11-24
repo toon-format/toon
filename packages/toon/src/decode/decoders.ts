@@ -3,6 +3,7 @@ import type { LineEffect, LineReader, LineRule } from './line-reader.ts'
 import type { ArrayHeaderParseResult } from './parser.ts'
 import { COLON, DEFAULT_DELIMITER, LIST_ITEM_MARKER, LIST_ITEM_PREFIX } from '../constants.ts'
 import { findUnquotedChar, trimSpaces } from '../shared/string-utils.ts'
+import { assertValidIndentSize } from '../shared/validation.ts'
 import { ToonDecodeError, withLine } from './errors.ts'
 import { createLineReader, driveAsync, driveSync, peekLine, readLine } from './line-reader.ts'
 import { countLeafFields, isArrayHeaderContent, isKeyValueContent, mapRowValuesToPrimitives, parseArrayHeaderLine, parseDelimitedValues, parseKeyToken, parsePrimitiveToken } from './parser.ts'
@@ -11,8 +12,11 @@ import { assertExpectedCount, isDataRow, validateNoBlankLinesInRange, validateNo
 interface DecoderContext { indentSize: number, strict: boolean }
 
 function resolveContext(options?: DecodeStreamOptions): DecoderContext {
+  const indentSize = options?.indentSize ?? options?.indent ?? 2
+  assertValidIndentSize(indentSize)
+
   return {
-    indentSize: options?.indentSize ?? options?.indent ?? 2,
+    indentSize,
     strict: options?.strict ?? true,
   }
 }
