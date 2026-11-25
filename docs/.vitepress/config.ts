@@ -66,6 +66,7 @@ export default defineConfig({
         items: [
           { text: 'Tools & Playgrounds', link: '/ecosystem/tools-and-playgrounds' },
           { text: 'Implementations', link: '/ecosystem/implementations' },
+          { text: 'Research', link: '/ecosystem/research' },
         ],
       },
       {
@@ -132,6 +133,7 @@ function sidebarPrimary(): DefaultTheme.SidebarItem[] {
       items: [
         { text: 'Tools & Playgrounds', link: '/ecosystem/tools-and-playgrounds' },
         { text: 'Implementations', link: '/ecosystem/implementations' },
+        { text: 'Research', link: '/ecosystem/research' },
       ],
     },
     {

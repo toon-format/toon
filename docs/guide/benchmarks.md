@@ -14,6 +14,8 @@ Benchmarks are organized into two tracks to ensure fair comparisons:
 - **Mixed-Structure Track**: Nested and semi-uniform datasets (TOON vs JSON, YAML, XML). CSV is excluded – it cannot represent these structures without lossy flattening.
 - **Flat-Only Track**: Flat, fully tabular-eligible datasets, where CSV is a fair competitor (CSV vs TOON vs JSON, YAML, XML).
 
+Papers that evaluate TOON are listed under [Research](/ecosystem/research).
+
 ## Retrieval Accuracy
 
 <!-- automd:file src="../../benchmarks/results/retrieval-accuracy.md" -->
