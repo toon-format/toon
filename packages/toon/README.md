@@ -788,7 +788,7 @@ Follow the detailed [LLM integration guide](https://toonformat.dev/guide/llm-pro
 
 **Tooling** – [Tooner](https://github.com/chaindead/tooner) is an MCP proxy that converts JSON tool responses to TOON.
 
-**Research** – papers that study TOON as model input, as model output, and as fine-tuning data are listed under [Research](https://toonformat.dev/ecosystem/research).
+**Research** – the [Research](https://toonformat.dev/ecosystem/research) page lists papers that study TOON.
 
 ## Documentation
 
